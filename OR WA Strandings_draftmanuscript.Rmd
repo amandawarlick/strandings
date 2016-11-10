@@ -1,0 +1,772 @@
+---
+title: ""
+output: 
+  word_document
+    
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 3.5)
+```
+
+```{r load packages, echo = FALSE}
+
+# install.packages("ggmap") 
+# install.packages("data.table")
+#install.packages("devtools")
+library(devtools)
+#devtools::install_github("hadley/ggplot2")
+#devtools::install_github("adletaw/captioner")
+library(tidyr)
+library(ggmap)
+library(data.table)
+library(dplyr)
+library(cowplot)
+library(ggplot2)
+library(stats)
+library(captioner)
+library(knitr)
+library(reshape2)
+library(stringr)
+library(magrittr)
+library(scales)
+#setwd("~/Strands")
+setwd("~/Documents/R/Strandings")
+
+case <- function(x)
+  paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
+
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
+
+pubfigure_simple_theme <- function(...) {
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title.x = element_blank(),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
+    ...)
+}
+
+pubfigure_theme <- function(...) {
+  theme(
+    #text = element_text(size = 11),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 10),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title = element_text(size = 10),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(), 
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
+    ...)
+}
+
+
+```
+
+```{r load tables, echo = FALSE, results = 'hide'}
+setwd("~/Documents/R/Strandings/Figures")
+#setwd("C:/Users/Amanda.Warlick/Documents/R/Strandings/Figures/")
+
+#tbls must be called above where they are referenced, so putting them here where tables are read in
+
+#HI proportion of species
+species.HI.prop.table <- read.csv("species.HI.prop.table.csv", check.names = F)
+tbls("species.HI.prop.table", caption = "Species composition of all strandings and all human interaction cases and the percent composition of human interaction type for each species.")
+
+#Age class and sex proportion table - add perc WA/OR?
+age.sex.table <- read.csv("age.sex.table.csv", check.names = F)
+tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class.")
+
+#Sex proportion table 
+sex.composition.table <- read.csv("sex.composition.table.csv", check.names = FALSE)
+tbls("sex.composition.table", caption = "Sex composition of all strandings (n = 14,167) and all human interaction cases (n = 1,513), and the percent composition of human interaction type for each sex.")
+
+#Age proportion table
+age.composition.table <- read.csv("age.composition.table.csv", check.names = FALSE)
+tbls("age.composition.table", caption = "Age composition of all strandings (n = 14,167) and all human interaction cases (n = 1,513), and the percent composition of human interaction type for each age class.")
+
+#Washington counties
+WAcounties.table <- read.csv("WAcounties.table.csv", check.names = FALSE)
+tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Washington (n = 9,022).")
+
+#Oregon counties
+ORcounties.table <- read.csv("ORcounties.table.csv", check.names = FALSE)
+tbls("ORcounties.table", caption = "Proportion of all strandings (%), human interaction cases and the composition of human interaction cases for each county in Oregon (n = 5145).")
+
+```
+
+```{r load pre-cleaned csv, echo = FALSE}
+setwd("~/Documents/R/Strandings/")
+#setwd("C:/Users/Amanda.Warlick/Documents/Strands")
+
+pinnipeds.data <- read.csv("pinnipeds.data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+
+pinnipeds.data$Age.Class <- gsub("NA", "Unid", pinnipeds.data$Age.Class)
+pinnipeds.data$Age.Class <- gsub("UNKNOWN", "Unid", pinnipeds.data$Age.Class)
+pinnipeds.data$Age.Class <- gsub("PUP/CALF", "PUP", pinnipeds.data$Age.Class)
+pinnipeds.data$Age.Class <- case(pinnipeds.data$Age.Class)
+pinnipeds.data$Age.Class <- factor(pinnipeds.data$Age.Class, 
+    levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+
+pinnipeds.data$Sex <- gsub("NA", "Unid", pinnipeds.data$Sex)
+pinnipeds.data$Sex <- gsub("UNKNOWN", "Unid", pinnipeds.data$Sex)
+pinnipeds.data$Sex <- case(pinnipeds.data$Sex)
+
+pinnipeds.data$Month.of.Observation <- factor(pinnipeds.data$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+
+#Minimal number of data objects for inline stats
+species <- pinnipeds.data %>%
+  group_by(Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+species.year.mean <- pinnipeds.data %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name) %>%
+  summarize(mean = round(mean(cnt)))
+age.all <- pinnipeds.data %>%
+  group_by(Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+  age.all$prop <- round(age.all$cnt/sum(age.all$cnt), 2)*100
+data.by.year <- pinnipeds.data %>% 
+  group_by(Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+data.by.year.state.prop <- pinnipeds.data %>%
+  group_by(State, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ State, value.var = 'cnt') %>%
+  transform(prop.or = round(OR/(OR+WA), 2)*100)
+HI.state.prop <- pinnipeds.data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(State, Interaction.Type) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Interaction.Type ~ State, value.var = 'cnt') %>%
+  transform(prop.or = round(OR/(OR+WA), 2)*100)
+year.prop.HI <- pinnipeds.data %>%
+  group_by(Findings.of.Human.Interaction, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') 
+year.prop.HI[is.na(year.prop.HI)] <- 0
+year.prop.HI <- year.prop.HI %>% transform(Prop.HI = round(Y/(Y + N + CBD), 2)*100)
+```
+
+```{r all figures, echo = FALSE, results = 'hide'}
+
+#Species boxplots
+species.all.final <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(Pinniped.Common.Name, cnt)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = comma) +
+  xlab("") + ylab("All Strandings") +
+  pubfigure_simple_theme(axis.title = element_text(size = 10))
+  
+species.HI.type.final <- pinnipeds.data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name, Interaction.Type) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(Pinniped.Common.Name, cnt, fill = Interaction.Type)) +
+  geom_boxplot() +
+  xlab("") + ylab("Human Interactions") +
+  scale_y_continuous(labels = comma) +
+  pubfigure_theme(legend.position = 'top') + 
+  scale_fill_grey()
+
+species.boxplots <- plot_grid(species.all.final, species.HI.type.final, labels = "auto", align = 'v', ncol = 1, rel_heights = c(.5, 1.2), hjust = 0, label_size = 10)
+figs("species.boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for harbor seals and California sea lions, and larger interquartile range for harbor seals and lower average strandings for other species; and (b) boxplot of annual human interactions by type, showing a high number of Other cases for harbor seals and gunshot wounds for California sea lions and Steller sea lions.")
+
+################
+
+#annual time series
+all.yr.final <- pinnipeds.data %>% 
+  group_by(Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = Year.of.Observation, y = cnt)) + 
+  geom_point(position = "identity") +
+  geom_smooth(method = "lm", se = FALSE, col = 'black', linetype = 3) +
+  xlab("") + ylab("All Strandings") +
+  scale_y_continuous(labels = comma) +
+  #scale_x_continuous(breaks = c(1989:2015)) +
+  pubfigure_simple_theme(axis.title = element_text(size = 10)) 
+
+HI.type.yr.final <- pinnipeds.data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = Year.of.Observation, y = cnt, 
+             group = Interaction.Type, 
+             col = Interaction.Type,
+             shape = Interaction.Type)) + 
+  geom_point(position = "identity") +
+  geom_smooth(method = "lm", se = FALSE, linetype = 3) +
+ # scale_x_continuous(breaks = c(1989:2015)) +
+  xlab("") + ylab("Human Interaction Cases") +
+  pubfigure_theme(legend.position = 'top') + 
+  scale_color_grey()
+
+all.HI.timeseries <- plot_grid(all.yr.final, HI.type.yr.final, align = 'v', ncol = 1, labels = "auto", vjust = 1, label_size = 10)
+figs("all.HI.timeseries", caption = "(a) Total annual strandings shows increasing strandings over the study period (y = 25.7x, t = 5.0, p < 0.01, r-sq = 0.5) (n = 14,167); and (b) annual human interaction cases (n = 1,513) showing increasing number of cases overall (y = 5.4x, t = 7.6, p < 0.01, r-sq = 0.68), increasing gunshot wounds (symbol, y = 22.3x, t = 6.2, p < 0.001), fisheries entanglements (symbol, y = 13.7x, t = 3.8, p < 0.001), and boat injuries (symbol, y = 1.5x, t = 9.6, p < 0.001) over the study period.")
+
+##################
+
+#all and HI by species time series
+species.all.line.final <- pinnipeds.data %>% 
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = Year.of.Observation, y = cnt, 
+             col = Pinniped.Common.Name,
+             group = Pinniped.Common.Name,
+             shape = Pinniped.Common.Name)) +
+  geom_point(stat = 'identity', position = 'identity') + 
+  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  ylab("All Strandings") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_simple_theme(legend.position = 'top',
+                         axis.title = element_text(size = 10)) +
+  scale_color_grey()
+
+species.HI.line.final <- pinnipeds.data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = Year.of.Observation, y = cnt, 
+             col = Pinniped.Common.Name,
+             group = Pinniped.Common.Name,
+             shape = Pinniped.Common.Name)) +
+  geom_point(stat = 'identity', position = 'identity') + 
+  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  ylab("Human Interaction Cases") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_theme(legend.position = 'none') +
+  scale_color_grey()
+
+species.timeseries <- plot_grid(species.all.line.final, species.HI.line.final, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
+figs("species.timeseries", caption = "(a) Annual strandings per species shows increasing strandings in harbor seals (symbol, y = 209x, t = 9.9, p < 0.001) and California sea lions (symbol, y = 5.9x, t = 6.9, p < 0.001) and slightly decreasing trends for the other species; and (b) human interactions cases shows similarly increasing trends for harbor seals (symbol, (y = 15.3x, t = 4.2, p < 0.001)), California sea lions (symbol, y = 1.4x, t = 8.2, p < 0.001), and decreasing at a rate of 8-20 individuals per year for the other species (CHECK THESE - SEEMS FISHY).")
+
+
+#######
+
+HI.prev.figure <- pinnipeds.data %>%
+  group_by(Year.of.Observation, Findings.of.Human.Interaction) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt')
+HI.prev.figure[is.na(HI.prev.figure)] <- 0
+HI.prev.figure <- HI.prev.figure %>%
+    transform(Prop.HI = round(Y/(Y+N+CBD), 2)) %>%
+
+ggplot(aes(Year.of.Observation, Prop.HI)) +
+  geom_point(stat = 'identity') + 
+  geom_line() +
+  geom_smooth(method = 'lm', se = F, col = "black", linetype = 3) +
+  xlab("") + ylab("Prevalence of HI") +
+  pubfigure_simple_theme(legend.position = 'none',
+                         axis.title = element_text(size = 10))
+
+HI.species.prev <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, 
+           Findings.of.Human.Interaction, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation + Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt')
+HI.species.prev[is.na(HI.species.prev)] <- 0
+HI.species.prev <- HI.species.prev %>%
+    transform(Prop.HI = round(Y/(Y+N+CBD), 2))
+
+HI.species.prev.figure <- 
+  ggplot(HI.species.prev, aes(x = Year.of.Observation, y = Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name, shape = Pinniped.Common.Name)) +
+  geom_point(stat = 'identity', position = 'identity') + 
+  #geom_line() +
+  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  xlab("") + ylab("Prevalence of HI") +
+  pubfigure_theme(legend.position = 'top') + 
+  scale_color_grey()
+
+HI.prev.final <- plot_grid(HI.prev.figure, HI.species.prev.figure, align = 'v', ncol = 1, labels = "auto", rel_heights = c(.8, 1.3), vjust = c(1.2, .1), label_size = 10)
+figs("HI.prev.final", caption = "The prevalence of human interactions cases for all combined species over time shows an increasing trend (y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55).")
+
+####################
+
+monthly.all <- pinnipeds.data %>%
+  group_by(Year.of.Observation, Month.of.Observation, Sex, Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+monthly.HI <- pinnipeds.data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+#limits <- aes(ymax = mean + se, ymin = mean - se)
+
+#Monthly HI cases by age and HI type - mean doesn't show much of a seasonal patter, but sum does
+monthly.HI.age.final <- monthly.HI %>% 
+  group_by(Month.of.Observation, Age.Class) %>%
+  summarize(mean = sum(cnt), se = sd(cnt, na.rm = T)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = mean, fill = Age.Class)) +
+  geom_bar(stat = 'identity') +
+  #geom_errorbar(limits) +
+  ylab("Human Interactions") + xlab("") + 
+  pubfigure_simple_theme(legend.position = 'top',
+                         axis.title = element_text(size = 10)) + 
+  scale_fill_grey()
+  
+monthly.HI.type.final <- monthly.HI %>% 
+  filter(Interaction.Type != 'NA') %>%
+  group_by(Month.of.Observation, Interaction.Type) %>%
+  summarize(mean = sum(cnt)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = mean, fill = Interaction.Type)) +
+  geom_bar(stat = 'identity') +
+  ylab("Human Interactions") + xlab("") + 
+  pubfigure_theme(legend.position = 'top') + 
+  scale_fill_grey()
+
+monthly.age.HI.figure <- plot_grid(monthly.HI.age.final, monthly.HI.type.final, align = 'v', ncol = 1, label_size = 10, labels = "auto")
+figs("monthly.age.HI.figure", caption = "Sum of human interactions cases across years for each month according to (a) age class, showing summer peak for human interaction cases for pups; and (b) human interaction type, showing a high number of fisheries cases in August and Other in July.")
+
+
+##############
+
+#Monthly by species 
+monthly.species.final <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = cnt,
+                linetype = Pinniped.Common.Name,
+                group = Pinniped.Common.Name, 
+                color = Pinniped.Common.Name)) +
+  geom_line(aes(group = Pinniped.Common.Name)) + 
+  #geom_smooth(se = F) +
+  ylab("All Strandings") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_simple_theme(legend.position = 'top', 
+                         axis.title = element_text(size = 10)) + 
+  scale_color_grey()
+
+#Monthly HI by species
+monthly.HI.final <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = cnt,
+                linetype = Pinniped.Common.Name,
+                group = Pinniped.Common.Name, 
+                color = Pinniped.Common.Name)) +
+  geom_line(aes(group = Pinniped.Common.Name)) + 
+  #geom_smooth(se = F) +
+  ylab("Human Interactions") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_theme(legend.position = 'none') + 
+  scale_color_grey()
+
+monthly.species.final <- plot_grid(monthly.species.final, monthly.HI.final, align = 'v', ncol = 1, label_size = 10)
+figs("monthly.species.final", caption = "Sum of cases within months across all years for each species shows (a) a summer peak in all strandings for harbor seals (2.3 < t < 13.7, p < 0.001) and (b) a summer peak in human interaction cases for harbor seals (2.1 < t < 4.9, p < 0.001) and greater variability in late spring for California sea lions (stats).")
+
+############
+stateboxplot <- pinnipeds.data %>%
+  group_by(State, Year.of.Observation, Month.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = as.factor(Year.of.Observation), y = cnt, fill = State)) +
+  geom_boxplot() +
+  xlab("") + ylab("Mean Monthly Strandings") +
+  pubfigure_theme(legend.position = 'top') +
+  scale_fill_grey()
+
+figs("stateboxplot", caption = "Boxplot of average monthly strandings over the study period shows increasing average and variability in both states.")
+
+##############
+
+#OR
+allOR.county.final <- pinnipeds.data %>% 
+  filter(County != 'NA' & State == 'OR' & County != 'Unknown') %>% 
+  group_by(County, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = County, y = cnt)) + 
+  geom_bar(stat = 'identity')  + 
+  ylab("All Strandings") + xlab("") + ggtitle("Oregon") +
+  scale_y_continuous(labels = comma) +
+  pubfigure_simple_theme(axis.title = element_text(size = 10),
+                         plot.margin = unit(c(.1, -1, .1, .1), "cm")) +
+  scale_fill_grey()
+
+ORHI.county.final <- pinnipeds.data %>% 
+  filter(County != 'NA' & State == 'OR' & County != 'Unknown' &
+        Findings.of.Human.Interaction == 'Y' & 
+        Interaction.Type != 'NA') %>% 
+  group_by(County, Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
+  geom_bar(stat = 'identity')  + 
+  ylab("Human Interactions") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_theme(legend.position = 'none',
+                  plot.margin = unit(c(.1, -1, -.5, .1), "cm")) + 
+  scale_fill_grey() 
+
+#WA
+allWA.county.final <- pinnipeds.data %>% 
+  filter(County != 'NA' & State == 'WA' & County != 'Unknown') %>% 
+  group_by(County, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = County, y = cnt)) + 
+  geom_bar(stat = 'identity')  + 
+  ylab("") + xlab("") + ggtitle("Washington") +
+  scale_y_continuous(labels = comma) +
+  pubfigure_simple_theme(plot.margin = unit(c(.1, .1, .1, -1), "cm")) + 
+  scale_fill_grey()
+
+WAHI.county.final <- pinnipeds.data %>% 
+  filter(County != 'NA' & State == 'WA' & County != 'Unknown' & 
+        Findings.of.Human.Interaction == 'Y' & 
+        Interaction.Type != 'NA') %>% 
+  group_by(County, Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
+  geom_bar(stat = 'identity')  + 
+  ylab("") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_theme(legend.position = 'top',
+                  axis.title.y = element_blank(),
+                  plot.margin = unit(c(.1, .1, -.5, -1), "cm")) + 
+  scale_fill_grey()  
+
+countyfigures <- plot_grid(allOR.county.final, allWA.county.final, ORHI.county.final, 
+          WAHI.county.final,
+          align = 'v', ncol = 2, rel_widths = c(1.2, 1.8), rel_heights = c(1, 1.2), label_size = 10)
+figs("countyfigures", caption = "All strandings (above) and human interaction cases (below) for each county in Oregon (left) and Washington (right) shows high strandings in Lincoln and proportionally higher HI cases in Clatstop in Oregon and high strandings in Pacific and Pierce but proportionally higher HI cases in San Juan.")
+
+#################Extras################
+ 
+#I like this figure, but I'm not sure it adds anything
+stacked.species.FI <- pinnipeds.data %>%
+  filter(Fishery.Interaction == 'Y' & Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = factor(Year.of.Observation), y = cnt, fill = Pinniped.Common.Name)) +
+  geom_bar(stat = 'identity') + 
+  ylab("Annual fisheries Interactions") + xlab("") + 
+  pubfigure_theme(legend.position = 'top') + 
+  #scale_fill_brewer(palette = 'Set2') 
+  scale_fill_grey()
+
+figs("stacked.species.FI", caption = "Annual fisheries interactions per species shows greater numbers beginning in the mid 2000s, with a high proportion of harbor seals and CSL. I like this figure, but I'm not sure it adds anything.")
+
+#Monthly yearly lines - find other more idealistic figure type
+
+monthly.all.years.final <- monthly.all %>%
+  group_by(Year.of.Observation, Month.of.Observation) %>%
+  summarize(cnt = sum(cnt)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = cnt, 
+                    group = factor(Year.of.Observation), 
+                    color = factor(Year.of.Observation))) +
+  geom_line(aes(group = Year.of.Observation)) + 
+  #geom_smooth(se = F) +
+  ylab("All Strandings") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  pubfigure_simple_theme(legend.position = 'none',
+                         axis.title = element_text(size = 10)) + 
+  scale_color_grey()
+
+monthly.HI.years.final <- monthly.HI %>%
+  group_by(Year.of.Observation, Month.of.Observation) %>%
+  summarize(cnt = sum(cnt)) %>%
+  ggplot(aes(x = factor(Month.of.Observation), y = cnt, 
+            group = factor(Year.of.Observation), 
+            color = factor(Year.of.Observation))) +
+  geom_line(aes(group = factor(Year.of.Observation))) + 
+  #geom_smooth(se = F) +
+  ylab("Human Interactions") + xlab("") + 
+  pubfigure_theme(legend.position = 'none') + 
+  scale_color_grey()
+
+monthly.lineplots <- plot_grid(monthly.all.years.final, monthly.HI.years.final, align = 'v', ncol = 1, labels = "auto", vjust = c(1.5, .5), label_size = 10)
+figs("monthly.lineplots", caption = "(a) Sum of cases across years for each month shows consistent seasonal peak while (b) sum of human interaction cases for each month shows greater variability across years.")
+```
+
+**Title: Characterization of Pinniped Stranding and Human Interaction Cases along the Oregon and Washington Coasts, 1989 - 2015**
+
+**Abstract**  
+
+Pinnipeds are often considered sentinels of ocean health. Strandings can be used as a proxy to assess pinniped health and the impacts of anthropogenic activities in the local marine environment. We used stranding response network data to examine stranding patterns over time (interannual and inter-seasonal) and space (regionally). From 1989 to 2015, a total of `r prettyNum(pinnipeds.data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` pinnipeds stranded along the coasts of Washington and Oregon, `r round(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% of which were documented as human interaction cases. Gunshot wounds and fisheries interactions comprised the majority of human interaction cases overall (`r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% and `r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%, respectively), though the prevalence of specific types of human interaction cases has changed over time and varies significantly across sex, age class, and species. The majority of stranded individuals were harbor seals (`r round(species[species$Pinniped.Common.Name == "Harbor seal", 2]/sum(species$cnt), 2)*100`%) and California sea lions (`r round(species[species$Pinniped.Common.Name == "California sea lion", 2]/sum(species$cnt), 2)*100`%) of specific age classes, likely reflecting species' demographic characteristics, such as local abundance, the timing of weaning, and seasonal migratory patterns. Overall, the number of strandings and human interaction cases have significantly increased over time. Spatial patterns in stranding vary across species, but overall, the average number of cases is higher in Washington and human interactions are significantly higher in certain counties of both states. Despite the challenges and uncertainties inherent in using stranding data as an indicator of pinniped health and anthropogenic impacts, these data and analyses are useful tools for evaluating major threats to pinniped populations, hotspots of anthropogenic impacts, and the importance of continued support and development of regional stranding response networks.  
+
+Keywords: pinnipeds, fisheries interactions, stranding/health, spatiotemporal variation, wildlife health, anthropogenic impacts.  
+
+
+**Introduction**  
+
+Outline:  
+
+Paragraph  
+- Pinnipeds often considered sentinels of ocean health.  
+- Strandings can be used as a proxy to assess pinniped health and the impacts of anthropogenic activities in the local marine environment; land-sea interface.  
+- Reasons pinnipeds strand: illness and injury - wide variety of cause and condition.  
+
+Paragraph  
+- Despite caveats, stranding data can be a useful tool for evaluating major threats to pinniped populations, ongoing anthropogenic impacts, and the allocation of resources to regional stranding networks.  
+- Previous studies: disposition, age/sex, human interactions.  
+- Previous studies: rates of change, population prevalence, composition of HI types.  
+
+Paragraph  
+- Comprehensive data from stranding response networks used here to characterize the number of strandings across six species according to sex and age class to examine stranding patterns across time (interannual and inter-seasonal) and space.  
+- More details on why animals strand - think locally (oceanographic conditions, prey availability, pup production, anthropogenic activities).  
+- More details on using stranding data - think locally (changing network coverage and beach access, population grown or contraction).  
+- Importance/relevance.  
+
+
+**Methods**   
+
+*Species and Region*  
+
+Six pinniped species are found in coastal and inland waters of the Pacific Northwest, each with unique life history characteristics, local abundance, popultion trends, and ecological behaviors that impact their presence within the study area, and therefore their prevalence in stranding data through time and regionally. Each of these species will be briefly described below. The coastline of Oregon and Washington is also variable, ranging in natural landscape (inaccessible rocky intertidal zones, sandy beaches, estuarine deltas, etc.) and socioeconomic development (residential and commercial districts, shipping channels, ports, fishing activities, ecotourism, etc.). 
+
+Harbor seals - Harbor seals (*Phoca  vitulina*) are the most abundant and widely distributed pinniped in Washington state waters, and are found throughout coastal areas along the U.S. West Coast. Harbor seals are separated into five stocks: California, Oregon/Washington Coast, and newly delineated inland stocks of Southern Puget Sound, Washington Northern Inland Waters, and Hood Canal (Carretta et al. 2016, Huber et al. 2012). The Oregon/Washington Coast stock has been presumed to have reached carrying capacity, and the inland stocks are thought to be stable, though no recent abundance estimates are available. Based on a survey conducted in 1999, the coastal stock is estimated to be the largest, followed by the Northern Inland Waters stock, with much smaller estimates for the Hood Canal and Southern Puget Sound stocks (Carretta et al. 2016). Harbor seals exhibit strong haulout site fidelity, hauling out at hundreds of sites depending on time of day, tides, season, or food availability (London et al. 2012). Harbor seals are known to make smaller localized movements to forage opportunistically as opposed to making longer seasonal migrations, with movement patterns depending on prey availability and oceanographic conditions (Carretta et al. 2016?). The timing of peak pupping varies for different areas, ranging from mid-April in the Columbia River to late summer and early fall throughout Puget Sound (Jeffries et al. 2000).
+
+California sea lions  - California sea lions (*Zalophus californianus*) are the most abundant pinniped off the coast of California, with an annual growth rate of 5.4%, an abundance estimated at nearly 300,000 individuals, and the highest pup count on record occurring in 2011 (Carretta et al. 2016, Carreta et al. 2011). Female adults remain near to the primary rookeries off the coast of southern California throughout the year, making shorter local foraging trips until pups are weaned (Melin et al. 2008). Adult and subadult males make winter migratory foraging trips into British Columbia and return south in late spring (Lowry and Forney, 2005). Due to these life history and migratory patterns, individuals generally found in the Pacific Northwest would be males traveling en-route to feeding areas in fall and spring months. 
+
+Steller sea lions - Steller sea lions (*Eumetopias jubatus*) range from Japan throughout the North Pacific and south into California with two recognized stocks: Western and Eastern. The Eastern stock is listed as Threatened under the ESA, with an estimated 60,000 - 75,000 individuals (Carretta et al. 2016, demaster 2014). Breeding sites are located along the coast of southeast Alaska, British Columbia, Oregon, and California, with only haulout sites along the Washington coast. Population demographic rates vary by region, with populations decreasing at California rookeries in recent years, but increasing in the northern part of their range (Carretta et al. 2016). During the summer breeding season, adult males remain ashore while females and juveniles make short foraging trips (recovery plan).  
+
+Northern elephant seals - Northern elephant seals (*Mirounga angustirostris*) range from Mexico to the Aleutians, making seasonal migrations from rookeries in California and Oregon to feeding areas in Alaska and the central North Pacific. Females and males have vastly different energy demands and therefore different seasonal migration patterns, with males making spring and fall feeding trips and females making an initial two-month foraging trip after pups are weaned in late winter, followed by the summer molting period, and then another eight-month foraging trip during gestation before returning to the rookery to give birth and breed (Le Beouf et al. 2000). The population of the California breeding stock was estimated to be 179,000 individuals in 2010, with a growth rate of 3.8% in recent decades (Lowry et al. 2014). 
+
+Northern fur seals - Northern fur seals (*Callorhinus ursinus*) range from southern California far into the North Pacific, with two recognized stocks: California and Eastern Pacific. Primary rookeries located on the Pribilof and Bogoslof Islands, and to a lesser extent islands off southern California (the latter comprising just over 1% of the population during the summer breeding season) (Gelatt et al. 2015). Individuals may also haul out along the coast in the Pacific Northwest or British Columbia outside of the breeding season. Adults remain ashore throughout the summer breeding season and then remain at sea for seven to eight months, with adult females and pups from both stocks migrating to foraging areas off the U.S. West Coast (Lea et al. 2009; Orr et al. 2012). Population growth and demographics of the California stock are changing due to the co-occurrence of emmigration and El Nino events. 
+
+Guadalupe fur seals - Guadalupe fur seals (*Arctocephalus townsendi*) were hunted nearly to extinction in the late 1800s, with the remaining population centered around islands off the coast of Baja California, Mexico. The population is listed as "threatened" under the ESA, but has been rebuilding, increasing by 13% - 21% each year (Esperon-Rodriguez and Gallo-Reynoso 2012). Individuals have been sighted in the Channel Islands, suggesting recolonization of their historic range. In recent years, strandings have occurred as far north as Oregon and Washington. Similar to other otariids, pupping occurs in early summer, and then females remain close to the rookeries, making brief foraging trips for approximately eight months until pups are weaned (Figureroa-Carranza, 1994).  
+
+*Data Sources*  
+Data for this analysis were drawn from the NOAA National Marine Fisheries Service national stranding database (accessed October 2015), including records for all pinnipeds stranded along Oregon and Washington from 1989 to 2015 (n = `r prettyNum(pinnipeds.data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")`). In Oregon and Washington, there are numerous stranding networks responsible for retrieving and documenting stranded marine mammals and contributing their data to the national stranding database. These response network members have grown in their capacity and coverage over the study period.
+
+*Data Characteriziation*  
+The total number of pinnipeds stranded along the coasts of Oregon and Washington were characterized according to several variables including sex, age class, species which were summed by month, year, and stranding location. In addition to examining total stranding cases (both live and dead) across these variables, the number of human interaction cases were also examined. Human interaction cases are determined by veterinarians and recorded on the Level A stranding intake form, and include "Yes" or "No" designations for whether there is evidence for fisheries interactions, gunshot wounds, boat collisions, or "other" human interactions. Descriptions of "Other" human interactions include but are not limited to indeterminant blunt trauma, missing body parts, dog bites, oil, humans feeding or removing animals, etc. Records for dead or decomposed animals can be missing certain fields, resulting in "Unknown" or "Unidentified" fields, and are therefore only included in analyses where possible. 
+
+*Statistical Analysis*  
+Age class, sex, and species - Mean annual and monthly stranding cases were compared across age classes and sex using one-way ANOVA tests and post-hoc Tukey HSD tests for multiple comparisons, with age class, sex, and species as independent variables and mean annual and monthly stranding cases as the dependent variable. Two measures of the prevalence of human interaction are analyzed: (1) the percent composition of different human interaction cases (could suggest what type of anthropogenic activity has a higher impact on a given age, sex, or species), and (2) the changing annual prevalence of both combined and individual human interaction types among all stranding cases over time (could reveal change in the overall prominence of human interactions independent of changes in population demographics). 
+
+Temporal patterns - To determine whether strandings and human interaction cases have changed over the study period, we examined both the number and prevalence of strandings. We used linear regressions of mean annual stranding cases against year and repeated this analysis for each species and for proportions of sex and age classes. Regressions were repeated for the prevalence or rate of human interaction cases (human interactions as a proportion of total strandings) against year. The presence of monthly or seasonal patterns were tested using one-way ANOVA and post-hoc Tukey HSD tests with month as the independent variable and mean monthly stranding cases as the dependent variable. Monthly analyses were conducted on the subset of individuals that were recorded as being either alive or recently deceased at the time of observation in order to best capture the temporal component of the stranding event.
+
+Spatial patterns - To determine possible spatial patterns in overall strandings and human interaction cases, we used mixed-effects GLM using county as the fixed effect predictor, year and month as random effects, and mean monthly stranding cases as the dependent variable, repeated for sex and age class. For this analysis, we assume stranding location can be used as a relative approximation for where strandings and human interaction events occurred.
+
+**Results** 
+
+From 1989 to 2015, local stranding response networks identified and recovered a total of `r prettyNum(pinnipeds.data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` stranded pinnipeds along the coast of Oregon and Washington. The majority of these strandings were 
+harbor seals (`r round(species[species$Pinniped.Common.Name == "Harbor seal", 2]/sum(species$cnt), 2)*100`%) and 
+California sea lions (`r round(species[species$Pinniped.Common.Name == "California sea lion", 2]/sum(species$cnt), 2)*100`%), 
+followed by a smaller number of Steller sea lions (`r round(species[species$Pinniped.Common.Name == "Steller sea lion", 2]/sum(species$cnt), 2)*100`%), northern elephant seals (`r round(species[species$Pinniped.Common.Name == "Northern elephant seal", 2]/sum(species$cnt), 2)*100`%), Guadalupe fur seals (`r round(species[species$Pinniped.Common.Name == "Guadalupe fur seal", 2]/sum(species$cnt), 2)*100`%), and northern fur seals (`r round(species[species$Pinniped.Common.Name == "Northern fur seal", 2]/sum(species$cnt), 2)*100`%) (`r tbls("species.HI.prop.table", display = "cite")`). Approximately `r round(nrow(pinnipeds.data[pinnipeds.data$Observation.Status == "ALIVE",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% were alive and `r round(nrow(pinnipeds.data[pinnipeds.data$Observation.Status == "FRESH DEAD",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% were recently deceased at the time of recovery, with the remaining being in various states of decomposition.  
+
+Stranding causes noted in the stranding records include malnutrition, injury, sickness, out of habitat, abandonment, and human interaction. Findings of human interaction comprised `r round(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% of all stranding cases over the study period, including fisheries interactions (n = `r prettyNum(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Fisheries",]), big.mark = ",")`, comprising `r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% of all human interactions cases), gunshot wounds (n = `r nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Gunshot",])`, comprising `r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), boat collision injuries (n = `r nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Boat",])`, comprising `r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Boat",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), and "other" (n = `r nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Other",])`, comprising `r round(nrow(pinnipeds.data[pinnipeds.data$Interaction.Type == "Other",])/(nrow(pinnipeds.data[pinnipeds.data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%). 
+
+*Species*  
+As would be expected, average annual strandings are significantly different across species over the study period (F = 101.7, p < 0.001), ranging from 
+`r min(species.year.mean$mean)` per year for northern fur seals to `r max(species.year.mean$mean)` per year for harbor seals (`r figs("species.boxplots", display = "cite")`a). As mentioned above, harbor seals comprise the majority of all strandings cases (`r species.HI.prop.table[species.HI.prop.table$Species == 'Harbor seal', 2]`%), followed by California sea lions (`r species.HI.prop.table[species.HI.prop.table$Species == 'California sea lion', 2]`%) and Steller sea lions (`r species.HI.prop.table[species.HI.prop.table$Species == 'Steller sea lion', 2]`%). This is similar to the composition of species across human interactions cases, with harbor seals comprising `r species.HI.prop.table[species.HI.prop.table$Species == 'Harbor seal', 3]`% of cases, followed by California sea lions (`r species.HI.prop.table[species.HI.prop.table$Species == 'California sea lion', 3]`%) and Steller sea lions (`r species.HI.prop.table[species.HI.prop.table$Species == 'Steller sea lion', 3]`%) (`r tbls("species.HI.prop.table", display = "cite")`). 
+
+However, differences between species become apparent when examining overall prevalence of human interaction cases for each species (*i.e.*, percentage of cases with evidence of human interaction divided by total number of cases for a given species), and the percent composition of human interaction types for each species (*i.e.*, the proportion of human interaction cases comprised of gunshot wounds for a given species). The prevalence of human interaction cases in individual species ranges from `r species.HI.prop.table[species.HI.prop.table$Species == 'Northern elephant seal', 4]`% for northern elephant seals up to `r species.HI.prop.table[species.HI.prop.table$Species == 'Northern fur seal', 4]`% for northern fur seals and `r species.HI.prop.table[species.HI.prop.table$Species == 'Steller sea lion', 4]`% for Steller sea lions, the latter two being among the more depleted species occurring in the study area (`r tbls("species.HI.prop.table", display = "cite")`). The changes in these rates over time are detailed below.
+
+For the specific types of human interaction cases, gunshot wounds comprised `r species.HI.prop.table[species.HI.prop.table$Species == 'Steller sea lion', 6]`% of human interactions cases for Steller sea lions and `r species.HI.prop.table[species.HI.prop.table$Species == 'California sea lion', 6]`% for California sea lions, but only `r species.HI.prop.table[species.HI.prop.table$Species == 'Harbor seal', 6]`% for harbor seals. In contrast, fisheries interactions comprised a more equatable 16-20% of human interactions for those same three species. Boat collision cases are relatively low compared with the other types of human interaction cases, but was most prevalent for northern elephant seals, amounting to `r species.HI.prop.table[species.HI.prop.table$Species == 'Northern elephant seal', 7]`% of human interaction cases (`r tbls("species.HI.prop.table", display = "cite")` and `r figs("species.boxplots", display = "cite")`b). The changes in these rates over time are detailed below.
+
+*Sex and Age Class*  
+All stranding cases - The sex and age class of strandings remained relatively consistent across the study period, with annual average strandings being significantly different for both sex (F = 32.76, p < 0.001) and age class (F = 23.7, p < 0.001). From 1989 to 2015, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Male",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Female",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Unid",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age.sex.table", display = "cite")`). Across all strandings, the majority were pups (`r age.all[age.all$Age.Class == "Pup", 3]`%) and adults (`r age.all[age.all$Age.Class == "Adult", 3]`%), with significantly fewer yearlings (`r age.all[age.all$Age.Class == "Yearling", 3]`%) and subadults (`r age.all[age.all$Age.Class == "Subadult", 3]`%), with the remainder being unidentified (`r tbls("age.sex.table", display = "cite")`). All age classes were significantly different from each other except subadults compared to yearlings and adults compared to pups. 
+
+Additionally, the sex composition of annual strandings varies depending on age class, with the proportion of females ranging from `r age.sex.table[age.sex.table$Age == 'Subadult', 3]`% for subadults to `r age.sex.table[1, 3]`% for pups (p < 0.01) and the proportion of males ranging from `r age.sex.table[age.sex.table$Age == 'Pup', 5]`% of pups to `r age.sex.table[age.sex.table$Age == 'Adult', 5]`% of adults (p < 0.05) (`r tbls("age.sex.table", display = "cite")`). 
+#####age.sex.stats for stats for both pars above
+
+Human interaction cases - Compared to all combined stranding cases, the sex composition of human interaction cases within the dataset is more disperate between males and females, being `r sex.composition.table[sex.composition.table$Sex == 'Male', 3]`% male and `r sex.composition.table[sex.composition.table$Sex == 'Female', 3]`% female (`r tbls("sex.composition.table", display = "cite")`), though the prevalence of human interaction cases is equatable for males and females (approximately `r sex.composition.table[sex.composition.table$Sex == 'Male', 4]`% for each). The prevalence of fisheries interactions and boat injuries is similar between males and females, though gunshot wounds are more prevalent for males and "other" human interactions more prevalent for females (`r tbls("sex.composition.table", display = "cite")`). 
+
+For specific age clases, the prevalence of human interaction cases is most prominent in adults and subadults and lowest for yearlings ((F = 9.6, p < 0.001 (age.hi.stats))?) (`r tbls("age.composition.table", display = "cite")`). For specific types of human interaction cases, fisheries interactions are most problematic for yearlings (`r age.composition.table[age.composition.table$Age == 'Yearling', 5]`% of all HI cases for yearlings) and significantly less prominent for pups (`r age.composition.table[age.composition.table$Age == 'Pup', 5]`%), but not significantly different across age classes. Gunshot wounds are most prominent for adults (`r age.composition.table[age.composition.table$Age == 'Adult', 6]`% of HI cases in that age class) and subadults (`r age.composition.table[age.composition.table$Age == 'Subadult', 6]`%) and significantly less problematic for pups (`r age.composition.table[age.composition.table$Age == 'Pup', 6]`%) (F = 29.7, p < 0.001). Boat collisions comprise a small proportion (2-7%) of human interactions cases for all age classes (`r tbls("age.composition.table", display = "cite")`). 
+
+*Temporal Patterns*  
+All stranding cases - To examine temporal patterns in the stranding data such as whether strandings or human interaction cases have increased or decreased over time, or whether there are seasonal differences in the number of cases, we conducted linear regression and anova tests on the average number of cases within months and years of the study period. These analyses were then also conducted at the species level. 
+
+Since 1989, the number of stranding cases has increased significantly over time (y = 25.7x, t = 5.0, p < 0.01, r-sq = 0.5), with an annual average of `r data.by.year %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(cnt), 1))` individuals throughout the 1990s and `r data.by.year %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(cnt), 1))` per year since 2000 (`r figs("all.HI.timeseries", display = 'cite')`a). However, annual strandings are changing differently over the study period for individual species (p < 0.001, r-sq = 0.70); increasing for harbor seals (y = 209x, t = 9.9, p < 0.001) and California sea lions (y = 5.9x, t = 6.9, p < 0.001) and decreasing very slightly for the other species (`r figs("species.timeseries", display = 'cite')`a). 
+
+Human interaction cases - The overall number of human interactions cases has increased significantly from 1989-2015 (y = 5.4x, t = 7.6, p < 0.01, r-sq = 0.68), with an annual average of `r year.prop.HI %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(Prop.HI), 1))`% throughout the 1990s and `r year.prop.HI %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(Prop.HI), 1))`% per year since 2000. Specifically, data show an increasing number of gunshot wounds (y = 22.3x, t = 6.2, p < 0.001), fisheries entanglements (y = 13.7x, t = 3.8, p < 0.001), and boat injuries (y = 1.5x, t = 9.6, p < 0.001) over the study period (`r figs("all.HI.timeseries", display = "cite")`b). The prevalence of human interactions cases has also increased over time (y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55), and exceeded 20% in 2012, 2013, and 2015 (`r figs("HI.prev.final", display = "cite")`a). For specific types of human interaction cases, the prevalence of Other (Other as a proportion of total strandings) has increased, while the others do not show evidence of significantly changing over time. *Help check these numbers and multiple regression interpretations - slope direction.
+
+Examining whether human interaction cases are changing over time for individual species requires examining both the number and prevalence of cases over the study period. Similar to overall strandings, the number of human interaction cases is increasing for harbor seals (y = 15.3x, t = 4.2, p < 0.001) and California sea lions (y = 1.4x, t = 8.2, p < 0.001) and significantly decreasing at a rate of approximately 8 - 20 cases per year for the other species (`r figs("species.timeseries", display = 'cite')`b - check on these rates, since they seem high compared to the number of annual cases for these species?, and stellers look like they're increasing, not decreasing?). 
+
+The prevalence of human interactions cases is increasing for California sea lions (y = 0.002x, p < 0.05) and northern fur seals (y = 0.08x, p < 0.05), not significantly changing for Guadalupe fur seals and Steller sea lions, and slightly decreasing for northern elephant seals and harbor seals (`r figs("HI.prev.final", display = "cite")`b). More specifically, it is evident that the prevalence of gunshot wounds has increased for harbor seals, guadalupe fur seals, and northern elephant seals (p < 0.05) and that fisheries entanglements have increased in northern fur seals and guadalupe fur seals (p < 0.05). *Help check these numbers and multiple regression interpretations - slope direction.
+
+On a seasonal basis, a peak in total strandings is evident, with significantly more strandings (amounting to 4-7 per month) occuring June through October (p < 0.001). The age class composition of stranded animals varies seasonally, ranging from 10-20% pups when strandings are low in the winter to 60% when strandings are higher during July and August. Similarly, the prevalence of human interaction cases show a seasonal peak, ranging from 11% to 23% depending on the month. The summer peak in both the number of overall strandings and human interactions cases only occurs in harbor seals (2.1 < t < 4.9, p < 0.001) and is most evident in pups (`r figs("monthly.age.HI.figure", display = 'cite')`a, `r figs("monthly.species.final", display = "cite")`a, b). The proportion of fisheries interactions within human interaction cases is higher in June and August than other months (get stats), while boat injuries and gunshots do not change significantly throughout the months of the year (`r figs("monthly.age.HI.figure", display = 'cite')`b). 
+####monthly.stats
+
+*Spatial Patterns*  
+Over the study period, more strandings occurred in Washington and fewer occurred in Oregon overall, with the percentage of annual strandings in Oregon ranging from `r min(data.by.year.state.prop$prop.or)`% to `r max(data.by.year.state.prop$prop.or)`% and averaging `r round(mean(data.by.year.state.prop$prop.or))`% for the whole study period. Similarly, `r mean(HI.state.prop$prop.or)`% of all human interactions cases occurred in Oregon and the remaining `r 100 - mean(HI.state.prop$prop.or)`% in Washington. However, the specific types of human interaction cases are differently distributed between the two states compared with overall strandings and combined human interactions cases, with approximately `r HI.state.prop[HI.state.prop$Interaction.Type == 'Boat', 4]`% of boat collisions, `r HI.state.prop[HI.state.prop$Interaction.Type == 'Fisheries', 4]`% of fisheries interactions, and `r HI.state.prop[HI.state.prop$Interaction.Type == 'Gunshot', 4]`% of gunshot wounds, and `r HI.state.prop[HI.state.prop$Interaction.Type == 'Other', 4]`% of "other" occurring in Oregon. The lower percentage of "other" human interaction cases in Oregon is likely due to the fact that the majority of those cases are harbor seal pups, and a disproportional number of harbor seal stranding occurs in Washington, as described above.  
+
+Individual species strandings were also not equally distributed between the two states. Guadalupe fur seal, northern elephant seal, and northern fur seal strandings are distributed approximately 60% in Oregon and 40% in Washington while California sea lion and Steller sea lion strandings are approximately 70% in Oregon and 30% in Washington. In contrast, harbor seal strandings are approximately 15% in Oregon and 85% in Washington (`r figs("countyfigures", display = 'cite')`, `r tbls("species.HI.prop.table", display = 'cite')`). 
+
+At the county level, strandings were not evenly distributed along the coast in either Oregon or Washington. In Washington, the majority of strandings occurred in Pierce, San Juan, and Island counties (`r figs("countyfigures", display = 'cite')`). Similarly, the majority of human interaction cases occurred in Pierce county, with a disproportionately higher number of cases in Pacific county, the majority of which were gunshot wounds.  
+
+In Oregon, the majority of strandings occurred in Clatsop, Coos, and Lincoln counties (`r figs("countyfigures", display = 'cite')`). These counties were also where the majority of human interaction cases occurred, though a disproportionately higher number of human interactions cases occurred in Clatsop, the majority of which where gunshot wounds, increasing significantly over time (t = 2.3, p < 0.05).
+
+**Discussion**  
+
+*Outline*  
+- Brief summary of most important findings
+
+*Temporal Patterns*  
+- What is increasing, what is decreasing (overall cases, state-based strandings, species-specific numbers, species of certain ages, certain HI types, prevalence vs numbers)
+- What are possible explanations for these findings? (all things are variable (Huggins 2013: harbor seal pup mortality rates vary); populations are growing, ranges are changing/expanding, human activities also shifting over time)
+- Compare with previous studies
+
+*Spatial Patterns*
+- Certain areas increasing or decreasing? Certain areas higher/lower than others? 
+- Possible reasons (use of habitat varies by species and age class - stranding prevalence reflects local "abundance?")
+- Compare with previous studies
+
+\newpage
+
+**Figures and Tables**  
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+species.boxplots
+```
+
+`r figs("species.boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for HS and CSL, and larger IQR for harbor seals and lower average strandings for other species; and (b) boxplot of annual human interactions by type, showing high number of Other cases for HS and gunshot wounds for CSL and SSL.")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+all.HI.timeseries
+```
+
+`r figs("all.HI.timeseries", caption = "(a) Total annual strandings shows increasing strandings over the study period (y = 25.7x, t = 5.0, p < 0.01, r-sq = 0.5) (n = 14,167); and (b) annual human interaction cases (n = 1,513) showing increasing number of cases overall (y = 5.4x, t = 7.6, p < 0.01, r-sq = 0.68), increasing gunshot wounds (symbol, y = 22.3x, t = 6.2, p < 0.001), fisheries entanglements (symbol, y = 13.7x, t = 3.8, p < 0.001), and boat injuries (symbol, y = 1.5x, t = 9.6, p < 0.001) over the study period.")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+species.timeseries
+```
+
+`r figs("species.timeseries", caption = "(a) Annual strandings per species shows increasing strandings in harbor seals (symbol, y = 209x, t = 9.9, p < 0.001) and California sea lions (symbol, y = 5.9x, t = 6.9, p < 0.001) and slightly decreasing trends for the other species; and (b) human interactions cases shows similarly increasing trends for harbor seals (symbol, (y = 15.3x, t = 4.2, p < 0.001)), California sea lions (symbol, y = 1.4x, t = 8.2, p < 0.001), and decreasing at a rate of 8-20 individuals per year for the other species (CHECK THESE - SEEMS FISHY).")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+HI.prev.final
+```
+
+`r figs("HI.prev.final", caption = "Prevalence of human interactions cases over time for (a) all species shows an increasing trend () and for (b) individual species.")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+monthly.age.HI.figure
+```
+
+`r figs("monthly.age.HI.figure", caption = "Sum of human interactions cases across years for each month according to (a) age class, showing seasonal peak for human interaction cases for pups; and (b) interaction type, showing a high number of fisheries cases in August and Other in July.")`
+
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+monthly.species.final
+```
+
+`r figs("monthly.species.final", caption = "Sum of cases within months across all years for each species shows (a) a summer peak in all strandings for harbor seals (2.3 < t < 13.7, p < 0.001) and (b) a summer peak in human interaction cases for harbor seals (2.1 < t < 4.9, p < 0.001) and greater variability in late spring for California sea lions (stats).")`
+
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+stateboxplot
+```
+
+`r figs("stateboxplot", caption = "Boxplot of average monthly strandings over the study period shows increasing mean and IQR in both states.")`
+
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+countyfigures
+```
+
+`r figs("countyfigures", caption = "All strandings (above) and human interaction cases (below) for each county in Oregon (left) and Washington (right) shows high strandings in Lincoln and proportionally higher HI cases in Clatstop in Oregon and high strandings in Pacific and Pierce but proportionally higher HI cases in San Juan.")`
+
+
+\newpage
+
+`r tbls("species.HI.prop.table", caption = "Species composition of all strandings (n = ) and all human interaction cases (n = ) and the percent composition of human interaction type for each species.")`
+```{r species composition table}
+kable(species.HI.prop.table)
+
+```
+
+`r tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class.")`
+```{r age sex table, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+
+kable(age.sex.table)
+```
+
+`r tbls("sex.composition.table", caption = "Sex composition of all strandings (n = ) and all human interaction cases (n = ), and the percent composition of human interaction type for each sex.")` 
+```{r sex composition table}
+kable(sex.composition.table)
+```
+
+`r tbls("age.composition.table", caption = "Age composition of all strandings (n = ) and all human interaction cases (n = ), and the percent composition of human interaction type for each age class.")`
+```{r age composition table}
+kable(age.composition.table)
+```
+
+
+\newpage
+
+**Appendices: Additional Tables and Statistical Analyses**
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+stacked.species.FI
+```
+
+`r figs("stacked.species.FI", caption = "Annual fisheries interactions per species shows greater numbers beginning in the mid 2000s, with a high proportion of harbor seals and CSL.")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+monthly.lineplots
+```
+
+`r figs("monthly.lineplots", caption = "(a) Sum of cases across years for each month shows consistent seasonal peak while (b) sum of human interaction cases for each month shows greater variability across years.")`
+
+`r tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Washington.")`
+```{r wacounties}
+kable(WAcounties.table)
+
+```
+
+`r tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Oregon.")`
+```{r}
+kable(ORcounties.table)
+
+```
+
+**References**
+
+Carretta, J.V., Oleson, E.M., Baker, J., Weller, D.W., Lang, A.R., and others. 2016. U.S. Pacific marine mammal stock assessments: 2015. NOAA-TM-NMFS-SWFSC-561. Washington, DC. National Oceanic and Atmospheric Administration. 
+
+Carretta, J.V., Forney, K.A., Oleson, E., Martien, K., Muto, M., Lowry, M. S., and others. 2011. U.S. Pacific marine mammal stock assessments: 2010. NOAA Technical Memorandum NMFS-SWFSC-476. Washington, DC: National Oceanic and Atmospheric Administration.
+
+Esperon-Rodriguez, M., and J.P. Gallo-Reynoso. 2012. The re-colonization of the Archipelago 
+of San Benito, Baja California, by the Guadalupe fur seal. Revista Mexicana de Biodiversidad 
+83:170-176.
+
+Gelatt, T., R. Ream, and D. Johnson.  2015. Callorhinus ursinus.  The IUCN Red List of Threatened Species 2015:e.T3590A45224953.  Available at: http://www.iucnredlist.org/details/3590/0 
+
+Figureroa-Carranza, A.L. 1994. Early lactation and attendance behavior of the Guadalupe fur 
+seal females (Arctocephalus townsendi). University of California, Santa Cruz, California.
+
+Huber, H. R., B. R. Dickerson, S. J. Jeffries, and D. M. Lambourn.  2012.  Genetic analysis of Washington State harbor  seals  (Phoca  vitulina  richardii)  using  microsatellites.    Can.  J.  Zool.  90(12):1361-1369. 
+
+Huggins, J.L., Leahy, C.L., Calambokidis, J., Lambourn, D., Jeffries, S.J. and others. 2013. Causes and patterns of harbor seal (*Phoca vitulina*) pup mortality at Smith Island, Washington, 2004-2010. 
+
+Jeffries, S.J., P.J. Gearin, H.R. Huber, D.L. Saul, and D.A. Pruett. 2000.  Atlas of Seal and Sea Lion Haulout Sites in Washington.   Washington Department of Fish and Wildlife, Wildlife Science Division, 600 Capitol Way North, Olympia WA.  pp. 150.
+
+Le  Boeuf, B.J., Crocker, D.E., Costa, D.P., Blackwell, S.B., Webb, P.M., and D.S. Houser. 2000. Foraging ecology of northern elephant seals. Ecological monographs, 70(3), 353-
+382. 
+
+Lea, M.A.,  Johnson, D., Ream, R., Sterling, J., Melin, S., and T. Gelatt. 2009. Extreme  weather events influence dispersal of naïve northern fur seals.  Biol. Lett.  DOI: 10.1098/rsbl.2008.0643.
+
+London, J.M., Ver Hoef, J.M., Jeffries, S.J., Lance, M.M., and P.L. Boveng. 2012. Haul-out behavior of harbor seals (Phoca vitulina) in Hood Canal, Washington. PLoS ONE 7(6): e38180. doi:10.1371/journal.pone.0038180. 
+
+Lowry, M.S., R. Condit, B.Hatfield, S.G. Allen, R. Berger, P.A. Morris, B.J. Le Boeuf, and J. Reiter. 2014. Abundance,  Distribution,  and  Population  Growth  of  the  Northern  Elephant  Seal  (*Mirounga angustirostris*) in the United States from 1991 to 2010.  Aquatic Mammals 40(1): 20-31. 
+
+Melin, S.R., DeLong, R.L., and Thomason, J.R. 2000. Attendance patterns of California sea lion (Zalophus cali- fornianus) females and pups during the non-breeding season at San Miguel Island. Marine Mammal Science, 16(1), 169- 185.
+
+Orr,  A.J., Melin, S.R., Harris, J.D., and R.L. DeLong. 2012. Status  of  the  northern  fur  seal population at San Miguel Island, California during 2010 and 2011.  Pp. 41-58, In: Testa, J. W. (ed.), Fur seal investigations, 2010-2011.  U.S. Dep. Commer., NOAA Tech. Memo. NMFS
+-AFSC-241. 77 pp.
+
+ 
