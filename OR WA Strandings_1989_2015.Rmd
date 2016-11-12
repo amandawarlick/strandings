@@ -30,8 +30,9 @@ library(knitr)
 library(reshape2)
 library(stringr)
 library(magrittr)
-setwd("~/Documents/R/Strandings")
 
+#setwd("~/Documents/R/Strandings")
+# Define PlotTheme ----
 plot_theme <- function(...) {
   theme(
     #text = element_text(size = 11),
@@ -46,6 +47,40 @@ plot_theme <- function(...) {
     legend.title = element_blank(),
     legend.key = element_blank(),
     legend.text = element_text(size = 8),
+    ...)
+}
+# Define Function for Publication Plots
+pubfigure_simple_theme <- function(...) {
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title.x = element_blank(),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
+    ...)
+}
+
+# Define Plot Theme
+pubfigure_theme <- function(...) {
+  theme(
+    #text = element_text(size = 11),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 10),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title = element_text(size = 10),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(), 
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
     ...)
 }
 
@@ -146,7 +181,7 @@ Sex.all.yr.figure.stack <- ggplot(Sex.all.yr,
   scale_y_continuous(labels = comma) +
   xlab("") + ylab("Proportion of Strandings") +
   plot_theme(legend.position = 'top')
-ggsave(Sex.all.yr.figure.stack, file = "~/Documents/R/Strandings/Figures/Sex.all.yr.figure.stack.pdf")
+ggsave(Sex.all.yr.figure.stack, file = "./Figures/Sex.all.yr.figure.stack.pdf")
 
 Sex.all.yr.figure <- 
   ggplot(Sex.all.yr, aes(x = as.factor(Year.of.Observation), y = cnt, fill = Sex)) +
@@ -154,7 +189,7 @@ Sex.all.yr.figure <-
   scale_y_continuous(labels = comma) +
   xlab("") + ylab("Total Strandings") +
   plot_theme(legend.position = 'top')
-ggsave(Sex.all.yr.figure, file = "~/Documents/R/Strandings/Figures/Sex.all.yr.figure.pdf")
+ggsave(Sex.all.yr.figure, file = "./Figures/Sex.all.yr.figure.pdf")
 
 #Larger IQR for males
 Sex.all.yr.boxplot <- 
@@ -164,7 +199,7 @@ Sex.all.yr.boxplot <-
   scale_y_continuous(labels = comma) +
   xlab("") + ylab("Mean Monthly Strandings") +
   plot_theme(legend.position = 'top')
-ggsave(Sex.all.yr.boxplot, file = "~/Documents/R/Strandings/Figures/Sex.all.yr.boxplot.pdf")
+ggsave(Sex.all.yr.boxplot, file = "./Figures/Sex.all.yr.boxplot.pdf")
 
 #100% stacked bar chart - month - higher female percentage in august compared to december
 Sex.all.month.figure <- 
@@ -172,7 +207,7 @@ Sex.all.month.figure <-
   geom_bar(stat = 'identity', position = 'fill') +
   xlab("") + ylab("Proportion of Strandings") +
   plot_theme(legend.position = 'top')
-ggsave(Sex.all.month.figure, file = "~/Documents/R/Strandings/Figures/Sex.all.mo.figure.pdf")
+ggsave(Sex.all.month.figure, file = "./Figures/Sex.all.mo.figure.pdf")
 
 #Anova shows monthly mean stranding is different between sexes, months, but not months for the sexes, p < 0.05
 summary(aov(cnt ~ Month.of.Observation*Sex, Sex.all.yr.mo))
@@ -214,7 +249,7 @@ HI.type.sex.figure <- ggplot(Sex.HI.yr, aes(x = Interaction.Type, y = cnt, fill 
   geom_bar(stat = 'identity', position = 'fill') +
   xlab("") + ylab("Proportion of Strandings") +
   plot_theme(legend.position = 'top')
-ggsave(HI.type.sex.figure, file = "~/Documents/R/Strandings/Figures/HI.type.sex.figure.pdf")
+ggsave(HI.type.sex.figure, file = "./Figures/HI.type.sex.figure.pdf")
 
 ```
 
@@ -241,7 +276,7 @@ age.sex.all.figure <-
   xlab("") + ylab("Proportion of Strandings") +
   plot_theme(legend.position = 'top') +
   scale_fill_brewer(palette = 'Set1')
-ggsave(age.sex.all.figure, file = "~/Documents/R/Strandings/Figures/age.sex.all.figure.pdf")
+ggsave(age.sex.all.figure, file = "./Figures/age.sex.all.figure.pdf")
 
 age.sex.table <- age.sex.all %>% 
   dcast(Age.Class ~ Sex, value.var = 'cnt') %>% 
@@ -254,7 +289,9 @@ average.sex <- c(as.character("Average"), "--", mean(age.sex.table[,3]), "--", m
 
 age.sex.table <- rbind(age.sex.table, average.sex, stringsAsFactors = F)
 
-age.sex.table <- write.csv(age.sex.table, file = "~/Documents/R/Strandings/Figures/age.sex.table.csv", row.names = F)
+
+age.sex.table <- write.csv(age.sex.table, file = "./Figures/age.sex.table.csv", row.names = F)
+
 
 age.sex.stats <- pinnipeds.data %>%
   group_by(Sex, Year.of.Observation, Age.Class) %>%
@@ -285,7 +322,7 @@ all.yr.figure <-
   scale_y_continuous(labels = comma) +
   plot_theme() +
   scale_color_brewer(palette = 'Set1') 
-ggsave(all.yr.figure, file = "~/Documents/R/Strandings/Figures/all.year.figure.pdf")
+ggsave(all.yr.figure, file = "./Figures/all.year.figure.pdf")
 
 ```
 
@@ -314,7 +351,7 @@ HI.year.figure <-
   #scale_x_continuous(breaks = c(1989:2015)) +
   plot_theme(legend.position = 'top') +
   scale_color_brewer(palette = 'Set1')
-ggsave(HI.year.figure, file = "~/Documents/R/Strandings/Figures/HI.year.figure.pdf")
+ggsave(HI.year.figure, file = "./Figures/HI.year.figure.pdf")
 ```
 
 ```{r HI types over time}
@@ -339,7 +376,7 @@ HI.type.year.figure <-
   xlab("") + ylab("Human Interaction Cases") +
   plot_theme(legend.position = 'top') + 
   scale_color_brewer(palette = 'Set1')
-ggsave(HI.type.year.figure, file = "~/Documents/R/Strandings/Figures/HI.type.year.figure.pdf")
+ggsave(HI.type.year.figure, file = "./Figures/HI.type.year.figure.pdf")
 
 ```
 
@@ -371,7 +408,7 @@ species.figure <- species.year %>%
   scale_y_continuous(labels = comma) +
   xlab("") + ylab("Annual Strandings") +
   plot_theme()
-ggsave(species.figure, file = "~/Documents/R/Strandings/Figures/species.figure.pdf")
+ggsave(species.figure, file = "./Figures/species.figure.pdf")
 
 
 #Anova shows average annual strandings are significantly different between species. Should I also have year in the anova?
@@ -395,7 +432,7 @@ species.year.HI.figure <-
   xlab("") + ylab("Annual Human Interaction Cases") +
   scale_y_continuous(labels = comma) +
   plot_theme()
-ggsave(species.year.HI.figure, file = "~/Documents/R/Strandings/Figures/species.year.HI.figure.pdf")
+ggsave(species.year.HI.figure, file = "./Figures/species.year.HI.figure.pdf")
 
 #Anova shows that yes, the mean annual HI strandings are different across species.
 #Harbor seals are different from everything else, but no other sig difs
@@ -415,7 +452,7 @@ species.fish.figure <-
   geom_boxplot() +
   xlab("") + ylab("Annual Fisheries Interactions") +
   plot_theme()
-ggsave(species.fish.figure, file = "~/Documents/R/Strandings/Figures/species.fish.figure.pdf")
+ggsave(species.fish.figure, file = "./Figures/species.fish.figure.pdf")
 
 #Sig difs overall, but not pairwise?
 summary(aov(cnt ~ Pinniped.Common.Name, data = species.year.FI))
@@ -431,7 +468,7 @@ species.shot.figure <-
   geom_boxplot() +
   xlab("") + ylab("Annual Gunshot Woundss") +
   plot_theme()
-ggsave(species.shot.figure, file = "~/Documents/R/Strandings/Figures/species.shot.figure.pdf")
+ggsave(species.shot.figure, file = "./Figures/species.shot.figure.pdf")
 
 #No sig difs between species for gunshot wound cases. Sig difs for more recent years only. p = 0.06
 summary(aov(cnt ~ Pinniped.Common.Name, data = species.year.shot))
@@ -460,7 +497,7 @@ species.all.figure <-
   plot_theme(legend.position = 'top', 
              legend.text = element_text(size = 8)) +
   scale_color_brewer(palette = 'Set2')
-ggsave(species.all.figure, file = "~/Documents/R/Strandings/Figures/species.all.figure.pdf")
+ggsave(species.all.figure, file = "./Figures/species.all.figure.pdf")
 
 #strandings by year, species stacked
 species.all.figure.stacked <- 
@@ -470,7 +507,7 @@ species.all.figure.stacked <-
   scale_y_continuous(labels = comma) +
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set2')  
-ggsave(species.all.figure.stacked, file = "~/Documents/R/Strandings/Figures/species.all.figure.stacked.pdf")
+ggsave(species.all.figure.stacked, file = "./Figures/species.all.figure.stacked.pdf")
 
 species.HI.figure <- 
   ggplot(species.year.HI, aes(x = factor(Year.of.Observation), y = cnt, 
@@ -481,7 +518,7 @@ species.HI.figure <-
   plot_theme(legend.position = 'top', 
              legend.text = element_text(size = 8)) + 
   scale_color_brewer(palette = 'Set1')
-ggsave(species.HI.figure, file = "~/Documents/R/Strandings/Figures/species.HI.figure.pdf")
+ggsave(species.HI.figure, file = "./Figures/species.HI.figure.pdf")
 
 #Are fisheries interactions cases changing over time for particular species? 
 # Yes, harbors going up, others going down? But the figure really looks like they're going up. Do I need to have year in the model?
@@ -503,7 +540,7 @@ species.year.FI.figure <-
   plot_theme(legend.position = 'top', 
              legend.text = element_text(size = 8)) + 
   scale_color_brewer(palette = 'Set1')
-ggsave(species.year.FI.figure, file = "~/Documents/R/Strandings/Figures/species.year.FI.figure.pdf")
+ggsave(species.year.FI.figure, file = "./Figures/species.year.FI.figure.pdf")
 
 #Stacked
 stacked.FI.figure <- 
@@ -513,7 +550,7 @@ stacked.FI.figure <-
   ylab("Total fisheries Interactions") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set2') 
-ggsave(stacked.FI.figure, file = "~/Documents/R/Strandings/Figures/stacked.FI.figure.pdf")
+ggsave(stacked.FI.figure, file = "./Figures/stacked.FI.figure.pdf")
 
 #Exploring single species 
 
@@ -651,7 +688,7 @@ ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Sex)) +
   scale_y_continuous(labels = comma) +
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.sex.figure, file = "~/Documents/R/Strandings/Figures/monthly.sex.figure.pdf")
+ggsave(monthly.sex.figure, file = "./Figures/monthly.sex.figure.pdf")
 
 #Monthly strandings by age class
 monthly.age.figure <- monthly.all %>% 
@@ -664,7 +701,7 @@ monthly.age.figure <- monthly.all %>%
   plot_theme(legend.position = 'top', 
              legend.text = element_text(size = 8)) + 
   scale_fill_brewer(palette = 'Set3')
-ggsave(monthly.age.figure, file = "~/Documents/R/Strandings/Figures/monthly.age.figure.pdf")
+ggsave(monthly.age.figure, file = "./Figures/monthly.age.figure.pdf")
 
 monthly.age.stats <- monthly.all %>% 
   group_by(Month.of.Observation, Year.of.Observation, Age.Class) %>%
@@ -683,7 +720,7 @@ monthly.years.figure <-
   scale_y_continuous(labels = comma) +
   plot_theme() #+ 
   #scale_color_brewer()
-ggsave(monthly.years.figure, file = "~/Documents/R/Strandings/Figures/monthly.years.figure.pdf")
+ggsave(monthly.years.figure, file = "./Figures/monthly.years.figure.pdf")
 
 #Are there seasonal patterns in HI cases?
 
@@ -733,7 +770,7 @@ monthly.HI.figure <- monthly.HI %>%
   scale_y_continuous(labels = comma) +
   plot_theme() + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.figure.pdf")
+ggsave(monthly.HI.figure, file = "./Figures/monthly.HI.figure.pdf")
 
 #Bar chart showing monthly strandings by interaction type
 monthly.HI.figure.stacked <- monthly.HI %>% 
@@ -745,7 +782,7 @@ monthly.HI.figure.stacked <- monthly.HI %>%
   ylab("Total Human Interaction Cases") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.figure.stacked, file = "~/Documents/R/Strandings/Figures/monthly.HI.figure.stacked.pdf")
+ggsave(monthly.HI.figure.stacked, file = "./Figures/monthly.HI.figure.stacked.pdf")
 
 #Bar chart showing monthly strandings by sex
 monthly.HI %>% group_by(Month.of.Observation, Sex) %>%
@@ -765,7 +802,7 @@ ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Age.Class)) +
   ylab("Total Human Interaction Cases") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.age.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.age.figure.pdf")
+ggsave(monthly.HI.age.figure, file = "./Figures/monthly.HI.age.figure.pdf")
 
 #Peaks by the years
 monthly.HI.year.figure <- 
@@ -775,7 +812,7 @@ monthly.HI.year.figure <-
   ylab("Monthly Human Interaction Cases") + xlab("") + 
   plot_theme() #+ 
   #scale_color_brewer(palette = 'Set3')
-ggsave(monthly.HI.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.year.figure.pdf")
+ggsave(monthly.HI.year.figure, file = "./Figures/monthly.HI.year.figure.pdf")
 
 #Is there an effect of month on FI?
 monthly.FI <- pinnipeds.data %>%
@@ -798,7 +835,7 @@ monthly.FI.year.figure <-
   ylab("Monthly Fisheries Interactions") + xlab("") + 
   plot_theme() #+ 
  # scale_color_brewer(palette = 'Set3')
-ggsave(monthly.FI.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.FI.year.figure.pdf")
+ggsave(monthly.FI.year.figure, file = "./Figures/monthly.FI.year.figure.pdf")
 ```
 
 ```{r monthly by species}
@@ -830,7 +867,7 @@ monthly.species.figure <-
   ylab("Total Monthly Strandings") + xlab("") + 
   plot_theme(legend.position = 'top', legend.text = element_text(size = 4)) + 
   scale_color_brewer(palette = 'Set3')
-ggsave(monthly.species.figure, file = "~/Documents/R/Strandings/Figures/monthly.species.figure.pdf")
+ggsave(monthly.species.figure, file = "./Figures/monthly.species.figure.pdf")
 
 #HI by month per each species
 #HELP COMPARE: should this be done per species per month per year, so it is monthly FI cases in a given year (here)? Or just per species per all time series months combined, so it is summed across years (as above in HI and all cases per species)?
@@ -858,7 +895,7 @@ monthly.species.HI.figure <-
   ylab("Total Monthly Human Interaction Cases") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_color_brewer(palette = 'Set3')
-ggsave(monthly.species.HI.figure, file = "~/Documents/R/Strandings/Figures/monthly.species.HI.figure.pdf")
+ggsave(monthly.species.HI.figure, file = "./Figures/monthly.species.HI.figure.pdf")
 
 #Human interactions monthly each year
 
@@ -877,7 +914,7 @@ monthly.HI.year.figure <-
   ylab("Monthly Human Interaction Cases") + xlab("") + 
   plot_theme() + 
   scale_color_brewer(palette = 'Set3')
-ggsave(monthly.HI.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.year.figure.pdf")
+ggsave(monthly.HI.year.figure, file = "./Figures/monthly.HI.year.figure.pdf")
 
 #Monthly species FI
 
@@ -905,7 +942,7 @@ monthly.FI.shot.year.figure <- monthly.species.FI.shot %>%
   ylab("Total Strandings") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_color_brewer(palette = 'Set3')
-ggsave(monthly.FI.shot.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.FI.shot.year.figure.pdf")
+ggsave(monthly.FI.shot.year.figure, file = "./Figures/monthly.FI.shot.year.figure.pdf")
 
 ```
 
@@ -921,7 +958,7 @@ year.state.boxplot <-
   xlab("") + ylab("Monthly Strandings") +
   plot_theme(legend.position = 'top') +
   scale_fill_brewer(palette = 'Set1')
-ggsave(year.state.boxplot, file = "~/Documents/R/Strandings/Figures/year.state.boxplot.pdf")
+ggsave(year.state.boxplot, file = "./Figures/year.state.boxplot.pdf")
 
 year.state.prop <- pinnipeds.data %>%
   group_by(State, Year.of.Observation) %>%
@@ -930,7 +967,7 @@ year.state.prop <- pinnipeds.data %>%
   transform(prop.or = round(OR/(OR+WA), 2)*100)
   
 mean(year.state.prop$prop.or)
-sum(year.state.prop$OR)/sum(year.state$cnt)
+sum(year.state.prop$OR)/sum(year.month.state$cnt)
 
 #When accounting for differences across years, states are different
 summary(lm(cnt ~ Year.of.Observation + State, year.month.state))
@@ -947,7 +984,7 @@ ggplot(aes(x = factor(Year.of.Observation), y = cnt, fill = State)) +
    ylab("Total Annual Strandings") + xlab("") + 
    plot_theme() + 
    scale_fill_brewer(palette = 'Set1') 
-ggsave(all.state.figure, file = "~/Documents/R/Strandings/Figures/all.state.figure.pdf")
+ggsave(all.state.figure, file = "./Figures/all.state.figure.pdf")
 
 #HI by state
 HI.year.state <- pinnipeds.data %>%
@@ -981,7 +1018,7 @@ ggplot(aes(x = factor(Year.of.Observation), y = cnt, fill = State)) +
    ylab("Annual Human Interaction Cases") + xlab("") + 
    plot_theme() + 
    scale_fill_brewer(palette = 'Set1') 
-ggsave(HI.state.year.figure, file = "~/Documents/R/Strandings/Figures/HI.state.year.figure.pdf")
+ggsave(HI.state.year.figure, file = "./Figures/HI.state.year.figure.pdf")
 
 #Species by state
 
@@ -998,7 +1035,7 @@ state.species.prop.figure <-
   scale_y_continuous(labels = comma) +
   plot_theme() + 
    scale_fill_brewer(palette = 'Set1')
-ggsave(state.species.prop.figure, file = "~/Documents/R/Strandings/Figures/state.species.prop.figure.pdf")
+ggsave(state.species.prop.figure, file = "./Figures/state.species.prop.figure.pdf")
 
 #100% stacked
 state.species.prop.figure <- 
@@ -1007,7 +1044,7 @@ state.species.prop.figure <-
   xlab("") + ylab("Proportion of Strandings") +
   plot_theme() + 
    scale_fill_brewer(palette = 'Set1')
-ggsave(state.species.prop.figure, file = "~/Documents/R/Strandings/Figures/state.species.prop.figure.pdf")
+ggsave(state.species.prop.figure, file = "./Figures/state.species.prop.figure.pdf")
 
 ```
 
@@ -1025,7 +1062,7 @@ allWA.bycounty.figure <- ggplot(allWA.bycounty, aes(x = County, y = cnt)) +
   scale_y_continuous(labels = comma) +
   plot_theme() + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(allWA.bycounty.figure, file = "~/Documents/R/Strandings/Figures/allWA.bycounty.figure.pdf")
+ggsave(allWA.bycounty.figure, file = "./Figures/allWA.bycounty.figure.pdf")
 
 #Some counties have higher/lower strandings compared to others
 summary(aov(cnt ~ County, allWA.bycounty))
@@ -1101,7 +1138,7 @@ WAHI.bycounty.figure <-
   scale_y_continuous(labels = comma) +
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set1') 
-ggsave(WAHI.bycounty.figure, file = "~/Documents/R/Strandings/Figures/WAHI.bycounty.figure.pdf")
+ggsave(WAHI.bycounty.figure, file = "./Figures/WAHI.bycounty.figure.pdf")
 
 
 ```
@@ -1134,7 +1171,7 @@ allOR.bycounty.figure <-
   scale_y_continuous(labels = comma) +
   plot_theme() + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(allOR.bycounty.figure, file = "~/Documents/R/Strandings/Figures/allOR.bycounty.figure.pdf")
+ggsave(allOR.bycounty.figure, file = "./Figures/allOR.bycounty.figure.pdf")
 
 
 #all HI by county - OR
@@ -1165,7 +1202,7 @@ ORHI.bycounty.figure <-
   ylab("Human Interaction Cases") + xlab("") + 
   plot_theme(legend.position = 'top') + 
   scale_fill_brewer(palette = 'Set1')
-ggsave(ORHI.bycounty.figure, file = "~/Documents/R/Strandings/Figures/ORHI.bycounty.figure.pdf")
+ggsave(ORHI.bycounty.figure, file = "./Figures/ORHI.bycounty.figure.pdf")
 
 
 ```
@@ -1208,7 +1245,7 @@ bigtable.WA.HI.table <- bigtable.WA.HI.type %>%
   select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
 colnames(bigtable.WA.HI.table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
-WAcounties.table <- write.csv(bigtable.WA.HI.table, file = "~/Documents/R/Strandings/Figures/WAcounties.table.csv", row.names = F)
+WAcounties.table <- write.csv(bigtable.WA.HI.table, file = "./Figures/WAcounties.table.csv", row.names = F)
 
 
 #OR
@@ -1247,7 +1284,7 @@ bigtable.OR.HI.table <- bigtable.OR.HI.type %>%
   select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
 colnames(bigtable.OR.HI.table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
-ORcounties.table <- write.csv(bigtable.OR.HI.table, file = "~/Documents/R/Strandings/Figures/ORcounties.table.csv", row.names = F)
+ORcounties.table <- write.csv(bigtable.OR.HI.table, file = "./Figures/ORcounties.table.csv", row.names = F)
 ```
 
 ```{r weight length, eval = FALSE, echo = FALSE}
@@ -1374,7 +1411,7 @@ species.prop <- pinnipeds.data %>%
 species.prop$prop <- round(species.prop$cnt/sum(species.prop$cnt), 2)*100
 colnames(species.prop) <- c("Species", "Number", "Percent")
 
-species.prop.table <- write.csv(species.prop, file = "~/Documents/R/Strandings/Figures/species.prop.table.csv", row.names = FALSE)
+species.prop.table <- write.csv(species.prop, file = "./Figures/species.prop.table.csv", row.names = FALSE)
                   
 
 #Big proportion table for sex
@@ -1420,7 +1457,7 @@ Sex.HI.type.table <- pinnipeds.data %>%
   select(c(Sex, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
 colnames(Sex.HI.type.table) <- c("Sex", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
-sex.composition.table <- write.csv(Sex.HI.type.table, file = "~/Documents/R/Strandings/Figures/Sex.composition.table.csv", row.names = FALSE)
+sex.composition.table <- write.csv(Sex.HI.type.table, file = "./Figures/Sex.composition.table.csv", row.names = FALSE)
 
 
 #Big table for age class
@@ -1470,7 +1507,7 @@ colnames(Age.HI.type.table) <- c("Age", "All Strandings (%)", "Prevalence of HI 
 
 Age.HI.type.table <- Age.HI.type.table[order(Age.HI.type.table$Age),]
 
-age.composition.table <- write.csv(Age.HI.type.table, file = "~/Documents/R/Strandings/Figures/age.composition.table.csv", row.names = FALSE)
+age.composition.table <- write.csv(Age.HI.type.table, file = "./Figures/age.composition.table.csv", row.names = FALSE)
 
 ##Stats for age HI type
 age.HI.stats <- pinnipeds.data %>%
@@ -1513,7 +1550,7 @@ state.species.prop <- pinnipeds.data %>%
             prop.wa = round(WA/(OR+WA), 2)*100) %>%
   select(Pinniped.Common.Name, prop.or, prop.wa)
 
-# state.species.prop.table <- write.csv(state.species.prop, file = "~/Documents/R/Strandings/Figures/state.species.prop.table.csv", row.names = FALSE)
+# state.species.prop.table <- write.csv(state.species.prop, file = "./Figures/state.species.prop.table.csv", row.names = FALSE)
 
 species.bigtable <- pinnipeds.data %>%
   group_by(Pinniped.Common.Name) %>%
@@ -1557,7 +1594,7 @@ species.prop.HI[is.na(species.prop.HI)] <- 0
 
 colnames(species.prop.HI) <- c("Species", "All Strandings (%)", "OR (%)", "WA (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
-species.HI.prop.table <- write.csv(species.prop.HI, file = "~/Documents/R/Strandings/Figures/species.HI.prop.table.csv", row.names = F)
+species.HI.prop.table <- write.csv(species.prop.HI, file = "./Figures/species.HI.prop.table.csv", row.names = F)
 
 ##Big Prevalence over time Table(s)
 ##all species combined, interaction types as a proportion of all cases, not just HI cases
