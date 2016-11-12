@@ -49,6 +49,38 @@ plot_theme <- function(...) {
     ...)
 }
 
+pubfigure_simple_theme <- function(...) {
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title.x = element_blank(),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(),
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
+    ...)
+}
+
+pubfigure_theme <- function(...) {
+  theme(
+    #text = element_text(size = 11),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 10),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 10), 
+    axis.title = element_text(size = 10),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(), 
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 5.5),
+    ...)
+}
 case <- function(x)
   paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
 
@@ -116,8 +148,8 @@ Sex.all.yr.figure.stack <- ggplot(Sex.all.yr,
   plot_theme(legend.position = 'top')
 ggsave(Sex.all.yr.figure.stack, file = "~/Documents/R/Strandings/Figures/Sex.all.yr.figure.stack.pdf")
 
-Sex.all.yr.figure <- ggplot(Sex.all.yr, 
-                        aes(x = as.factor(Year.of.Observation), y = cnt, fill = Sex)) +
+Sex.all.yr.figure <- 
+  ggplot(Sex.all.yr, aes(x = as.factor(Year.of.Observation), y = cnt, fill = Sex)) +
   geom_bar(stat = 'identity') +
   scale_y_continuous(labels = comma) +
   xlab("") + ylab("Total Strandings") +
@@ -143,7 +175,7 @@ Sex.all.month.figure <-
 ggsave(Sex.all.month.figure, file = "~/Documents/R/Strandings/Figures/Sex.all.mo.figure.pdf")
 
 #Anova shows monthly mean stranding is different between sexes, months, but not months for the sexes, p < 0.05
-summary(aov(cnt ~ Sex + Month.of.Observation + Month.of.Observation*Sex, Sex.all.yr.mo))
+summary(aov(cnt ~ Month.of.Observation*Sex, Sex.all.yr.mo))
 
 #Tukey comparisons show which months males and females are different from each other and different from themselves. 
 sexmonthsTukey <- TukeyHSD(aov(cnt ~ Sex + Month.of.Observation + Month.of.Observation*Sex, Sex.all.yr.mo))
@@ -213,17 +245,14 @@ ggsave(age.sex.all.figure, file = "~/Documents/R/Strandings/Figures/age.sex.all.
 
 age.sex.table <- age.sex.all %>% 
   dcast(Age.Class ~ Sex, value.var = 'cnt') %>% 
-  transform(Prop.Fem = (round(Female/(Female + Male + Unid), 2)*100),
-            Prop.Male = (round(Male/(Female + Male + Unid), 2)*100),
-            Prop.Unid = (round(Unid/(Female + Male + Unid), 2)*100)) %>%
+  transform(Prop.Fem = round((Female)/(Female + Male + Unid), 2)*100,
+            Prop.Male = round(Male/(Female + Male + Unid), 2)*100,
+            Prop.Unid = round(Unid/(Female + Male + Unid), 2)*100) %>%
   select(c(Age.Class, Female, Prop.Fem, Male, Prop.Male, Unid, Prop.Unid))
 colnames(age.sex.table) <- c("Age", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
 average.sex <- c(as.character("Average"), "--", mean(age.sex.table[,3]), "--", mean(age.sex.table[,5]), "--", mean(age.sex.table[,7]))
 
-#HELP - need to bind the "average" row at the bottom, call the row "average", and then make sure it's not behaving strangely for the inline calls, where currently it is appending an "NA" after any percentages I call within "draftmanuscript"
 age.sex.table <- rbind(age.sex.table, average.sex, stringsAsFactors = F)
-
-#age.sex.table[6, 1] <- "Average"
 
 age.sex.table <- write.csv(age.sex.table, file = "~/Documents/R/Strandings/Figures/age.sex.table.csv", row.names = F)
 
@@ -231,8 +260,8 @@ age.sex.stats <- pinnipeds.data %>%
   group_by(Sex, Year.of.Observation, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
-summary(aov(cnt ~ Sex + Age.Class + Sex*Age.Class, data = age.sex.stats))
-TukeyHSD(aov(cnt ~ Sex + Age.Class + Sex*Age.Class, data = age.sex.stats))
+summary(aov(cnt ~ Sex*Age.Class, data = age.sex.stats))
+TukeyHSD(aov(cnt ~ Sex*Age.Class, data = age.sex.stats))
 
 ```
 
@@ -297,7 +326,7 @@ HI.by.year.type <- pinnipeds.data %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
 #Regression shows there is an effect of year for all HI types, that they are increasing over time (gunshot by 22/yr).
-summary(lm(cnt ~ Year.of.Observation + Interaction.Type, data = HI.by.year.type))
+summary(lm(cnt ~ Year.of.Observation*Interaction.Type, data = HI.by.year.type))
 
 #Tukey shows average annual HI types are not all different from one another
 TukeyHSD(aov(cnt ~ Interaction.Type, data = HI.by.year.type))
@@ -344,8 +373,9 @@ species.figure <- species.year %>%
   plot_theme()
 ggsave(species.figure, file = "~/Documents/R/Strandings/Figures/species.figure.pdf")
 
+
 #Anova shows average annual strandings are significantly different between species. Should I also have year in the anova?
-summary(aov(cnt ~ Pinniped.Common.Name + Year.of.Observation, data = species.year))
+summary(aov(cnt ~ Pinniped.Common.Name*Year.of.Observation, data = species.year))
 
 #Tukey shows which species are different from each other
 #pairwise.t.test(species.year$cnt, species.year$Pinniped.Common.Name, p.adj = "none")
@@ -417,6 +447,8 @@ TukeyHSD(aov(cnt ~ Pinniped.Common.Name, data = species.year.shot))
 
 #All species changing over time; HELP output suggests negative slope, but looks like an increasing trend in figure for stellers 
 summary(lm(cnt ~ Pinniped.Common.Name + Year.of.Observation, data = species.year))
+
+summary(lm(cnt ~ Pinniped.Common.Name + Year.of.Observation, data = species.year.HI))
     
 species.all.figure <- 
   ggplot(species.year, aes(x = Year.of.Observation, y = cnt, 
@@ -563,6 +595,9 @@ ggplot(HI.prev, aes(Year.of.Observation, Prop.HI)) +
 
 #Need stats for proportions over time - can I do regression on a proportion?
 summary(lm(Prop.HI ~ Year.of.Observation, data = HI.prev))
+
+#Prevalence of specific HI types per species over time in chunk near bottom - "allprev"
+
 
 #Proportion of fisheries
 year.prop.FI <- pinnipeds.data %>%
@@ -1382,8 +1417,8 @@ Sex.HI.type.table <- pinnipeds.data %>%
             Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
   select(c(Sex, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(sex.HI.prev, by = 'Sex') %>%
-  select(c(Sex, All.prop, HI.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Sex.HI.type.table) <- c("Sex", "All Strandings (%)", "Human Interactions (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+  select(c(Sex, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+colnames(Sex.HI.type.table) <- c("Sex", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 sex.composition.table <- write.csv(Sex.HI.type.table, file = "~/Documents/R/Strandings/Figures/Sex.composition.table.csv", row.names = FALSE)
 
@@ -1397,27 +1432,26 @@ Age.table <- pinnipeds.data %>%
 
 Age.table$All.prop <- round(Age.table$all.cnt/sum(Age.table$all.cnt), 2)*100
 
-#Adding in HI proportion
-Age.HI.table <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  #filter(Age.Class != 'Unid') %>%
-  group_by(Age.Class) %>%
-  summarize(HI.cnt = n_distinct(National.Database.Number)) %>%
-  merge(Age.table, by = 'Age.Class')
+#Adding in HI proportion - not using this anymore
+# Age.HI.table <- pinnipeds.data %>%
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+#   #filter(Age.Class != 'Unid') %>%
+#   group_by(Age.Class) %>%
+#   summarize(HI.cnt = n_distinct(National.Database.Number)) %>%
+#   merge(Age.table, by = 'Age.Class')
 
-Age.HI.table$HI.prop <- round(Age.HI.table$HI.cnt/sum(Age.HI.table$HI.cnt), 2)*100
+#Age.HI.table$HI.prop <- round(Age.HI.table$HI.cnt/sum(Age.HI.table$HI.cnt), 2)*100
 
 #Prevalence
 age.HI.prev <- pinnipeds.data %>%
-  #filter(Age.Class != 'Unid') %>%
   group_by(Age.Class, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Age.Class ~ Findings.of.Human.Interaction, value.var = 'cnt')
 age.HI.prev[is.na(age.HI.prev)] <- 0
 age.HI.prev <- age.HI.prev %>%
     transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
-  select(Age.Class, Prev.HI) %>%
-  merge(Age.HI.table, by = 'Age.Class')
+  merge(Age.table, by = 'Age.Class') %>%
+  select(Age.Class, All.prop, Prev.HI)
 
 #Adding in HI type and merging all three mini tables
 Age.HI.type.table <- pinnipeds.data %>%
@@ -1431,8 +1465,10 @@ Age.HI.type.table <- pinnipeds.data %>%
             Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
   select(c(Age.Class, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(age.HI.prev, by = 'Age.Class') %>%
-  select(c(Age.Class, All.prop, HI.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Age.HI.type.table) <- c("Age", "All Strandings (%)", "Human Interactions (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+  select(c(Age.Class, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+colnames(Age.HI.type.table) <- c("Age", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+
+Age.HI.type.table <- Age.HI.type.table[order(Age.HI.type.table$Age),]
 
 age.composition.table <- write.csv(Age.HI.type.table, file = "~/Documents/R/Strandings/Figures/age.composition.table.csv", row.names = FALSE)
 
@@ -1461,7 +1497,9 @@ monthly.age.HI <- pinnipeds.data %>%
   transform(Tot = Pup + Yearling + Subadult + Adult + Unid) %>%
   transform(Pup.prop = round(Pup/Tot, 2)*100)
 
+```
 
+```{r}
 ##Species composition table
 
 #It looks like, for example, harbor seals comrpise the majority of all cases, but FI and HI are more evenly distributed across species?
@@ -1482,13 +1520,13 @@ species.bigtable <- pinnipeds.data %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(all.prop = round(cnt/sum(cnt), 2)*100)
 
-species.HI.bigtable <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  group_by(Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(HI.prop = round(cnt/sum(cnt), 2)*100) %>%
-  merge(species.bigtable, by = 'Pinniped.Common.Name') %>%
-  select(Pinniped.Common.Name, all.prop, HI.prop)
+# species.HI.bigtable <- pinnipeds.data %>%
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+#   group_by(Pinniped.Common.Name) %>%
+#   summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   transform(HI.prop = round(cnt/sum(cnt), 2)*100) %>%
+#   merge(species.bigtable, by = 'Pinniped.Common.Name') %>%
+#   select(Pinniped.Common.Name, all.prop, HI.prop)
 
 species.HI.prev <- pinnipeds.data %>%
   #filter(Pinniped.Common.Name != 'Unidentified') %>% 
@@ -1499,7 +1537,7 @@ species.HI.prev[is.na(species.HI.prev)] <- 0
 species.HI.prev <- species.HI.prev %>%
     transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
   select(Pinniped.Common.Name, Prev.HI) %>%
-  merge(species.HI.bigtable, by = 'Pinniped.Common.Name')
+  merge(species.bigtable, by = 'Pinniped.Common.Name')
 
 species.prop.HI <- pinnipeds.data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
@@ -1513,11 +1551,11 @@ species.prop.HI <- pinnipeds.data %>%
             Prop.Other = round(Other/Total, 2)*100) %>%
   merge(species.HI.prev, by = 'Pinniped.Common.Name') %>%
   merge(state.species.prop, by = 'Pinniped.Common.Name') %>%
-  select(Pinniped.Common.Name, all.prop, HI.prop, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other, prop.or, prop.wa) 
+  select(Pinniped.Common.Name, all.prop, prop.or, prop.wa, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
 
 species.prop.HI[is.na(species.prop.HI)] <- 0
 
-colnames(species.prop.HI) <- c("Species", "All Strandings (%)", "Human Interactions (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)", "OR (%)", "WA (%)")
+colnames(species.prop.HI) <- c("Species", "All Strandings (%)", "OR (%)", "WA (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 species.HI.prop.table <- write.csv(species.prop.HI, file = "~/Documents/R/Strandings/Figures/species.HI.prop.table.csv", row.names = F)
 
@@ -1561,7 +1599,7 @@ HI.type.prev.figure <-
   scale_color_brewer(palette = 'Set1')
 
 #Shows increasing significantly just for Other, but negative slope when just variable?! HELP.
-summary(lm(value ~ Year.of.Observation*variable, data = allprev.type.stats))
+summary(lm(value ~ Year.of.Observation*variable, data = allprev.stats))
 
 ##individual species
 numberperyearperspecies <- pinnipeds.data %>% 

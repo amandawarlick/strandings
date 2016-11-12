@@ -1,8 +1,6 @@
 ---
-title: ""
-output: 
-  word_document
-    
+title: ''
+output: word_document
 ---
 
 ```{r include = FALSE}
@@ -83,27 +81,29 @@ setwd("~/Documents/R/Strandings/Figures")
 
 #HI proportion of species
 species.HI.prop.table <- read.csv("species.HI.prop.table.csv", check.names = F)
-tbls("species.HI.prop.table", caption = "Species composition of all strandings and all human interaction cases and the percent composition of human interaction type for each species.")
+tbls("species.HI.prop.table", caption = "Species composition of all strandings (n = 14,167), the prevalence of human interaction cases (HI/all cases) for each species, and the composition of human interaction type for each species (number of specific type/all HI cases).")
 
 #Age class and sex proportion table - add perc WA/OR?
 age.sex.table <- read.csv("age.sex.table.csv", check.names = F)
-tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class.")
+age.sex.table$Age <- as.character(age.sex.table$Age)
+age.sex.table[6, 1] <- "Average"
+tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class across all years and the average percentages of strandings for each sex all age classes and years combined.")
 
 #Sex proportion table 
 sex.composition.table <- read.csv("sex.composition.table.csv", check.names = FALSE)
-tbls("sex.composition.table", caption = "Sex composition of all strandings (n = 14,167) and all human interaction cases (n = 1,513), and the percent composition of human interaction type for each sex.")
+tbls("sex.composition.table", caption = "Sex composition of all strandings (n = 14,167), the prevalence of human interaction cases for each sex, and the composition of human interaction type for each sex.")
 
 #Age proportion table
 age.composition.table <- read.csv("age.composition.table.csv", check.names = FALSE)
-tbls("age.composition.table", caption = "Age composition of all strandings (n = 14,167) and all human interaction cases (n = 1,513), and the percent composition of human interaction type for each age class.")
+tbls("age.composition.table", caption = "Age composition of all strandings (n = 14,167), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")
 
 #Washington counties
 WAcounties.table <- read.csv("WAcounties.table.csv", check.names = FALSE)
-tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Washington (n = 9,022).")
+tbls("WAcounties.table", caption = "Proportion of all strandings, proportion of human interaction cases (%), and the composition of human interaction case types for each county in Washington (n = 9,022).")
 
 #Oregon counties
 ORcounties.table <- read.csv("ORcounties.table.csv", check.names = FALSE)
-tbls("ORcounties.table", caption = "Proportion of all strandings (%), human interaction cases and the composition of human interaction cases for each county in Oregon (n = 5145).")
+tbls("ORcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")
 
 ```
 
@@ -580,7 +580,7 @@ For the specific types of human interaction cases, gunshot wounds comprised `r s
 *Sex and Age Class*  
 All stranding cases - The sex and age class of strandings remained relatively consistent across the study period, with annual average strandings being significantly different for both sex (F = 32.76, p < 0.001) and age class (F = 23.7, p < 0.001). From 1989 to 2015, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Male",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Female",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Unid",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age.sex.table", display = "cite")`). Across all strandings, the majority were pups (`r age.all[age.all$Age.Class == "Pup", 3]`%) and adults (`r age.all[age.all$Age.Class == "Adult", 3]`%), with significantly fewer yearlings (`r age.all[age.all$Age.Class == "Yearling", 3]`%) and subadults (`r age.all[age.all$Age.Class == "Subadult", 3]`%), with the remainder being unidentified (`r tbls("age.sex.table", display = "cite")`). All age classes were significantly different from each other except subadults compared to yearlings and adults compared to pups. 
 
-Additionally, the sex composition of annual strandings varies depending on age class, with the proportion of females ranging from `r age.sex.table[age.sex.table$Age == 'Subadult', 3]`% for subadults to `r age.sex.table[1, 3]`% for pups (p < 0.01) and the proportion of males ranging from `r age.sex.table[age.sex.table$Age == 'Pup', 5]`% of pups to `r age.sex.table[age.sex.table$Age == 'Adult', 5]`% of adults (p < 0.05) (`r tbls("age.sex.table", display = "cite")`). 
+Additionally, the sex composition of annual strandings varies depending on age class, with the proportion of females ranging from `r age.sex.table[age.sex.table$Age == 'Subadult', 3]`% for subadults to `r age.sex.table[age.sex.table$Age == 'Pup', 3]`% for pups (p < 0.01) and the proportion of males ranging from `r age.sex.table[age.sex.table$Age == 'Pup', 5]`% of pups to `r age.sex.table[age.sex.table$Age == 'Adult', 5]`% of adults (p < 0.05) (`r tbls("age.sex.table", display = "cite")`). 
 #####age.sex.stats for stats for both pars above
 
 Human interaction cases - Compared to all combined stranding cases, the sex composition of human interaction cases within the dataset is more disperate between males and females, being `r sex.composition.table[sex.composition.table$Sex == 'Male', 3]`% male and `r sex.composition.table[sex.composition.table$Sex == 'Female', 3]`% female (`r tbls("sex.composition.table", display = "cite")`), though the prevalence of human interaction cases is equatable for males and females (approximately `r sex.composition.table[sex.composition.table$Sex == 'Male', 4]`% for each). The prevalence of fisheries interactions and boat injuries is similar between males and females, though gunshot wounds are more prevalent for males and "other" human interactions more prevalent for females (`r tbls("sex.composition.table", display = "cite")`). 
@@ -612,10 +612,18 @@ In Oregon, the majority of strandings occurred in Clatsop, Coos, and Lincoln cou
 
 **Discussion**  
 
-*Outline*  
-- Brief summary of most important findings
+Our results indicate certain patterns in pinniped strandings in Oregon and Washington from 1989 to 2015. Specifically, that harbor seals are the most commonly stranding species, that more males have stranded than females, that the most commonly stranding age classes are pups and adults, that the sex composition of strandings varies by age class, that the prevalence of human interactions varies by sex, age class, and species, and that the number of strandings has changed over time and are not equally distributed along the coast. 
+
+*Age Class and Sex*
 
 *Temporal Patterns*  
+We examined mean annual strandings, the prevalence of all combined human interaction cases, and the prevalence of each individual interaction type for all species combined and each individual species. Overall, our results indicate that the average annual strandings has significantly increased over the study period, largely driven by the increase in strandings of harbor seals and California sea lions. The other species are significantly but more slowly decreasing over time, with much fewer annual strandings. 
+
+There are three metrics for examining human interaction cases for a given species or age class: overall mean prevalence over the study period, changing annual prevalence over time, and changing number of cases over time. The number of human interaction cases is increasing over time for harbor seals and California sea lions, mirroring the rise in overall strandings. The mean prevalence of overall human interaction cases was highest for northern fur seals, Steller, and California sea lions, and lower for northern elephant seals and harbor seals (`r tbls("species.HI.prop.table", display = 'cite')`). Additionally, the prevalence of human interaction cases has increased significantly over time for California sea lions and northern fur seals, and decreasing for northern elephant seals. More specifically, 
+
+Specifically, the prevalence of human interactions has increased significantly for 
+
+
 - What is increasing, what is decreasing (overall cases, state-based strandings, species-specific numbers, species of certain ages, certain HI types, prevalence vs numbers)
 - What are possible explanations for these findings? (all things are variable (Huggins 2013: harbor seal pup mortality rates vary); populations are growing, ranges are changing/expanding, human activities also shifting over time)
 - Compare with previous studies
@@ -683,26 +691,26 @@ countyfigures
 
 \newpage
 
-`r tbls("species.HI.prop.table", caption = "Species composition of all strandings (n = ) and all human interaction cases (n = ) and the percent composition of human interaction type for each species.")`
+`r tbls("species.HI.prop.table", caption = "Species composition of all strandings (n = 14,167), the prevalence of human interaction cases (HI/all cases) for each species, and the composition of human interaction type for each species (number of specific type/all HI cases).")`
 ```{r species composition table}
-kable(species.HI.prop.table)
+kable(species.HI.prop.table, align = 'c')
 
 ```
 
-`r tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class.")`
+`r tbls("age.sex.table", caption = "Number and percentage of male, female, and unidentified strandings at each age class across all years and the average percentages of strandings for each sex all age classes and years combined.")`
 ```{r age sex table, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 
-kable(age.sex.table)
+kable(age.sex.table, align = 'c')
 ```
 
-`r tbls("sex.composition.table", caption = "Sex composition of all strandings (n = ) and all human interaction cases (n = ), and the percent composition of human interaction type for each sex.")` 
+`r tbls("sex.composition.table", caption = "Sex composition of all strandings (n = 14,167), the prevalence of human interaction cases for each sex, and the composition of human interaction type for each sex.")` 
 ```{r sex composition table}
-kable(sex.composition.table)
+kable(sex.composition.table, align = 'c')
 ```
 
-`r tbls("age.composition.table", caption = "Age composition of all strandings (n = ) and all human interaction cases (n = ), and the percent composition of human interaction type for each age class.")`
+`r tbls("age.composition.table", caption = "Age composition of all strandings (n = 14,167), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")`
 ```{r age composition table}
-kable(age.composition.table)
+kable(age.composition.table, align = 'c')
 ```
 
 
@@ -722,15 +730,15 @@ monthly.lineplots
 
 `r figs("monthly.lineplots", caption = "(a) Sum of cases across years for each month shows consistent seasonal peak while (b) sum of human interaction cases for each month shows greater variability across years.")`
 
-`r tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Washington.")`
+`r tbls("WAcounties.table", caption = "Proportion of all strandings, proportion of human interaction cases (%), and the composition of human interaction case types for each county in Washington (n = 9,022).")`
 ```{r wacounties}
-kable(WAcounties.table)
+kable(WAcounties.table, align = 'c')
 
 ```
 
-`r tbls("WAcounties.table", caption = "Proportion of all strandings, human interaction cases and the composition of human interaction cases for each county in Oregon.")`
+`r tbls("WAcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")`
 ```{r}
-kable(ORcounties.table)
+kable(ORcounties.table, align = 'c')
 
 ```
 
