@@ -260,6 +260,34 @@ figs("species.timeseries", caption = "(a) Annual strandings per species shows in
 
 
 #######
+numberperyear <- pinnipeds.data %>% 
+  group_by(Year.of.Observation) %>%
+  summarize(yr.cnt = n_distinct(National.Database.Number))
+
+allprev <- pinnipeds.data %>%
+  group_by(Findings.of.Human.Interaction, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') 
+allprev[is.na(allprev)] <- 0
+allprev <- allprev %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
+  merge(numberperyear, by = 'Year.of.Observation') %>%
+  select(Year.of.Observation, yr.cnt, HI.Prev)
+
+allprev.type <- pinnipeds.data %>%
+  group_by(Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Interaction.Type, value.var = 'cnt') 
+allprev.type[is.na(allprev.type)] <- 0
+allprev.type <- allprev.type %>%
+  merge(allprev, by = 'Year.of.Observation') %>%
+  transform(Boat = (Boat/yr.cnt), 
+            Fisheries = (Fisheries/yr.cnt),
+            Gunshot = (Gunshot/yr.cnt),
+            Other = (Other/yr.cnt)) %>%
+  select(Year.of.Observation, yr.cnt, HI.Prev, Boat, Gunshot, Fisheries, Other)
+
+allprev.stats <- allprev.type %>% 
+  select(-c(yr.cnt, HI.Prev)) %>% melt(id.vars = "Year.of.Observation") 
 
 HI.prev.figure <- pinnipeds.data %>%
   group_by(Year.of.Observation, Findings.of.Human.Interaction) %>%
@@ -277,6 +305,16 @@ ggplot(aes(Year.of.Observation, Prop.HI)) +
   pubfigure_simple_theme(legend.position = 'none',
                          axis.title = element_text(size = 10))
 
+HI.type.prev.figure <- 
+  ggplot(allprev.stats, aes(Year.of.Observation, value)) +
+  #geom_point() + 
+  geom_smooth(aes(Year.of.Observation, value), col = 'black') +
+  geom_line(aes(Year.of.Observation, value, group = variable, col = variable)) + 
+#geom_smooth(method = 'lm', se = F) +
+  xlab("") + ylab("Prevalence of HI") +
+  pubfigure_theme(legend.position = 'top') + 
+  scale_color_brewer(palette = 'Set1')
+
 HI.species.prev <- pinnipeds.data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Year.of.Observation, 
@@ -288,15 +326,16 @@ HI.species.prev <- HI.species.prev %>%
     transform(Prop.HI = round(Y/(Y+N+CBD), 2))
 
 HI.species.prev.figure <- 
-  ggplot(HI.species.prev, aes(x = Year.of.Observation, y = Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name, shape = Pinniped.Common.Name)) +
-  geom_point(stat = 'identity', position = 'identity') + 
-  #geom_line() +
-  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  ggplot(HI.species.prev, aes(x = Year.of.Observation, y = Prop.HI)) +
+  #geom_point(stat = 'identity', position = 'identity') + 
+  geom_smooth(aes(Year.of.Observation, Prop.HI), col = 'black') +
+  geom_line(aes(Year.of.Observation, Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name)) +
+  #geom_smooth(aes(Year.of.Observation, Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name), se = F) +
   xlab("") + ylab("Prevalence of HI") +
-  pubfigure_theme(legend.position = 'top') + 
-  scale_color_grey()
+  pubfigure_theme(legend.position = 'top') #+ 
+  #scale_color_grey()
 
-HI.prev.final <- plot_grid(HI.prev.figure, HI.species.prev.figure, align = 'v', ncol = 1, labels = "auto", rel_heights = c(.8, 1.3), vjust = c(1.2, .1), label_size = 10)
+HI.prev.final <- plot_grid(HI.prev.figure, HI.type.prev.figure, align = 'v', ncol = 1, labels = "auto", rel_heights = c(.8, 1.3), vjust = c(1.2, .1), label_size = 10)
 figs("HI.prev.final", caption = "The prevalence of human interactions cases for all combined species over time shows an increasing trend (y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55).")
 
 ####################
@@ -596,7 +635,7 @@ Human interaction cases - The overall number of human interactions cases has inc
 
 Examining whether human interaction cases are changing over time for individual species requires examining both the number and prevalence of cases over the study period. Similar to overall strandings, the number of human interaction cases is increasing for harbor seals (y = 15.3x, t = 4.2, p < 0.001) and California sea lions (y = 1.4x, t = 8.2, p < 0.001) and significantly decreasing at a rate of approximately 8 - 20 cases per year for the other species (`r figs("species.timeseries", display = 'cite')`b - check on these rates, since they seem high compared to the number of annual cases for these species?, and stellers look like they're increasing, not decreasing?). 
 
-The prevalence of human interactions cases is increasing for California sea lions (y = 0.002x, p < 0.05) and northern fur seals (y = 0.08x, p < 0.05), not significantly changing for Guadalupe fur seals and Steller sea lions, and slightly decreasing for northern elephant seals and harbor seals (`r figs("HI.prev.final", display = "cite")`b). More specifically, it is evident that the prevalence of gunshot wounds has increased for harbor seals, guadalupe fur seals, and northern elephant seals (p < 0.05) and that fisheries entanglements have increased in northern fur seals and guadalupe fur seals (p < 0.05). *Help check these numbers and multiple regression interpretations - slope direction.
+The prevalence of human interactions cases is increasing for California sea lions (y = 0.002x, p < 0.05) and northern fur seals (y = 0.08x, p < 0.05), not significantly changing for Guadalupe fur seals and Steller sea lions, and slightly decreasing for northern elephant seals and harbor seals (`r figs("HI.prev.final", display = "cite")`b). More specifically, it is evident that the prevalence of gunshot wounds has decreased for harbor seals and northern elephant seals (p < 0.05) and that fisheries entanglements have increased in northern fur seals and guadalupe fur seals (p < 0.05). *Help check these numbers and multiple regression interpretations - slope direction.
 
 On a seasonal basis, a peak in total strandings is evident, with significantly more strandings (amounting to 4-7 per month) occuring June through October (p < 0.001). The age class composition of stranded animals varies seasonally, ranging from 10-20% pups when strandings are low in the winter to 60% when strandings are higher during July and August. Similarly, the prevalence of human interaction cases show a seasonal peak, ranging from 11% to 23% depending on the month. The summer peak in both the number of overall strandings and human interactions cases only occurs in harbor seals (2.1 < t < 4.9, p < 0.001) and is most evident in pups (`r figs("monthly.age.HI.figure", display = 'cite')`a, `r figs("monthly.species.final", display = "cite")`a, b). The proportion of fisheries interactions within human interaction cases is higher in June and August than other months (get stats), while boat injuries and gunshots do not change significantly throughout the months of the year (`r figs("monthly.age.HI.figure", display = 'cite')`b). 
 ####monthly.stats
@@ -657,9 +696,17 @@ species.timeseries
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 HI.prev.final
+
 ```
 
 `r figs("HI.prev.final", caption = "Prevalence of human interactions cases over time for (a) all species shows an increasing trend () and for (b) individual species.")`
+
+```{r}
+print(HI.prev.figure)
+print(HI.type.prev.figure)
+print(HI.species.prev.figure)
+```
+Figure options for prevalence of HI.
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 monthly.age.HI.figure

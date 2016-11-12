@@ -1630,7 +1630,9 @@ allprev.stats <- allprev.type %>%
 
 HI.type.prev.figure <- 
   ggplot(allprev.stats, aes(Year.of.Observation, value, group = variable, col = variable)) +
-  geom_point() + geom_smooth(method = 'lm', se = F) +
+  geom_point() + 
+  geom_line() + 
+#geom_smooth(method = 'lm', se = F) +
   xlab("") + ylab("Prevalence") +
   pubfigure_theme(legend.position = 'top') + 
   scale_color_brewer(palette = 'Set1')
