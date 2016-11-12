@@ -31,7 +31,7 @@ library(stringr)
 library(magrittr)
 library(scales)
 #setwd("~/Strands")
-setwd("~/Documents/R/Strandings")
+# setwd("~/Documents/R/Strandings") #Don't Set WD
 
 case <- function(x)
   paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
@@ -76,7 +76,7 @@ pubfigure_theme <- function(...) {
 ```
 
 ```{r load tables, echo = FALSE, results = 'hide'}
-setwd("~/Documents/R/Strandings/Figures")
+setwd("./Figures")
 #setwd("C:/Users/Amanda.Warlick/Documents/R/Strandings/Figures/")
 
 #tbls must be called above where they are referenced, so putting them here where tables are read in
