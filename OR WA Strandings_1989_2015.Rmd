@@ -30,7 +30,8 @@ library(knitr)
 library(reshape2)
 library(stringr)
 library(magrittr)
-setwd("~/Documents/R/Strandings")
+
+#setwd("~/Documents/R/Strandings")
 
 plot_theme <- function(...) {
   theme(
