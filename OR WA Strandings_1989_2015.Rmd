@@ -1534,6 +1534,44 @@ monthly.age.HI <- pinnipeds.data %>%
   transform(Tot = Pup + Yearling + Subadult + Adult + Unid) %>%
   transform(Pup.prop = round(Pup/Tot, 2)*100)
 
+#Species and age/sex composition
+species.age.props <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Pinniped.Common.Name, Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(., aes(Age.Class, cnt)) +
+  #geom_boxplot() +
+    geom_bar(stat = 'identity') +
+    xlab("") + ylab("Strandings") +
+    facet_wrap(~ Pinniped.Common.Name) +
+    pubfigure_theme()
+
+species.sex.props <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Pinniped.Common.Name, Sex) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+ggplot(species.sex.props, aes(Pinniped.Common.Name, cnt, fill = Sex)) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  xlab("") + ylab("Strandings") +
+  pubfigure_theme()
+
+species.props <- pinnipeds.data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Pinniped.Common.Name, Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Pinniped.Common.Name ~ Age.Class, value.var = 'cnt') %>%
+  transform(Tot = Pup+Yearling+Subadult+Adult+Unid) %>%
+  transform(Prop.pup = round(Pup/(Tot), 3)*100, 
+            Prop.year = round(Yearling/(Tot), 3)*100,
+            Prop.sub = round(Subadult/(Tot), 3)*100,
+            Prop.ad = round(Adult/(Tot), 3)*100,
+            Prop.un = round(Unid/(Tot), 3)*100) %>%
+  select(Pinniped.Common.Name, Prop.pup, Prop.year, Prop.sub, Prop.ad, Prop.un)
+colnames(species.props) <- c("Species", "Pup (%)", "Yearling (%)", "Subadult (%)", "Adult (%)", "Unidentified (%)")
+  
+  
+
 ```
 
 ```{r}

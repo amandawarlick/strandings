@@ -635,7 +635,7 @@ Human interaction cases - The overall number of human interactions cases has inc
 
 Examining whether human interaction cases are changing over time for individual species requires examining both the number and prevalence of cases over the study period. Similar to overall strandings, the number of human interaction cases is increasing for harbor seals (y = 15.3x, t = 4.2, p < 0.001) and California sea lions (y = 1.4x, t = 8.2, p < 0.001) and significantly decreasing at a rate of approximately 8 - 20 cases per year for the other species (`r figs("species.timeseries", display = 'cite')`b - check on these rates, since they seem high compared to the number of annual cases for these species?, and stellers look like they're increasing, not decreasing?). 
 
-The prevalence of human interactions cases is increasing for California sea lions (y = 0.002x, p < 0.05) and northern fur seals (y = 0.08x, p < 0.05), not significantly changing for Guadalupe fur seals and Steller sea lions, and slightly decreasing for northern elephant seals and harbor seals (`r figs("HI.prev.final", display = "cite")`b). More specifically, it is evident that the prevalence of gunshot wounds has decreased for harbor seals and northern elephant seals (p < 0.05) and that fisheries entanglements have increased in northern fur seals and guadalupe fur seals (p < 0.05). *Help check these numbers and multiple regression interpretations - slope direction.
+The prevalence of human interactions cases is increasing for California sea lions (y = 0.002x, p < 0.05) and northern fur seals (y = 0.08x, p < 0.05), not significantly changing for Guadalupe fur seals and Steller sea lions, and slightly decreasing for northern elephant seals and harbor seals (`r figs("HI.prev.final", display = "cite")`b). More specifically, it is evident that the prevalence of gunshot wounds has decreased for harbor seals and northern elephant seals (p < 0.05) and that fisheries entanglements have increased in northern fur seals and guadalupe fur seals (p < 0.05). *Help check these numbers and multiple regression interpretations - slope direction. allprev.species.stats
 
 On a seasonal basis, a peak in total strandings is evident, with significantly more strandings (amounting to 4-7 per month) occuring June through October (p < 0.001). The age class composition of stranded animals varies seasonally, ranging from 10-20% pups when strandings are low in the winter to 60% when strandings are higher during July and August. Similarly, the prevalence of human interaction cases show a seasonal peak, ranging from 11% to 23% depending on the month. The summer peak in both the number of overall strandings and human interactions cases only occurs in harbor seals (2.1 < t < 4.9, p < 0.001) and is most evident in pups (`r figs("monthly.age.HI.figure", display = 'cite')`a, `r figs("monthly.species.final", display = "cite")`a, b). The proportion of fisheries interactions within human interaction cases is higher in June and August than other months (get stats), while boat injuries and gunshots do not change significantly throughout the months of the year (`r figs("monthly.age.HI.figure", display = 'cite')`b). 
 ####monthly.stats
@@ -654,6 +654,12 @@ In Oregon, the majority of strandings occurred in Clatsop, Coos, and Lincoln cou
 Our results indicate certain patterns in pinniped strandings in Oregon and Washington from 1989 to 2015. Specifically, that harbor seals are the most commonly stranding species, that more males have stranded than females, that the most commonly stranding age classes are pups and adults, that the sex composition of strandings varies by age class, that the prevalence of human interactions varies by sex, age class, and species, and that the number of strandings has changed over time and are not equally distributed along the coast. 
 
 *Age Class and Sex*
+Patterns in the age class and sex of strandings remained relatively constant over time, but varied across age class. Overall, more males stranded than females, with adult and subadult strandings having the highest proportion of males and pups the lowest. These findings are similar to other studies that have found a higher proportion of males in overall strandings compared to females (citations). However, our finding of a higher percentage of adult strandings differ from others where pups have comprised the majority of strandings (citations). In X and Y, male pups had a higher proportion of human interaction cases (citations), while here we found similar prevalence of human interaction cases in both males and females (16%) and a higher prevalence of human interaction cases in adults and subadults rather than pups and yearlings (16% versus 8-11%). 
+
+Looking more closely at the composition of age class and sex of strandings is more informative at the species level considering that the different demographic and behavioral ecology of each species largely determines how many and when animals are weaning pups, foraging, or transiting along the coast. 
+
+
+The patterns in age class and sex of strandings likely reflects the demographics of the six species found in the study area. 
 
 *Temporal Patterns*  
 We examined mean annual strandings, the prevalence of all combined human interaction cases, and the prevalence of each individual interaction type for all species combined and each individual species. Overall, our results indicate that the average annual strandings has significantly increased over the study period, largely driven by the increase in strandings of harbor seals and California sea lions. The other species are significantly but more slowly decreasing over time, with much fewer annual strandings. 
@@ -702,8 +708,6 @@ HI.prev.final
 `r figs("HI.prev.final", caption = "Prevalence of human interactions cases over time for (a) all species shows an increasing trend () and for (b) individual species.")`
 
 ```{r}
-print(HI.prev.figure)
-print(HI.type.prev.figure)
 print(HI.species.prev.figure)
 ```
 Figure options for prevalence of HI.
