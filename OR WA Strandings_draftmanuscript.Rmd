@@ -28,8 +28,6 @@ library(reshape2)
 library(stringr)
 library(magrittr)
 library(scales)
-#setwd("~/Strands")
-# setwd("~/Documents/R/Strandings") #Don't Set WD
 
 case <- function(x)
   paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
@@ -97,6 +95,10 @@ tbls("sex.composition.table", caption = "Sex composition of all strandings (n = 
 age.composition.table <- read.csv("age.composition.table.csv", check.names = FALSE)
 tbls("age.composition.table", caption = "Age composition of all strandings (n = 14,167), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")
 
+#Age and sex per species
+species.age.sex.composition.table <- read.csv("species.age.sex.composition.csv", check.names = F)
+tbls("species.age.sex.composition.table", caption = "Age class and sex composition of all strandings (n = 14,167) by species shows very different composition according to species.")
+
 #Washington counties
 WAcounties.table <- read.csv("WAcounties.table.csv", check.names = FALSE)
 tbls("WAcounties.table", caption = "Proportion of all strandings, proportion of human interaction cases (%), and the composition of human interaction case types for each county in Washington (n = 9,022).")
@@ -105,10 +107,11 @@ tbls("WAcounties.table", caption = "Proportion of all strandings, proportion of 
 ORcounties.table <- read.csv("ORcounties.table.csv", check.names = FALSE)
 tbls("ORcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")
 
+setwd("..") 
 ```
 
 ```{r load pre-cleaned csv, echo = FALSE}
-setwd("~/Documents/R/Strandings/")
+
 #setwd("C:/Users/Amanda.Warlick/Documents/Strands")
 
 pinnipeds.data <- read.csv("pinnipeds.data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
@@ -565,7 +568,7 @@ Paragraph
 - Comprehensive data from stranding response networks used here to characterize the number of strandings across six species according to sex and age class to examine stranding patterns across time (interannual and inter-seasonal) and space.  
 - More details on why animals strand - think locally (oceanographic conditions, prey availability, pup production, anthropogenic activities).  
 - More details on using stranding data - think locally (changing network coverage and beach access, population grown or contraction).  
-- Importance/relevance.  
+- Importance/relevance: baseline, changing oceans, blob, etc.
 
 
 **Methods**   
@@ -619,7 +622,7 @@ For the specific types of human interaction cases, gunshot wounds comprised `r s
 *Sex and Age Class*  
 All stranding cases - The sex and age class of strandings remained relatively consistent across the study period, with annual average strandings being significantly different for both sex (F = 32.76, p < 0.001) and age class (F = 23.7, p < 0.001). From 1989 to 2015, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Male",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Female",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds.data[pinnipeds.data$Sex == "Unid",])/n_distinct(pinnipeds.data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age.sex.table", display = "cite")`). Across all strandings, the majority were pups (`r age.all[age.all$Age.Class == "Pup", 3]`%) and adults (`r age.all[age.all$Age.Class == "Adult", 3]`%), with significantly fewer yearlings (`r age.all[age.all$Age.Class == "Yearling", 3]`%) and subadults (`r age.all[age.all$Age.Class == "Subadult", 3]`%), with the remainder being unidentified (`r tbls("age.sex.table", display = "cite")`). All age classes were significantly different from each other except subadults compared to yearlings and adults compared to pups. 
 
-Additionally, the sex composition of annual strandings varies depending on age class, with the proportion of females ranging from `r age.sex.table[age.sex.table$Age == 'Subadult', 3]`% for subadults to `r age.sex.table[age.sex.table$Age == 'Pup', 3]`% for pups (p < 0.01) and the proportion of males ranging from `r age.sex.table[age.sex.table$Age == 'Pup', 5]`% of pups to `r age.sex.table[age.sex.table$Age == 'Adult', 5]`% of adults (p < 0.05) (`r tbls("age.sex.table", display = "cite")`). 
+Additionally, the sex composition of annual strandings varies depending on species and age class, with the proportion of females ranging from `r age.sex.table[age.sex.table$Age == 'Subadult', 3]`% for subadults to `r age.sex.table[age.sex.table$Age == 'Pup', 3]`% for pups (p < 0.01) and the proportion of males ranging from `r age.sex.table[age.sex.table$Age == 'Pup', 5]`% of pups to `r age.sex.table[age.sex.table$Age == 'Adult', 5]`% of adults (p < 0.05) (`r tbls("age.sex.table", display = "cite")`). For California sea lions and northern elephant seals, the majority of identified strandings were male, while the sex composition was more equatable for the other species (`r tbls("species.age.sex.composition.table", display = "cite")`). For California sea lions and steller sea lions, the majority of strandings were adults, while the majority of strandings for Guadalupe fur seals, harbor seals, and northern fur seals were pups and yearlings (`r tbls("species.age.sex.composition.table", display = "cite")`).
 #####age.sex.stats for stats for both pars above
 
 Human interaction cases - Compared to all combined stranding cases, the sex composition of human interaction cases within the dataset is more disperate between males and females, being `r sex.composition.table[sex.composition.table$Sex == 'Male', 3]`% male and `r sex.composition.table[sex.composition.table$Sex == 'Female', 3]`% female (`r tbls("sex.composition.table", display = "cite")`), though the prevalence of human interaction cases is equatable for males and females (approximately `r sex.composition.table[sex.composition.table$Sex == 'Male', 4]`% for each). The prevalence of fisheries interactions and boat injuries is similar between males and females, though gunshot wounds are more prevalent for males and "other" human interactions more prevalent for females (`r tbls("sex.composition.table", display = "cite")`). 
@@ -645,38 +648,43 @@ Over the study period, more strandings occurred in Washington and fewer occurred
 
 Individual species strandings were also not equally distributed between the two states. Guadalupe fur seal, northern elephant seal, and northern fur seal strandings are distributed approximately 60% in Oregon and 40% in Washington while California sea lion and Steller sea lion strandings are approximately 70% in Oregon and 30% in Washington. In contrast, harbor seal strandings are approximately 15% in Oregon and 85% in Washington (`r figs("countyfigures", display = 'cite')`, `r tbls("species.HI.prop.table", display = 'cite')`). 
 
-At the county level, strandings were not evenly distributed along the coast in either Oregon or Washington. In Washington, the majority of strandings occurred in Pierce, San Juan, and Island counties (`r figs("countyfigures", display = 'cite')`). Similarly, the majority of human interaction cases occurred in Pierce county, with a disproportionately higher number of cases in Pacific county, the majority of which were gunshot wounds.  
+At the county level, strandings were not evenly distributed along the coast in either Oregon or Washington. In Washington, the majority of strandings occurred in Pierce, San Juan, and Island counties (`r figs("countyfigures", display = 'cite')`), with strandings in those counties in addition to Grays Harbor, King, and Skagit increasing over time (F = 21.1, p < 0.001). Similarly, the majority of human interaction cases occurred in Pierce and Pacific counties, with a disproportionately higher number of cases in Pacific county compared with all strandings, the majority of which were gunshot wounds. Combined human interactions increased over the study period in Grays Harbor, Pacific, and Pierce, and decreased in Clallam and Clark (F = 3.0, p < 0.001). !help check these with different regression.
 
-In Oregon, the majority of strandings occurred in Clatsop, Coos, and Lincoln counties (`r figs("countyfigures", display = 'cite')`). These counties were also where the majority of human interaction cases occurred, though a disproportionately higher number of human interactions cases occurred in Clatsop, the majority of which where gunshot wounds, increasing significantly over time (t = 2.3, p < 0.05).
+In Oregon, the majority of strandings occurred in Clatsop, Coos, and Lincoln counties (`r figs("countyfigures", display = 'cite')`), with strandings in these counties and Tillamook significantly increasing over time (F = 27.8, p < 0.005). These counties were also where the majority of human interaction cases occurred, though a disproportionately higher number of human interactions cases occurred in Clatsop, the majority of which where gunshot wounds, increasing significantly over time (t = 2.3, p < 0.05).
 
 **Discussion**  
 
-Our results indicate certain patterns in pinniped strandings in Oregon and Washington from 1989 to 2015. Specifically, that harbor seals are the most commonly stranding species, that more males have stranded than females, that the most commonly stranding age classes are pups and adults, that the sex composition of strandings varies by age class, that the prevalence of human interactions varies by sex, age class, and species, and that the number of strandings has changed over time and are not equally distributed along the coast. 
+Our results highlight patterns in pinniped strandings in Oregon and Washington from 1989 to 2015. Specifically, that harbor seals are the most commonly stranding species, that more males have stranded than females, that the most commonly stranding age classes are pups and adults, that the sex composition of strandings varies by age class, that the prevalence of human interactions varies by sex, age class, and species, and that the number of strandings has changed over time and are not equally distributed along the coast. 
+
+*Species*
+As noted above, the distribution of species stranding along the coasts of Oregon and Washington from 1989-2015 can be largely explained by the local abundance and demographic characteristics of each species. Harbor seals stranded primarily in Washington due to the large number of haulouts in the state, and the other species stranded primarily in Oregon due to the presence of rookeries, foraging areas, and migratory routes. The annual mean number of harbor seals and California sea lions stranding per year are similar to X, Y, and Z noted in X places. Similar to our findings, studies have noted northern fur seals as having a relatively high/higher prevalence of entanglement, evident in rookery field surveys and stranding data (Fowler 1987, Antonelis et al. 2006, Delong et al. 1990). Additionally, Colegrove et al. (2005) found the prevalence of human interaction cases varying each year, but higher in harbor seals than northern elephant seals, also similar to the results presented here. 
+- UMEs in study area?
 
 *Age Class and Sex*
-Patterns in the age class and sex of strandings remained relatively constant over time, but varied across age class. Overall, more males stranded than females, with adult and subadult strandings having the highest proportion of males and pups the lowest. These findings are similar to other studies that have found a higher proportion of males in overall strandings compared to females (citations). However, our finding of a higher percentage of adult strandings differ from others where pups have comprised the majority of strandings (citations). In X and Y, male pups had a higher proportion of human interaction cases (citations), while here we found similar prevalence of human interaction cases in both males and females (16%) and a higher prevalence of human interaction cases in adults and subadults rather than pups and yearlings (16% versus 8-11%). 
+Patterns in the age class and sex of strandings remained relatively constant over time, but varied across age class. Overall, more males stranded than females, with adult and subadult strandings having the highest proportion of males and pups the lowest. These findings are similar to other studies that have found a higher proportion of males in overall strandings compared to females (Colegrove et al. 2005, Greig et al. 2005). However, our finding of a higher percentage of adult strandings differ from others where young animals have comprised the majority of strandings and human interaction cases (Greig et al. 2005; Goldstein et al. 1999; Hanni and Pyle 2000). Many studies have found that males of various age classes (but particularly young animals) had a greater number of human interaction cases (Greig et al. 2005, Delong et al. 1990, Kiyota and Baba 2001), while here we found similar prevalence of human interaction cases in both males and females (~16%) and a higher prevalence of human interaction cases in adults and subadults rather than pups and yearlings (16% versus 8-11%). 
 
-Looking more closely at the composition of age class and sex of strandings is more informative at the species level considering that the different demographic and behavioral ecology of each species largely determines how many and when animals are weaning pups, foraging, or transiting along the coast. 
-
-
-The patterns in age class and sex of strandings likely reflects the demographics of the six species found in the study area. 
+Looking more closely at the composition of age class and sex of strandings is more informative at the species level considering that the different demographic and behavioral ecology of each species largely determines how many and when animals are weaning pups, foraging, or transiting along the coast. For example, the majority of of California sea lion strandings were male, reflecting the fact that females largely stay around the rookeries in California. Our findings were similar to that of Kessina (2016), where California sea lions were primarily males while Steller sea lions were more equatably distributed between males and females. The higher prevalence of pups in harbor seal and northern fur seal strandings is likely the result of those species having rookeries and haulouts in the area, or young animals migrating through the Pacific Northwest. Analyses of stranding rates in Oregon and Washington have seen X, Y, and Z (citations). 
 
 *Temporal Patterns*  
 We examined mean annual strandings, the prevalence of all combined human interaction cases, and the prevalence of each individual interaction type for all species combined and each individual species. Overall, our results indicate that the average annual strandings has significantly increased over the study period, largely driven by the increase in strandings of harbor seals and California sea lions. The other species are significantly but more slowly decreasing over time, with much fewer annual strandings. 
 
-There are three metrics for examining human interaction cases for a given species or age class: overall mean prevalence over the study period, changing annual prevalence over time, and changing number of cases over time. The number of human interaction cases is increasing over time for harbor seals and California sea lions, mirroring the rise in overall strandings. The mean prevalence of overall human interaction cases was highest for northern fur seals, Steller, and California sea lions, and lower for northern elephant seals and harbor seals (`r tbls("species.HI.prop.table", display = 'cite')`). Additionally, the prevalence of human interaction cases has increased significantly over time for California sea lions and northern fur seals, and decreasing for northern elephant seals. More specifically, 
+There are three metrics for examining human interaction cases for a given species or age class: overall mean prevalence over the study period, changing annual prevalence over time, and changing number of cases over time. The number of human interaction cases is increasing over time for harbor seals and California sea lions, mirroring the rise in overall strandings. The mean prevalence of overall human interaction cases was approximately X%, but was highest for northern fur seals, Steller, and California sea lions, and lower for northern elephant seals and harbor seals (`r tbls("species.HI.prop.table", display = 'cite')`). These findings are similar to other studies reviewing the disposition and cause of death in stranded pinnipeds (Bogomolni et al. 2010, )
 
-Specifically, the prevalence of human interactions has increased significantly for 
+Additionally, the prevalence of human interaction cases has increased significantly over time for California sea lions and northern fur seals, and decreased for northern elephant seals. More specifically, the prevalence of gunshot wounds has decreased for harbor seals and northern elephant seals and fisheries entanglements have increased in northern fur seals and guadalupe fur seals. !Help check these numbers and multiple regression interpretations. 
+
+Seasonal discussion  
+- Presentation from TMMC pdf
+
+It is difficult to theorize about potential explanations for these correlations because likely both the pinniped populations and human activities are changing over time (*e.g.* changing population sizes, expanding habitat ranges, interannual variability in pup production or mortality (Huggins 2013), prey availability or distribution, and fishing activities all have the potential to shift in magnitude and space). However, our findings are similar to those found in X, Y, and Z, where the prevalence of human interactions (and specifically fisheries interactions) have increased over time (citations). In the Pacific Northwest, X, Y, and Z has been noted (citations). 
+
+*Spatial Patterns*  
+We found that, as expected, overall strandings and human interactions cases are not distributed equally along the coasts at the state and county levels, likely due to the distribution of both the animals and stranding response network effort. From 1989-2015, more pinnipeds stranded in Washington, though the proportion between the two states varied considerably over the study period and per species. The majority of harbor seals stranded in Washington due to the presence of pupping haulouts throughout the state, while the other species stranded more in Oregon (`r tbls("species.HI.prop.table", display = 'cite')`). Within Washington, strandings were disproportionately higher in Pierce, Pacifc, Island, San Juan, and Whatcom, with human interactions highest in some of those same counties (). These findings could reflect areas of higher local abundance for harbor seals and or hotspots for human activities. In Oregon, strandings were highest in Lincoln county, where strandings also increased significantly over time. Human interactions were disproportionately higher and increasing in Clatsop (where nearly half of all human interactions in Oregon were recorded, specifically gunshot wounds), Lincoln, Tillamook, and Coos counties. Our results also indicate that strandings and human interaction cases within certain counties have changed over time, specifically gunshot wounds in Clatsop county. 
 
 
-- What is increasing, what is decreasing (overall cases, state-based strandings, species-specific numbers, species of certain ages, certain HI types, prevalence vs numbers)
-- What are possible explanations for these findings? (all things are variable (Huggins 2013: harbor seal pup mortality rates vary); populations are growing, ranges are changing/expanding, human activities also shifting over time)
 - Compare with previous studies
+- Importance of hotspot analysis to guide support to stranding networks. Williams et al. (2011) suggests areas of overlap between high density/risk marmam areas and accumulation of marine debris can often occur away from dense population centers and therefore go undetected and under-reported.
 
-*Spatial Patterns*
-- Certain areas increasing or decreasing? Certain areas higher/lower than others? 
-- Possible reasons (use of habitat varies by species and age class - stranding prevalence reflects local "abundance?")
-- Compare with previous studies
+**Conclusion**  
 
 \newpage
 
@@ -764,6 +772,10 @@ kable(sex.composition.table, align = 'c')
 kable(age.composition.table, align = 'c')
 ```
 
+`r tbls("species.age.sex.composition.table", caption = "Age class and sex composition of all strandings (n = 14,167) by species shows very different composition according to species.")`
+```{r}
+kable(species.age.sex.composition.table, align = 'c')
+```
 
 \newpage
 
@@ -787,32 +799,51 @@ kable(WAcounties.table, align = 'c')
 
 ```
 
-`r tbls("WAcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")`
+`r tbls("ORcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")`
 ```{r}
 kable(ORcounties.table, align = 'c')
 
 ```
 
 **References**
+Antonelis, G.A., J.D. Baker, T.C. Johanos, R.C. Braun, and A.L. Harting. 2006. Hawaiian monk seal (
+Monachus schauinslandi): status and conservation issues. Atoll Research Bulletin 543: 75–101.
+ 
+Bogomolni, A., K.R. Pugliares, S.M. Sharp, K. Patchett, C.T. Harry, J.M. LaRocque, K.M. Touhey, and M. Moore. 2010. Mortality trends of stranded marine mammals on Cape Cod and southeastern Massachusetts, USA, 2000 to 2006. Diseases of Aquatic Organisms 88: 143-155.
 
 Carretta, J.V., Oleson, E.M., Baker, J., Weller, D.W., Lang, A.R., and others. 2016. U.S. Pacific marine mammal stock assessments: 2015. NOAA-TM-NMFS-SWFSC-561. Washington, DC. National Oceanic and Atmospheric Administration. 
 
 Carretta, J.V., Forney, K.A., Oleson, E., Martien, K., Muto, M., Lowry, M. S., and others. 2011. U.S. Pacific marine mammal stock assessments: 2010. NOAA Technical Memorandum NMFS-SWFSC-476. Washington, DC: National Oceanic and Atmospheric Administration.
 
+Colegrove, K.M., Greig, D.J., and F.M.D. Gulland. 2005. Causes of live strandings of northern elephant seals and Pacific harbor seals along the central California coast, 1992-2001. Aquatic Mammals 31(1): 1-10.
+
+DeLong, R.L., Gearin, P.J., Bengston, J.L., Dawson, P. and S.D. Feldkamp. 1990. Studies of the effects of entanglement on individual northern fur seals [Abstract]. In: R.S. Shomura and M.L. Godfrey (eds.), Proceedings of the Second International Conference on Marine Debris, 2–7 April, 1989, Honolulu, Hawaii. NOAA Technical Memorandum NMFS SWFSC 154. pp. 492–493.
+
 Esperon-Rodriguez, M., and J.P. Gallo-Reynoso. 2012. The re-colonization of the Archipelago 
 of San Benito, Baja California, by the Guadalupe fur seal. Revista Mexicana de Biodiversidad 
 83:170-176.
 
-Gelatt, T., R. Ream, and D. Johnson.  2015. Callorhinus ursinus.  The IUCN Red List of Threatened Species 2015:e.T3590A45224953.  Available at: http://www.iucnredlist.org/details/3590/0 
-
 Figureroa-Carranza, A.L. 1994. Early lactation and attendance behavior of the Guadalupe fur 
 seal females (Arctocephalus townsendi). University of California, Santa Cruz, California.
+
+Fowler, C.W. 1987. Marine debris and northern fur seals: a case study. 
+Marine Pollution Bulletin 18: 326–335.
+ 
+Gelatt, T., R. Ream, and D. Johnson.  2015. Callorhinus ursinus.  The IUCN Red List of Threatened Species 2015:e.T3590A45224953.  Available at: http://www.iucnredlist.org/details/3590/0 
+
+Goldstein, T., Johnson, S.P., Phillips, A.V., Hanni, K.D., Fauquier, D.A. and F.M.D. Gulland. 1999. Human-related injuries observed in live stranded pinnipeds along the central California coast 1986–1998. Aquatic Mammals 25: 43–51.
+
+Good, T.P., June, J.A., Etnier, M. and G. Broadhurst. 2010. erelict fishing nets in Puget Sound and the Northwest Straits: Patterns and threats to marine fauna. Marine Pollution Bulletin 60 (1): 39-50.
+
+Greig, D. J., Gulland, F. M. D., & Kreuder, C. 2005. A decade of live California sea lion (Zalophus california- nus) strandings along the central California coast: Causes and trends, 1991-2000. Aquatic Mammals, 31(1), 11-22. http://dx.doi.org/10.1578/AM.31.1.2005.11
 
 Huber, H. R., B. R. Dickerson, S. J. Jeffries, and D. M. Lambourn.  2012.  Genetic analysis of Washington State harbor  seals  (Phoca  vitulina  richardii)  using  microsatellites.    Can.  J.  Zool.  90(12):1361-1369. 
 
 Huggins, J.L., Leahy, C.L., Calambokidis, J., Lambourn, D., Jeffries, S.J. and others. 2013. Causes and patterns of harbor seal (*Phoca vitulina*) pup mortality at Smith Island, Washington, 2004-2010. 
 
 Jeffries, S.J., P.J. Gearin, H.R. Huber, D.L. Saul, and D.A. Pruett. 2000.  Atlas of Seal and Sea Lion Haulout Sites in Washington.   Washington Department of Fish and Wildlife, Wildlife Science Division, 600 Capitol Way North, Olympia WA.  pp. 150.
+
+Kessina, L. 2016. Stranding mortality patterns in California sea lions and Steller sea lions in Oregon and southern Washington, 2006 to 2014. Dissertations and Theses. Paper 2995. Portland State University.
 
 Le  Boeuf, B.J., Crocker, D.E., Costa, D.P., Blackwell, S.B., Webb, P.M., and D.S. Houser. 2000. Foraging ecology of northern elephant seals. Ecological monographs, 70(3), 353-
 382. 
@@ -828,4 +859,5 @@ Melin, S.R., DeLong, R.L., and Thomason, J.R. 2000. Attendance patterns of Calif
 Orr,  A.J., Melin, S.R., Harris, J.D., and R.L. DeLong. 2012. Status  of  the  northern  fur  seal population at San Miguel Island, California during 2010 and 2011.  Pp. 41-58, In: Testa, J. W. (ed.), Fur seal investigations, 2010-2011.  U.S. Dep. Commer., NOAA Tech. Memo. NMFS
 -AFSC-241. 77 pp.
 
+Williams, R., E. Ashe, and P.D. O'Hara. 2011. Marine mammals and debris in coastal waters of British Columbia, Canada. Marine Pollution Bulletin 62(6): 1303-1316.
  
