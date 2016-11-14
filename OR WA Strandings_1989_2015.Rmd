@@ -1368,6 +1368,12 @@ ORcounties.table <- write.csv(bigtable.OR.HI.table, file = "./Figures/ORcounties
 ```{r mapping, echo = FALSE, eval = FALSE}
 ##MAPPING
 
+pinnipeds.data.latcleaning <- pinnipeds.data %>%
+  transform(Longitude = as.numeric(Longitude),
+            Latitude = as.numeric(Latitude)) %>%
+  filter(Latitude > 49 & Longitude < -123.5) %>%
+  select(National.Database.Number, Year.of.Observation, City, County, Latitude, Longitude)
+
 box <- c(-126.7, 41.79, -119.19, 50.078)
 pugetbox <- c(-125.5, 46.79, -121.5, 49.28)
 
@@ -1388,23 +1394,23 @@ pinnipeds.data.mapping <- pinnipeds.data %>%
 #     axis.text = element_blank())
 
 #All WA OR - all strandings - black dots
-ggmap(get_map(location = box, source = "stamen", maptype = "terrain")) +
+ggmap(get_map(location = box, source = "osm")) +
    geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude)) +
 scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
-  theme(
-    axis.ticks = element_blank(),
-    axis.text = element_blank())
+  #xlab("") + ylab("") +
+  theme()
+    #axis.ticks = element_blank(),
+    #axis.text = element_blank())
 
 #Greater Puget Sound all strandings - black dots
 ggmap(get_map(location = pugetbox, source = "osm")) +
   geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7) +
  scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
+  #xlab("") + ylab("") +
   theme(
     legend.key = element_blank(),
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
+    #axis.ticks = element_blank(),
+    #axis.text = element_blank(),
     legend.position = 'top',
     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
 
