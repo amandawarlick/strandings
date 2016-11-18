@@ -107,6 +107,9 @@ tbls("WAcounties.table", caption = "Proportion of all strandings, proportion of 
 ORcounties.table <- read.csv("ORcounties.table.csv", check.names = FALSE)
 tbls("ORcounties.table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (n = 5,145).")
 
+#Maps
+#pugetheatmap <- load("pugetheatmap.pdf")
+
 setwd("..") 
 ```
 
@@ -122,7 +125,7 @@ pinnipeds.data$Age.Class <- gsub("PUP/CALF", "PUP", pinnipeds.data$Age.Class)
 pinnipeds.data$Age.Class <- case(pinnipeds.data$Age.Class)
 pinnipeds.data$Age.Class <- factor(pinnipeds.data$Age.Class, 
     levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
-
+ 
 pinnipeds.data$Sex <- gsub("NA", "Unid", pinnipeds.data$Sex)
 pinnipeds.data$Sex <- gsub("UNKNOWN", "Unid", pinnipeds.data$Sex)
 pinnipeds.data$Sex <- case(pinnipeds.data$Sex)
@@ -492,6 +495,22 @@ countyfigures <- plot_grid(allOR.county.final, allWA.county.final, ORHI.county.f
           WAHI.county.final,
           align = 'v', ncol = 2, rel_widths = c(1.2, 1.8), rel_heights = c(1, 1.2), label_size = 10)
 figs("countyfigures", caption = "All strandings (above) and human interaction cases (below) for each county in Oregon (left) and Washington (right) shows high strandings in Lincoln and proportionally higher HI cases in Clatstop in Oregon and high strandings in Pacific and Pierce but proportionally higher HI cases in San Juan.")
+
+# HI.county.facet <- pinnipeds.data %>% 
+#   filter(County != 'NA' & County != 'Unknown' & 
+#         Findings.of.Human.Interaction == 'Y' & 
+#         Interaction.Type != 'NA') %>% 
+#   group_by(County, Interaction.Type, Year.of.Observation, State) %>%
+#   summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
+#   geom_bar(stat = 'identity')  + 
+#   ylab("") + xlab("") + 
+#   scale_y_continuous(labels = comma) +
+#   pubfigure_theme(legend.position = 'top',
+#                   axis.title.y = element_blank(),
+#                   plot.margin = unit(c(.1, .1, -.5, -1), "cm")) + 
+#   scale_fill_grey() + 
+#   facet_grid(~ State)
 
 #################Extras################
  

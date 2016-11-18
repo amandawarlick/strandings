@@ -20,6 +20,7 @@ library(devtools)
 library(tidyr)
 library(ggmap)
 library(data.table)
+library(ggfortify)
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -316,16 +317,12 @@ data.by.year <- pinnipeds.data %>%
 timeseries.all.model <- glm(cnt ~ Year.of.Observation, family = "poisson", data = data.by.year)
 
 summary(timeseries.all.model)
-plot(timeseries.all.model$residuals)
-hist(timeseries.all.model$residuals)
-plot(abs(timeseries.all.model$residuals) ~ timeseries.all.model$fitted)
-qqnorm(timeseries.all.model$residuals)
-qqline(timeseries.all.model$residuals)
+autoplot(timeseries.all.model)
 
 all.yr.figure <- 
   ggplot(data.by.year, aes(x = Year.of.Observation, y = cnt)) + 
   geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE, col = 'black', linetype = 3) +
+  geom_smooth(method = "loess", se = FALSE, col = 'black', linetype = 3) +
   xlab("") + ylab("Annual Strandings") +
   scale_y_continuous(labels = comma) +
   plot_theme() +
@@ -347,8 +344,7 @@ HI.by.year <- pinnipeds.data %>%
 #Regression shows significant increase (6/yr) of all HI cases, p < 0.05
 timeseries.HI.model <- lm(cnt ~ Year.of.Observation, data = HI.by.year)
 
-plot(timeseries.HI.model$residuals)
-hist(timeseries.HI.model$residuals)
+autoplot(timeseries.HI.model)
 summary(timeseries.HI.model)
 
 #anova confirms years are different, p-val < 0.05
@@ -538,13 +534,13 @@ ggsave(species.HI.figure, file = "./Figures/species.HI.figure.pdf")
 #Anova shows average annual FI cases are different across species
 summary(aov(cnt ~ Pinniped.Common.Name, data = species.year.FI))
 
-model.species.FI <- summary(lm(cnt ~ Year.of.Observation + Pinniped.Common.Name, species.year.FI))
+model.species.FI <- lm(cnt ~ Year.of.Observation + Pinniped.Common.Name, species.year.FI)
 
-plot(model.species.FI$residuals)
-hist(model.species.FI$residuals)
+autoplot(model.species.FI)
+summary(model.species.FI)
 
 species.year.FI.figure <- 
-  ggplot(species.year.FI, aes(x = factor(Year.of.Observation), y = cnt, 
+  ggplot(species.year.FI, aes(x = Year.of.Observation, y = cnt, 
             col = Pinniped.Common.Name, group = Pinniped.Common.Name)) +
   geom_point(stat = 'identity', position = 'jitter') + 
   geom_smooth(method = 'lm', se = F) +
@@ -1108,11 +1104,8 @@ summary(aov(cnt ~ County, allWA.bycounty))
 WAcounty.model <- lm(cnt ~ County + Year.of.Observation, allWA.bycounty)
 
 summary(WAcounty.model)
-plot(WAcounty.model$residuals)
-hist(WAcounty.model$residuals)
-plot(abs(WAcounty.model$residuals) ~ WAcounty.model$fitted)
-qqnorm(WAcounty.model$residuals)
-qqline(WAcounty.model$residuals)
+autoplot(WAcounty.model)
+
 
 
 #all HI by county - WA
@@ -1170,6 +1163,9 @@ bigtable.WA.HI.props <- pinnipeds.data %>%
   merge(bigtable.WA.props, by = 'County') %>%
   select(County, all.prop, HI.prop)
 
+#https://www.r-bloggers.com/comparison-of-two-proportions-parametric-z-test-and-non-parametric-chi-squared-methods/
+#https://ww2.coastal.edu/kingw/statistics/R-tutorials/proport.html
+
 smokers  <- c( 83, 90, 129, 70 )
 patients <- c( 86, 93, 136, 82 )
 pairwise.prop.test(smokers, patients)
@@ -1209,11 +1205,7 @@ TukeyHSD(aov(cnt ~ County, allOR.bycounty))
 #Increasing in Clatsop, Coos, and Lincoln, Curry, Tillamook, Clackamas
 ORcounty.model <- lm(cnt ~ County + Year.of.Observation, allOR.bycounty)
 summary(ORcounty.model)
-plot(ORcounty.model$residuals)
-hist(ORcounty.model$residuals)
-plot(abs(ORcounty.model$residuals) ~ ORcounty.model$fitted)
-qqnorm(ORcounty.model$residuals)
-qqline(ORcounty.model$residuals)
+autoplot(ORcounty.model)
 
 allOR.bycounty.figure <- 
   ggplot(allOR.bycounty, aes(x = County, y = cnt)) + 
@@ -1368,14 +1360,16 @@ ORcounties.table <- write.csv(bigtable.OR.HI.table, file = "./Figures/ORcounties
 ```{r mapping, echo = FALSE, eval = FALSE}
 ##MAPPING
 
-pinnipeds.data.latcleaning <- pinnipeds.data %>%
+latlong.cleaning <- pinnipeds.data %>%
   transform(Longitude = as.numeric(Longitude),
             Latitude = as.numeric(Latitude)) %>%
-  filter(Latitude > 49 & Longitude < -123.5) %>%
-  select(National.Database.Number, Year.of.Observation, City, County, Latitude, Longitude)
+  filter(Latitude < 46.5 & Latitude > 46 & Longitude > -123.3) %>%
+  select(National.Database.Number, Year.of.Observation, State, City, County, Latitude, Longitude)
 
-box <- c(-126.7, 41.79, -119.19, 50.078)
-pugetbox <- c(-125.5, 46.79, -121.5, 49.28)
+allbox <- c(-126, 41.8, -121.7, 49.1)
+ORbox <- c(-125, 41.91, -121.5, 46.28)
+WAbox <- c(-125.2, 46, -121.7, 49.1)
+pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
 
 pinnipeds.data.mapping <- pinnipeds.data %>% 
   transform(Longitude = as.numeric(Longitude),
@@ -1394,17 +1388,20 @@ pinnipeds.data.mapping <- pinnipeds.data %>%
 #     axis.text = element_blank())
 
 #All WA OR - all strandings - black dots
-ggmap(get_map(location = box, source = "osm")) +
-   geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude)) +
+allstrands <- 
+  ggmap(get_map(location = allbox, source = "osm")) +
+   geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = .7, alpha = .5, color = 'grey50') +
 scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  #xlab("") + ylab("") +
-  theme()
-    #axis.ticks = element_blank(),
-    #axis.text = element_blank())
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank())
+ggsave(allstrands, file = "./Figures/Maps/allstrands.pdf")
 
-#Greater Puget Sound all strandings - black dots
-ggmap(get_map(location = pugetbox, source = "osm")) +
-  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7) +
+#Washington all strandings - black dots
+pugetstrands <- 
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey50') +
  scale_alpha(range = c(0, 0.3), guide = FALSE) +
   #xlab("") + ylab("") +
   theme(
@@ -1413,10 +1410,26 @@ ggmap(get_map(location = pugetbox, source = "osm")) +
     #axis.text = element_blank(),
     legend.position = 'top',
     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(pugetstrands, file = "./Figures/Maps/pugetstrands.pdf")
+
+#Greater Puget Sound all strandings - black dots
+pugetstrands <- 
+  ggmap(get_map(location = pugetbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey50') +
+ scale_alpha(range = c(0, 0.3), guide = FALSE) +
+  #xlab("") + ylab("") +
+  theme(
+    legend.key = element_blank(),
+    #axis.ticks = element_blank(),
+    #axis.text = element_blank(),
+    legend.position = 'top',
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(pugetstrands, file = "./Figures/Maps/pugetstrands.pdf")
 
 #All strandings heatmap
-ggmap(get_map(location = box, source = "osm")) +
-  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7)  +
+allheatmap <- 
+  ggmap(get_map(location = allbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey50')  +
   stat_density2d(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
 
   scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
@@ -1425,33 +1438,68 @@ ggmap(get_map(location = box, source = "osm")) +
   theme(
     axis.ticks = element_blank(),
     axis.text = element_blank())
+ggsave(allheatmap, file = "./Figures/Maps/allheatmap.pdf")
 
-#Puget sound heatmap - all strandings
-ggmap(get_map(location = "Puget Sound", source = "stamen", maptype = "watercolor")) +
-  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7)  +
+#WA heatmap - all strandings
+WAheatmap <- 
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey50')  +
   stat_density2d(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
   scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   theme(
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
+    legend.position = 'none',
+    #axis.ticks = element_blank(),
+    #axis.text = element_blank(),
     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(WAheatmap, file = "./Figures/Maps/WAheatmap.pdf")
+
+#Puget sound heatmap - all strandings, watercolor
+# pugetheatmap_water <- 
+#   ggmap(get_map(location = "Puget Sound", source = "stamen", maptype = "watercolor")) +
+#   geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7)  +
+#   stat_density2d(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+#   scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   theme(
+#     axis.ticks = element_blank(),
+#     axis.text = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+# ggsave(pugetheatmap_water, file = "./Figures/pugetheatmap_water.pdf")
 
 #Oregon coast heatmap - all strandings
-ggmap(get_map(location = c(-123.627933, 44.163370), source = "google", maptype = "roadmap", zoom = 7)) +
-  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7)  +
+ORheatmap <- 
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey50')  +
   stat_density2d(data = pinnipeds.data.mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 60, geom = "polygon") +
 
   scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-  scale_alpha(range = c(0, 0.3), guide = FALSE)
+  scale_alpha(range = c(0, 0.3), guide = FALSE) + 
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(ORheatmap, file = "./Figures/Maps/ORheatmap.pdf")
+
+#######HI Series
+pinnipeds.data.mapping_HI <- pinnipeds.data.mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
+
+pinnipeds.data.mapping_HI_boat <- pinnipeds.data.mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Boat')
+pinnipeds.data.mapping_HI_fish <- pinnipeds.data.mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Fisheries')
+pinnipeds.data.mapping_HI_shot <- pinnipeds.data.mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Gunshot')
 
 #Human interactions - dots by HI type
-pinniped.HI.map.data <- pinnipeds.data.mapping %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
-
-ggmap(get_map(location = box, source = "osm")) +
-  geom_point(data = pinniped.HI.map.data, aes(x = Longitude, y = Latitude, color = Interaction.Type), size = 0.7) +
-scale_alpha(range = c(0, 0.3), guide = FALSE) +
+HI.type.map <- 
+  ggmap(get_map(location = allbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude, color = Interaction.Type), size = 0.7) +
+#scale_alpha(range = c(0, 0.3), guide = FALSE) +
   xlab("") + ylab("") +
   plot_theme(
     legend.key = element_blank(),
@@ -1459,6 +1507,265 @@ scale_alpha(range = c(0, 0.3), guide = FALSE) +
     axis.text = element_blank(),
     legend.position = 'top',
     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(HI.type.map, file = "./Figures/Maps/HI.type.map.pdf")
+
+#All HI - colors
+HI.heatmap.colors <- 
+ggmap(get_map(location = allbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), size = 0.3, alpha = .5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude, color = as.factor(Interaction.Type)), bins = 4, size = 1.5, alpha = .6) +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  scale_color_brewer(palette = 'Set2') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    legend.text = element_text(size = 9),
+    legend.key = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = 1)) 
+ggsave(HI.heatmap.colors, file = "./Figures/HI.heatmap.colors.pdf")
+
+#All HI - facet
+HI.heatmap.facet <-  
+  ggmap(get_map(location = allbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Interaction.Type)
+ggsave(HI.heatmap.facet, file = "./Figures/HI.heatmap.facet.pdf")
+
+
+###HI - WA
+
+#WA HI - colors
+WAHI.heatmap.colors <- 
+ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), size = 0.3, alpha = .5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude, color = as.factor(Interaction.Type)), bins = 4, size = 1.5, alpha = .6) +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  scale_color_brewer(palette = 'Set2') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    legend.text = element_text(size = 9),
+    legend.key = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = 1)) 
+ggsave(HI.heatmap.WA.colors, file = "./Figures/HI.heatmap.WA.colors.pdf")
+
+#WA HI - facet
+HI.heatmap.WA.facet <-  
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank()) +
+    #panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Interaction.Type)
+ggsave(HI.heatmap.WA.facet, file = "./Figures/HI.heatmap.WA.facet.pdf")
+
+###HI Series - OR
+
+#OR HI - colors
+ORHI.heatmap.colors <- 
+ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), size = 0.3, alpha = .5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude, color = as.factor(Interaction.Type)), bins = 4, size = 1.5, alpha = .6) +
+  scale_color_brewer(palette = 'Set2') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    legend.text = element_text(size = 9),
+    legend.key = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = 1)) 
+ggsave(HI.heatmap.OR.colors, file = "./Figures/HI.heatmap.OR.colors.pdf")
+
+#OR HI - facet
+HI.heatmap.OR.facet <-  
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Interaction.Type)
+ggsave(HI.heatmap.OR.facet, file = "./Figures/HI.heatmap.OR.facet.pdf")
+
+
+#######Species Series
+pinnipeds.data.mapping_sp <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name != 'Unidentified') 
+
+#colored by species - WA
+WAheatmap_species <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), size = 0.3, alpha = .5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, color = as.factor(Pinniped.Common.Name)), bins = 4, size = 1.5, alpha = .6) +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  scale_color_brewer(palette = 'Set2') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    legend.text = element_text(size = 9),
+    legend.key = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = 1)) 
+
+#faceted species - WA
+WAheatmap_species_facet <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  #scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Pinniped.Common.Name)
+ggsave(WAheatmap_species_facet, file = "./Figures/WAheatmap_species_facet.pdf")
+
+
+#Colored by species - OR
+ORheatmap_species <-   
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), size = 0.3, alpha = .5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, color = as.factor(Pinniped.Common.Name)), bins = 4, size = 1.5, alpha = .6) +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  scale_color_brewer(palette = 'Set2') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    legend.text = element_text(size = 9),
+    legend.key = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_blank())
+    #panel.border = element_rect(colour = "black", fill = "NA", size = 1)) 
+
+#faceted species - OR
+ORheatmap_species_facet <-   
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  #scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Pinniped.Common.Name)
+ggsave(ORheatmap_species_facet, file = "./Figures/ORheatmap_species_facet.pdf")
+
+#Harbor seals
+pinnipeds.data.mapping_hs <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name == 'Harbor seal') 
+WAheatmap_hs <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_hs, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey65')  +
+  stat_density2d(data = pinnipeds.data.mapping_hs, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") + ggtitle("Harbor Seals") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(WAheatmap_hs, file = "./Figures/Maps/WAheatmap_hs.pdf")
+
+##CSL
+pinnipeds.data.mapping_csl <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name == 'California sea lion') 
+WAheatmap_csl <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_csl, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey65')  +
+  stat_density2d(data = pinnipeds.data.mapping_csl, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") + ggtitle("California Sea Lion") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(WAheatmap_csl, file = "./Figures/Maps/WAheatmap_csl.pdf")
+
+##SSL
+pinnipeds.data.mapping_ssl <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name == 'Steller sea lion') 
+WAheatmap_ssl <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_ssl, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey65')  +
+  stat_density2d(data = pinnipeds.data.mapping_ssl, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") + ggtitle("Steller Sea Lion") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(WAheatmap_ssl, file = "./Figures/Maps/WAheatmap_ssl.pdf")
+
+##NEL
+pinnipeds.data.mapping_nel <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name == 'Northern elephant seal') 
+WAheatmap_nel <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_nel, aes(x = Longitude, y = Latitude), size = 0.7, alpha = .5, color = 'grey65')  +
+  stat_density2d(data = pinnipeds.data.mapping_nel, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") + ggtitle("Northern Elephant Seal") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+ggsave(WAheatmap_nel, file = "./Figures/Maps/WAheatmap_nel.pdf")
+
 
 ```
 
