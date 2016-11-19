@@ -1488,12 +1488,12 @@ ggsave(ORheatmap, file = "./Figures/Maps/ORheatmap.pdf")
 pinnipeds.data.mapping_HI <- pinnipeds.data.mapping %>% 
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
 
-pinnipeds.data.mapping_HI_boat <- pinnipeds.data.mapping %>% 
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Boat')
-pinnipeds.data.mapping_HI_fish <- pinnipeds.data.mapping %>% 
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Fisheries')
-pinnipeds.data.mapping_HI_shot <- pinnipeds.data.mapping %>% 
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Gunshot')
+# pinnipeds.data.mapping_HI_boat <- pinnipeds.data.mapping %>% 
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Boat')
+# pinnipeds.data.mapping_HI_fish <- pinnipeds.data.mapping %>% 
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Fisheries')
+# pinnipeds.data.mapping_HI_shot <- pinnipeds.data.mapping %>% 
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'Gunshot')
 
 #Human interactions - dots by HI type
 HI.type.map <- 

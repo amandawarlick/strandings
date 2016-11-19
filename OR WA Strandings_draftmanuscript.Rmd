@@ -47,7 +47,7 @@ pubfigure_simple_theme <- function(...) {
     panel.grid = element_blank(),
     legend.title = element_blank(),
     legend.key = element_blank(),
-    legend.text = element_text(size = 5.5),
+    legend.text = element_text(size = 8),
     ...)
 }
 
@@ -189,8 +189,9 @@ species.HI.type.final <- pinnipeds.data %>%
   geom_boxplot() +
   xlab("") + ylab("Human Interactions") +
   scale_y_continuous(labels = comma) +
-  pubfigure_theme(legend.position = 'top') + 
-  scale_fill_grey()
+  pubfigure_theme(legend.position = 'top') #+ 
+  #scale_fill_grey()
+ #scale_color_brewer(palette = 2)
 
 species.boxplots <- plot_grid(species.all.final, species.HI.type.final, labels = "auto", align = 'v', ncol = 1, rel_heights = c(.5, 1.2), hjust = 0, label_size = 10)
 figs("species.boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for harbor seals and California sea lions, and larger interquartile range for harbor seals and lower average strandings for other species; and (b) boxplot of annual human interactions by type, showing a high number of Other cases for harbor seals and gunshot wounds for California sea lions and Steller sea lions.")
@@ -215,14 +216,13 @@ HI.type.yr.final <- pinnipeds.data %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = Year.of.Observation, y = cnt, 
              group = Interaction.Type, 
-             col = Interaction.Type,
-             shape = Interaction.Type)) + 
+             col = Interaction.Type)) + 
   geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE, linetype = 3) +
+  geom_smooth(method = "lm", se = FALSE, linetype = 1) +
  # scale_x_continuous(breaks = c(1989:2015)) +
   xlab("") + ylab("Human Interaction Cases") +
-  pubfigure_theme(legend.position = 'top') + 
-  scale_color_grey()
+  pubfigure_theme(legend.position = 'top') #+ 
+  #scale_color_grey()
 
 all.HI.timeseries <- plot_grid(all.yr.final, HI.type.yr.final, align = 'v', ncol = 1, labels = "auto", vjust = 1, label_size = 10)
 figs("all.HI.timeseries", caption = "(a) Total annual strandings shows increasing strandings over the study period (y = 25.7x, t = 5.0, p < 0.01, r-sq = 0.5) (n = 14,167); and (b) annual human interaction cases (n = 1,513) showing increasing number of cases overall (y = 5.4x, t = 7.6, p < 0.01, r-sq = 0.68), increasing gunshot wounds (symbol, y = 22.3x, t = 6.2, p < 0.001), fisheries entanglements (symbol, y = 13.7x, t = 3.8, p < 0.001), and boat injuries (symbol, y = 1.5x, t = 9.6, p < 0.001) over the study period.")
@@ -236,15 +236,14 @@ species.all.line.final <- pinnipeds.data %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = Year.of.Observation, y = cnt, 
              col = Pinniped.Common.Name,
-             group = Pinniped.Common.Name,
-             shape = Pinniped.Common.Name)) +
+             group = Pinniped.Common.Name)) +
   geom_point(stat = 'identity', position = 'identity') + 
-  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  geom_smooth(method = 'lm', se = F, linetype = 1) +
   ylab("All Strandings") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_simple_theme(legend.position = 'top',
-                         axis.title = element_text(size = 10)) +
-  scale_color_grey()
+                         axis.title = element_text(size = 10)) #+
+  #scale_color_grey()
 
 species.HI.line.final <- pinnipeds.data %>%
   filter(Findings.of.Human.Interaction == 'Y') %>%
@@ -252,14 +251,13 @@ species.HI.line.final <- pinnipeds.data %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = Year.of.Observation, y = cnt, 
              col = Pinniped.Common.Name,
-             group = Pinniped.Common.Name,
-             shape = Pinniped.Common.Name)) +
+             group = Pinniped.Common.Name)) +
   geom_point(stat = 'identity', position = 'identity') + 
-  geom_smooth(method = 'lm', se = F, linetype = 3) +
+  geom_smooth(method = 'lm', se = F, linetype = 1) +
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
-  pubfigure_theme(legend.position = 'none') +
-  scale_color_grey()
+  pubfigure_theme(legend.position = 'none') #+
+  #scale_color_grey()
 
 species.timeseries <- plot_grid(species.all.line.final, species.HI.line.final, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
 figs("species.timeseries", caption = "(a) Annual strandings per species shows increasing strandings in harbor seals (symbol, y = 209x, t = 9.9, p < 0.001) and California sea lions (symbol, y = 5.9x, t = 6.9, p < 0.001) and slightly decreasing trends for the other species; and (b) human interactions cases shows similarly increasing trends for harbor seals (symbol, (y = 15.3x, t = 4.2, p < 0.001)), California sea lions (symbol, y = 1.4x, t = 8.2, p < 0.001), and decreasing at a rate of 8-20 individuals per year for the other species (CHECK THESE - SEEMS FISHY).")
@@ -365,8 +363,8 @@ monthly.HI.age.final <- monthly.HI %>%
   #geom_errorbar(limits) +
   ylab("Human Interactions") + xlab("") + 
   pubfigure_simple_theme(legend.position = 'top',
-                         axis.title = element_text(size = 10)) + 
-  scale_fill_grey()
+                         axis.title = element_text(size = 10)) #+ 
+  #scale_fill_grey()
   
 monthly.HI.type.final <- monthly.HI %>% 
   filter(Interaction.Type != 'NA') %>%
@@ -375,8 +373,8 @@ monthly.HI.type.final <- monthly.HI %>%
   ggplot(aes(x = factor(Month.of.Observation), y = mean, fill = Interaction.Type)) +
   geom_bar(stat = 'identity') +
   ylab("Human Interactions") + xlab("") + 
-  pubfigure_theme(legend.position = 'top') + 
-  scale_fill_grey()
+  pubfigure_theme(legend.position = 'top') #+ 
+  #scale_fill_grey()
 
 monthly.age.HI.figure <- plot_grid(monthly.HI.age.final, monthly.HI.type.final, align = 'v', ncol = 1, label_size = 10, labels = "auto")
 figs("monthly.age.HI.figure", caption = "Sum of human interactions cases across years for each month according to (a) age class, showing summer peak for human interaction cases for pups; and (b) human interaction type, showing a high number of fisheries cases in August and Other in July.")
@@ -399,8 +397,8 @@ monthly.species.final <- pinnipeds.data %>%
   ylab("All Strandings") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_simple_theme(legend.position = 'top', 
-                         axis.title = element_text(size = 10)) + 
-  scale_color_grey()
+                         axis.title = element_text(size = 10)) #+ 
+  #scale_color_grey()
 
 #Monthly HI by species
 monthly.HI.final <- pinnipeds.data %>%
@@ -417,8 +415,8 @@ monthly.HI.final <- pinnipeds.data %>%
   #geom_smooth(se = F) +
   ylab("Human Interactions") + xlab("") + 
   scale_y_continuous(labels = comma) +
-  pubfigure_theme(legend.position = 'none') + 
-  scale_color_grey()
+  pubfigure_theme(legend.position = 'none') #+ 
+  #scale_color_grey()
 
 monthly.species.final <- plot_grid(monthly.species.final, monthly.HI.final, align = 'v', ncol = 1, label_size = 10)
 figs("monthly.species.final", caption = "Sum of cases within months across all years for each species shows (a) a summer peak in all strandings for harbor seals (2.3 < t < 13.7, p < 0.001) and (b) a summer peak in human interaction cases for harbor seals (2.1 < t < 4.9, p < 0.001) and greater variability in late spring for California sea lions (stats).")
@@ -511,6 +509,93 @@ figs("countyfigures", caption = "All strandings (above) and human interaction ca
 #                   plot.margin = unit(c(.1, .1, -.5, -1), "cm")) + 
 #   scale_fill_grey() + 
 #   facet_grid(~ State)
+
+#########MAPS#######
+allbox <- c(-126, 41.8, -121.7, 49.1)
+ORbox <- c(-125, 41.91, -121.5, 46.28)
+WAbox <- c(-125.2, 46, -121.7, 49.1)
+pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
+
+pinnipeds.data.mapping <- pinnipeds.data %>% 
+  transform(Longitude = as.numeric(Longitude),
+            Latitude = as.numeric(Latitude)) %>%
+  filter(Longitude != 'NA')
+
+
+#######HI 
+pinnipeds.data.mapping_HI <- pinnipeds.data.mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
+
+#WA HI - facet
+HI.heatmap.WA.facet <-  
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank()) +
+    #panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Interaction.Type)
+figs("HI.heathmap.WA.facet", caption = "Kernel density plot showing hotspots of human interaction cases in Oregon, with fisheries and boat collisions distributed throughout Puget Sound, and gunshot wounds centered along the coast, particularly in Astoria.")
+
+#OR HI - facet
+HI.heatmap.OR.facet <-  
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Interaction.Type)
+figs("HI.heathmap.OR.facet", caption = "Kernel density plot showing hotspots of human interaction cases in Oregon, with fisheries and boat collisions distributed along the northern coast, and gunshot wounds focused in Astoria.")
+
+#######Species Series
+pinnipeds.data.mapping_sp <- pinnipeds.data.mapping %>% filter(Pinniped.Common.Name != 'Unidentified') 
+
+#faceted species - WA
+WAheatmap.species.facet <-   
+  ggmap(get_map(location = WAbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  #scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Pinniped.Common.Name)
+figs("WAheatmap.species.facet", caption = "Kernel density plot of species stranding hotspots in Washington.")
+
+#faceted species - OR
+ORheatmap.species.facet <-   
+  ggmap(get_map(location = ORbox, source = "osm")) +
+  geom_point(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+  # stat_density2d(data = pinnipeds.data.mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  #scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10), 
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", size = 1)) +
+  facet_wrap(~ Pinniped.Common.Name)
+figs("ORheatmap.species.facet", caption = "Kernel density plot of species stranding hotspots in Oregon.")
 
 #################Extras################
  
@@ -699,6 +784,8 @@ It is difficult to theorize about potential explanations for these correlations 
 *Spatial Patterns*  
 We found that, as expected, overall strandings and human interactions cases are not distributed equally along the coasts at the state and county levels, likely due to the distribution of both the animals and stranding response network effort. From 1989-2015, more pinnipeds stranded in Washington, though the proportion between the two states varied considerably over the study period and per species. The majority of harbor seals stranded in Washington due to the presence of pupping haulouts throughout the state, while the other species stranded more in Oregon (`r tbls("species.HI.prop.table", display = 'cite')`). Within Washington, strandings were disproportionately higher in Pierce, Pacifc, Island, San Juan, and Whatcom, with human interactions highest in some of those same counties (). These findings could reflect areas of higher local abundance for harbor seals and or hotspots for human activities. In Oregon, strandings were highest in Lincoln county, where strandings also increased significantly over time. Human interactions were disproportionately higher and increasing in Clatsop (where nearly half of all human interactions in Oregon were recorded, specifically gunshot wounds), Lincoln, Tillamook, and Coos counties. Our results also indicate that strandings and human interaction cases within certain counties have changed over time, specifically gunshot wounds in Clatsop county. 
 
+`r figs("WAheatmap.species.facet", display = 'cite')``r figs("ORheatmap.species.facet", display = 'cite')``r figs("HI.heatmap.WA.facet", display = 'cite')``r figs("HI.heatmap.OR.facet", display = 'cite')`
+
 
 - Compare with previous studies
 - Importance of hotspot analysis to guide support to stranding networks. Williams et al. (2011) suggests areas of overlap between high density/risk marmam areas and accumulation of marine debris can often occur away from dense population centers and therefore go undetected and under-reported.
@@ -766,6 +853,29 @@ countyfigures
 
 `r figs("countyfigures", caption = "All strandings (above) and human interaction cases (below) for each county in Oregon (left) and Washington (right) shows high strandings in Lincoln and proportionally higher HI cases in Clatstop in Oregon and high strandings in Pacific and Pierce but proportionally higher HI cases in San Juan.")`
 
+```{r}
+WAheatmap.species.facet
+```
+
+`r figs("WAheatmap.species.facet", caption = "Kernel density plot of species stranding hotspots in Washington.")`
+
+```{r}
+ORheatmap.species.facet
+```
+
+`r figs("ORheatmap.species.facet", caption = "Kernel density plot of species stranding hotspots in Oregon.")`
+
+```{r}
+HI.heatmap.WA.facet
+```
+
+`r figs("HI.heathmap.WA.facet", caption = "Kernel density plot showing hotspots of human interaction cases in Oregon, with fisheries and boat collisions distributed throughout Puget Sound, and gunshot wounds centered along the coast, particularly in Astoria.")`
+
+```{r}
+HI.heatmap.OR.facet
+```
+
+`r figs("HI.heathmap.OR.facet", caption = "Kernel density plot showing hotspots of human interaction cases in Oregon, with fisheries and boat collisions distributed along the northern coast, and gunshot wounds focused in Astoria.")`
 
 \newpage
 
