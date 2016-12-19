@@ -78,20 +78,20 @@ all.data$Latitude <- as.numeric(all.data$Latitude)
 
 #Only pinniped data
 
-pinnipeds.data <- all.data %>% filter(Mammal.Type == 'Pinniped' & Common.Name != 'Seal, harp')
+pinnipeds_data <- all.data %>% filter(Mammal.Type == 'Pinniped' & Common.Name != 'Seal, harp')
 
-pinnipeds.data$Age.Class[is.na(pinnipeds.data$Age.Class)] <- "NA"
-pinnipeds.data$Age.Class <- gsub("NA", "Unid", pinnipeds.data$Age.Class)
-pinnipeds.data$Age.Class <- gsub("UNKNOWN", "Unid", pinnipeds.data$Age.Class)
-pinnipeds.data$Age.Class <- gsub("PUP/CALF", "PUP", pinnipeds.data$Age.Class)
-pinnipeds.data$Age.Class <- case(pinnipeds.data$Age.Class)
+pinnipeds_data$Age.Class[is.na(pinnipeds_data$Age.Class)] <- "NA"
+pinnipeds_data$Age.Class <- gsub("NA", "Unid", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- gsub("UNKNOWN", "Unid", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- gsub("PUP/CALF", "PUP", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- case(pinnipeds_data$Age.Class)
 
-pinnipeds.data$Sex[is.na(pinnipeds.data$Sex)] <- "NA"
-pinnipeds.data$Sex <- gsub("NA", "Unid", pinnipeds.data$Sex)
-pinnipeds.data$Sex <- gsub("UNKNOWN", "Unid", pinnipeds.data$Sex)
-pinnipeds.data$Sex <- case(pinnipeds.data$Sex)
+pinnipeds_data$Sex[is.na(pinnipeds_data$Sex)] <- "NA"
+pinnipeds_data$Sex <- gsub("NA", "Unid", pinnipeds_data$Sex)
+pinnipeds_data$Sex <- gsub("UNKNOWN", "Unid", pinnipeds_data$Sex)
+pinnipeds_data$Sex <- case(pinnipeds_data$Sex)
 
-write.csv(pinnipeds.data, file = "~/Documents/R/Strandings/pinnipeds.data.csv", row.names = F)
-#write.csv(pinnipeds.data, file = "~/Strands/pinnipeds.data.csv", row.names = F)
+write.csv(pinnipeds_data, file = "~/Documents/R/Strandings/pinnipeds_data.csv", row.names = F)
+#write.csv(pinnipeds_data, file = "~/Strands/pinnipeds_data.csv", row.names = F)
 
 ```
