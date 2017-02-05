@@ -76,10 +76,12 @@ c('D:' = dev2, "p value" = 1 - pchisq(dev2, df = 121 - 8))
 
 # GOF results for the independent model indicate the fit is not sufficent.
 
+
 #### Questions
 
 ## 1. Changes in mean annual strandings per year
-# Are mean annual combined strandings or each species increasing over time?  timeseries_all_model, timeseries_all_model_sp
+# Are mean annual combined strandings or of each species increasing over time?  
+        #timeseries_all_model, timeseries_all_model_sp
 # Are mean annual human interaction cases increasing over time for:
         # - combined species? timeseries_HI_model
         # - certain HI types? timeseries_HI_type_model
@@ -102,6 +104,10 @@ c('D:' = dev2, "p value" = 1 - pchisq(dev2, df = 121 - 8))
 # Is there a difference in age class strandings/HI cases?  age_model
 
 #age_sex_table has counts and percs of age classes for each sex
+
+
+
+
 
 
 

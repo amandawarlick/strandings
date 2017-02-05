@@ -1,0 +1,436 @@
+---
+title: ''
+output:
+  pdf_document: default
+  pdf: default
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+#setwd("~/Documents/R/Strandings")
+
+# Data Load 
+###############################################################################
+# Data is pre-cleaned
+pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+
+# Set Up Factors
+pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
+                                   levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+
+pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, 
+                      levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+
+```
+
+#### Questions
+
+##Changes in mean annual strandings per year  
+
+- Are mean annual combined strandings or of each species increasing or decreasing over time?
+```{r}
+### Are mean annual combined strandings or of each species increasing over time?  
+
+##All strandings, combined species
+data_by_year <- pinnipeds_data %>% 
+  group_by(Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Statistically significant change in all stranding cases combined over time (p < 0.05, XX strandings per year).
+timeseries_all_model <- glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = data_by_year)
+summary(timeseries_all_model)
+autoplot(timeseries_all_model)
+
+#chow test?
+
+##All strandings, separate species
+species_year <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, significantly changing over time. CSL and harbor seals increasing, others decreasing
+timeseries_all_model_sp <- glm(cnt ~ Pinniped.Common.Name + Year.of.Observation, family = poisson(link = log), data = species_year)
+summary(timeseries_all_model_sp)
+autoplot(timeseries_all_model_sp)
+
+
+```
+
+- Are mean annual *number* of HI cases increasing over time?
+```{r}
+# Are mean annual human interaction cases increasing/decreasing over time for:
+
+# (a) combined species 
+HI_by_year <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, significant increase of all HI cases, p < 0.05
+timeseries_HI_model <- glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_by_year)
+summary(timeseries_HI_model)
+
+
+# (b) certain HI types
+HI_by_year_type <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, increasing for all interaction types
+timeseries_HI_type_model <- glm(cnt ~ Year.of.Observation + Interaction.Type, family = poisson(link = log), data = HI_by_year_type)
+summary(timeseries_HI_type_model)
+autoplot(timeseries_HI_type_model)
+  
+# (c) for individual species?  
+species_year_HI <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- Yes, increasing for harbor seal and CSL, decreasing for all others, similar to overall stranding cases.
+timeseries_HI_model_sp <- glm(cnt ~ Pinniped.Common.Name + Year.of.Observation, family = poisson(link = log), data = species_year_HI)
+summary(timeseries_HI_model_sp)
+
+```
+
+- NEEDS HELP. Is the *prevalence* of human interaction cases increasing or decreasing over time for certain species? 
+```{r}
+
+# Is the prevalence of human interaction cases increasing or decreasing over time for certain species? 
+
+#All HI cases, species combined
+HI_prev <- pinnipeds_data %>%
+  group_by(Year.of.Observation, Findings.of.Human.Interaction) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt')
+HI_prev[is.na(HI_prev)] <- 0
+HI_prev <- HI_prev %>%
+    transform(Prop.HI = round(Y/(Y+N+CBD), 2)) %>%
+  select(-c(CBD, N, Y))
+
+# <-- poisson (non-significant) and linear (significant increase) show very different results here. Help - regression on proportion? Get warning message from glm function that values aren't integers
+HIprev_model <- glm(Prop.HI ~ Year.of.Observation, family = poisson(link = log), data = HI_prev)
+summary(HIprev_model)
+autoplot(HIprev_model)
+
+HIprev_model_lm <- lm(Prop.HI ~ Year.of.Observation, data = HI_prev)
+summary(HIprev_model_lm)
+autoplot(HIprev_model_lm)
+
+#All HI cases, separate species
+HI_prev_species <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>% 
+  group_by(Pinniped.Common.Name, Year.of.Observation, Findings.of.Human.Interaction) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Pinniped.Common.Name + Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt')
+HI_prev_species[is.na(HI_prev_species)] <- 0
+HI_prev_species <- HI_prev_species %>%
+  transform(Prop.HI = round(Y/(Y+N+CBD), 2)) %>%
+  select(-c(CBD, N, Y))
+
+# <--- Here again, lm and glm have very different results
+HIprev_model_sp <- glm(Prop.HI ~ Year.of.Observation + Pinniped.Common.Name, family = poisson(link = log), data = HI_prev_species)
+summary(HIprev_model_sp)
+
+HIprev_model_sp_lm <- lm(Prop.HI ~ Year.of.Observation + Pinniped.Common.Name, data = HI_prev_species)
+summary(HIprev_model_sp_lm)
+
+
+#**Separate HI types, combined species
+numberperyear <- pinnipeds_data %>% 
+  group_by(Year.of.Observation) %>%
+  summarize(yr.cnt = n_distinct(National.Database.Number))
+
+HIprev_type <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Interaction.Type, value.var = 'cnt') 
+HIprev_type[is.na(HIprev_type)] <- 0
+HIprev_type <- HIprev_type %>%
+  merge(numberperyear, by = c('Year.of.Observation')) %>%
+  transform(Boat = (Boat/yr.cnt), 
+            Fisheries = (Fisheries/yr.cnt),
+            Gunshot = (Gunshot/yr.cnt),
+            Other = (Other/yr.cnt)) %>%
+  select(Year.of.Observation, Boat, Gunshot, Fisheries, Other) %>%
+  melt(id.vars = c("Year.of.Observation")) 
+
+# <-- help, glm vs lm
+HIprev_type_model <- glm(value ~ Year.of.Observation + variable, family = poisson(link = log), data = HIprev_type)
+summary(HIprev_type_model)
+
+HIprev_type_model_lm <- lm(value ~ Year.of.Observation + variable, data = HIprev_type)
+summary(HIprev_type_model_lm)
+
+#Separate HI types, separate species
+numberperyearperspecies <- pinnipeds_data %>% 
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(yr.cnt = n_distinct(National.Database.Number))
+
+HIprev_type_species <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != "Unidentified") %>%
+  group_by(Interaction.Type, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation + Pinniped.Common.Name ~ Interaction.Type, value.var = 'cnt') 
+HIprev_type_species[is.na(HIprev_type_species)] <- 0
+HIprev_type_species <- HIprev_type_species %>%
+  merge(numberperyearperspecies, by = c('Year.of.Observation', 'Pinniped.Common.Name')) %>%
+  transform(Boat = (Boat/yr.cnt), 
+            Fisheries = (Fisheries/yr.cnt),
+            Gunshot = (Gunshot/yr.cnt),
+            Other = (Other/yr.cnt)) %>%
+  select(Year.of.Observation, Pinniped.Common.Name, Boat, Gunshot, Fisheries, Other) %>%
+  melt(id.vars = c("Year.of.Observation", "Pinniped.Common.Name")) 
+
+# <--- same as above
+HItype_model_sp <- glm(value ~ Year.of.Observation + Pinniped.Common.Name*variable, family = poisson(link = log), data = HIprev_type_species)
+summary(HItype_model_sp)
+
+HItype_model_sp_lm <- lm(value ~ Year.of.Observation + Pinniped.Common.Name*variable, data = HIprev_type_species)
+summary(HItype_model_sp_lm)
+
+```
+
+## Seasonality  
+
+- NEEDS HELP. Is there a seasonal peak in strandings and HI cases for certain species?
+```{r}
+# Is there a seasonal peak in stranding cases for certain species? 
+
+monthly_species <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- Help - not so sure about these multiple interaction regressions. Needs further refining.
+# <--- Shows sig dif for GFS in June, HS Apr - Sep, Stellers Sep-Oct, NFS May, NES Sep-Nov, Apr.
+monthly_all_model_sp <- glm(cnt ~ Month.of.Observation*Pinniped.Common.Name, family = poisson(link = log), data = monthly_species)
+summary(monthly_all_model_sp)
+
+# Seasonal peak for human interactions cases?  
+
+monthly_species_HI <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- same as above, if correct, HS only one showing seasonal peak for HI cases
+monthly_HI_model_sp <- glm(cnt ~ Month.of.Observation*Pinniped.Common.Name, family = poisson(link = log), data = monthly_species_HI)
+summary(monthly_HI_model_sp)
+
+```
+
+## Spatial Patterns  
+
+- Is there a statistical difference in strandings and HI across counties? (WA)
+```{r}
+# Is there a statistical difference in strandings/HI across counties? 
+# Ideally, would show which are different from the "baseline" of overall stranding cases in those counties, but struggled with this.
+
+#All strandings, WA
+allWA_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & County != 'Unknown' & State == 'WA') %>%
+  transform(County = factor(County)) %>%
+  group_by(County, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- Shows San Juan dif from Mason, Pacific, Clark, Cowlitz, Thurston
+kruskal.test(allWA_bycounty)
+posthoc.kruskal.nemenyi.test(cnt ~ County, allWA_bycounty, dist = "Chisquare")
+
+#HI strandings, WA
+WAHI_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & State == 'WA' & 
+           Findings.of.Human.Interaction == 'Y' & 
+           Interaction.Type != 'NA') %>% 
+  transform(County = factor(County)) %>%
+  group_by(County, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- Help, K-W shows no sig dif, but glm shows human interaction cases higher in grays, pacific, pierce, whatcom
+kruskal.test(WAHI_bycounty)
+posthoc.kruskal.nemenyi.test(cnt ~ County, WAHI_bycounty, dist = "Chisquare")
+
+WAHI_bycounty_model <- glm(cnt ~ County, family = poisson(link = log), WAHI_bycounty)
+summary(WAHI_bycounty_model)
+
+# HI cases in certain counties changing over time?
+
+WAHI_type_yr <- pinnipeds_data %>% 
+  filter(County != 'NA' & State == 'WA' & 
+           Findings.of.Human.Interaction == 'Y' & 
+           Interaction.Type != 'NA') %>% 
+  transform(County = factor(County)) %>%
+  group_by(County, Year.of.Observation, Interaction.Type) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- Shows increasing in Grays, Pacific, Pierce, CLallam, Whatcom?
+WAHI_yr_model <- glm(cnt ~ County + Year.of.Observation, family = poisson(link = log), WAHI_type_yr)
+summary(WAHI_yr_model)
+
+# <--- Shows only "other" increasing in Pierce?
+WAHI_type_yr_model <- glm(cnt ~ County*Interaction.Type, family = poisson(link = log), WAHI_type_yr)
+summary(WAHI_type_yr_model)
+
+```
+
+- Is there a statistical difference in strandings and HI across counties? (OR)
+```{r}
+
+#All strandings, OR
+allOR_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & County != 'Unknown' & State == 'OR') %>% 
+  transform(County = factor(County)) %>%
+  group_by(County, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+# <--- K-W show strandings higher in Lincoln, GLM says more. Help.
+ORcounty_model <- glm(cnt ~ County, family = poisson(link = log), allOR_bycounty)
+summary(ORcounty_model)
+
+kruskal.test(allOR_bycounty)
+posthoc.kruskal.nemenyi.test(cnt ~ County, allOR_bycounty, dist = "Chisquare")
+
+#HI strandings, OR
+ORHI_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & State == 'OR' & 
+           Findings.of.Human.Interaction == 'Y' & 
+           Interaction.Type != 'NA') %>% 
+  transform(County = factor(County)) %>%
+  group_by(County, Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- GLM shows Clatsop, K-W shows none, though shows Clatsop-Curry with Tukey dist
+ORcounty_HI_model <- glm(cnt ~ County, family = poisson(link = log), ORHI_bycounty)
+summary(ORcounty_HI_model)
+
+kruskal.test(ORHI_bycounty)
+posthoc.kruskal.nemenyi.test(cnt ~ County, ORHI_bycounty, dist = "Tukey")
+
+#Increasing just in Clallam and Clatsop, not changing either way anywhere else
+ORcounty_HI_model_yr <- summary(glm(cnt ~ County + Year.of.Observation, family = poisson(link = log), ORHI_bycounty))
+
+# 
+
+```
+
+- Are specific types of HI cases increasing or decreasing in certain counties?
+```{r}
+# Are gunshot, entanglements, or boat collisions increasing in certain counties? 
+
+
+```
+
+
+## Age and Sex Classes  
+
+- Is there a difference in sex of strandings and HI cases?
+```{r}
+
+# Is there a difference in sex of strandings/HI cases?  
+ 
+#All strandings
+Sex_all_yr <- pinnipeds_data %>%
+  filter(Sex == 'Male' | Sex == 'Female') %>%
+  group_by(Sex, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, males different (higher) from females
+kruskal.test(Sex_all_yr)
+kruskalmc(Sex_all_yr$cnt ~ Sex_all_yr$Sex)
+
+#HI strandings
+Sex_HI_yr <- pinnipeds_data %>%
+  filter(Sex == 'Male' | Sex == 'Female') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Sex, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <-- Yes, males different (higher) from females
+kruskal.test(Sex_HI_yr)
+kruskalmc(Sex_HI_yr$cnt ~ Sex_HI_yr$Sex)
+# sex_HI_model <- glm(cnt ~ Sex, family = poisson(link = log), Sex_HI_yr)
+# summary(sex_HI_model)
+
+```
+
+- Is there a difference in sex of strandings across months of the year?
+```{r}
+# Is there a difference in sex of strandings in different seasons?
+
+#All strandings
+Sex_all_mo <- pinnipeds_data %>%
+  filter(Sex == 'Male' | Sex == 'Female') %>%
+  group_by(Sex, Month.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+Sex_all_mo_male <- pinnipeds_data %>%
+  filter(Sex == 'Male') %>%
+  group_by(Year.of.Observation, Month.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+Sex_all_mo_fem <- pinnipeds_data %>%
+  filter(Sex == 'Female') %>%
+  group_by(Year.of.Observation, Month.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- For females, July is different from Jan through May, whereas for males, July is different from only Jan, Feb (males stranding more in late spring, so broader peak?)
+kruskal.test(Sex_all_mo_fem)
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo_fem, dist = "Chisquare")
+
+kruskal.test(Sex_all_mo_male)
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo_male, dist = "Chisquare")
+
+
+```
+
+- Is there a difference in age class of strandings and HI cases?
+```{r}
+# Is there a difference in age class strandings/HI cases? 
+
+#all strandings
+age_all <- pinnipeds_data %>%
+  group_by(Age.Class, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, pups and adults (not different from each other) are different from subadults and yearlings (not different from each other). p < 0.05, difs amount to ~38 animals/yr
+kruskal.test(age_all)
+kruskalmc(age_all$cnt ~ age_all$Age.Class)
+#posthoc.kruskal.nemenyi.test(cnt ~ Age.Class, age_all, dist = "Chisquare")
+
+#HI strandings
+age_HI <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Age.Class, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+# <--- Yes, yearlings significantly different (lower). p < 0.05, difs amount to ~38 animals/yr
+kruskal.test(age_HI)
+kruskalmc(age_HI$cnt ~ age_HI$Age.Class)
+#posthoc.kruskal.nemenyi.test(cnt ~ Age.Class, age_HI, dist = "Chisquare")
+
+```
+
+- Is there a difference between ages and sexes?
+```{r }
+#Differences between ages and sexes?  Help.
+age_sex_all <- pinnipeds_data %>%
+  group_by(Sex, Age.Class, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+#Need non-parametric version of this, for multiple comparisons :(
+TukeyHSD(aov(cnt ~ Sex*Age.Class, data = age_sex_stats))
+
+# kruskalmc(age_sex_all$cnt ~ age_sex_all$Age.Class*age_sex_all$Sex)
+# posthoc.kruskal.nemenyi.test(cnt ~ Age.Class + Sex, age_sex_all, dist = "Chisquare")
+
+```
+

@@ -1,0 +1,208 @@
+---
+title: "Lit Review Notes"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Notes - general strandings
+
+Frungillo 2014
+- examining strandings to identify competition between species; grey seals increase, decreasing or stable in harbor seals - reflects local abundance
+- hs peaked may through june, peak of HI as well, but number, not proportion
+- gray seal HI peak in summer
+
+Steiger 1989
+- mortality of harbor seals at smith island
+
+Osinga 2012
+- netherlands 79-08
+- peak in pupping season
+- age classes, sex ratio by cause
+- bycatch highest cause in sub adults and adults, highest in summer
+- reflected population increase and seasonal/local distribution
+
+Hart 2007
+- bycatch highest in spring-summer
+
+Harris and Gupta 2006
+- GIS 96-02 gulf of maine
+- created high "seal stranding density" areas
+- spatial theories/discussion
+- cite increase in strandings to: increase pop, fish stocks, environmental conditions, increasing effort
+- chi sq for categorical, K-W for numerical
+- seasonality of location
+- strandings follow seasonal presence
+
+Osinga 2011
+- Strandings as evidence of shift in pupping season/date
+
+Johnston 2015
+- patterns likely due to abundance trends
+- cite short/long-term environmental perterbations and variation in local abundance
+- chow test in R for breakpoint analysis
+- gray seal increase ~ 20% since 90s
+
+Leeney 2008
+- cetacean strandings over almost 100 years in cornwall
+- frequency has increased, due to: effort, change in abundance, or climate-related range shifts
+- can learn about bycatch from strandings (ref Rogan 01, Kemper 05, Kirk 97)
+- factors influencing strandings (ref Hart 06, Brabyn and McClean 92)
+- overall, found strong seasonal/decadal trends
+- similar to Jepson 2005 (increasing effort and distrib/abundance)
+
+Gulland and Hall 2007
+- marmam health deteriorating?
+
+Bishop
+- 50 hs strandings in san juan county/year, 71% pups
+- high prevalence of blunt trauma
+
+Stroud and Roffe 1979
+- causes: gunshot, blunt trauma, parasites, multiple species along oregon coast
+
+Norman 2004
+- PNW oceanography/drift details
+- strandings sample effort
+- unusual distribution of cetaceans during ENSO
+- stranding hotspots: astoria, yachats, newport, neah, oly pen, san juans
+- summer peak attrib to more people, seasonal presence, winds
+- moving inshore for upwelling, majority stranded in WA
+- Woodhouse 91 - reflect local abundance
+- compare numbers to AK and CA
+- strandings can supplement knowledge about species abundance
+- HI can provide need to closer monitor certain areas, inform mitigation
+- ID novel diseases, population movements
+
+Maldini 2005
+- examining strandings to measure abundance
+
+###UNincorporated
+
+McCullagh, M. J. (2006). 
+- Detecting hotspots in time and space
+- Importance of a "mixed spatial and temporal approach" so hotspot doesn't just find where something is highest, but also where something might be increasing or decreasing
+- Good citations for recent mapping efforts (Ma 2006, Kulldorf 2001)
+  *Ma J, Zeng D, and Chen H, 2006, Spatial-Temporal Cross-Correlation Analysis: A New Measure and a Case Study in Infectious Disease Informatics, In Proceedings of the Intelligence and Security Informatics: IEEE International Conference on Intelligence and Security Informatics (ISI 2006), San Diego, CA, USA, May 23-24, 2006.*
+- "Local Indicator of Spatial Autocorrelation"
+- Chainey and Radcliffe (2005) for more detailed explanation of hotspot calculations
+  (*Chainey S, & Ratcliffe J, 2005, GIS and Crime Mapping, John Wiley & Sons, ISBN: 0470860995, 442 p*)
+- Bailey and Gatrell 1996 for (a) kernel density calculation
+    *Gatrell AC, Bailey, TC, Diggle, P and Rowlingson, BS, 1996, Spatial Point Pattern Analysis and its Application in Geographical Epidemiology, Trans. Inst Br Geogr NS 2: 256- 274.*
+- (b) SaTScan (Kulldorf 2001 2005)
+- (c) risk adjusted support vector clustering (RSVC)
+
+Pikesley 2011
+- from Peltier 14 - "underutilized resource"
+
+Norman 2011 (1 discuss)
+- spatial clustering; harbor porpoise UME in pacific northwest 06-07
+- stat scan 
+- global (regional; Knox) versus local (county; saTScan) levels
+- first use of Knox for marmam strandings
+- Kreuder 03 for satscan in otters
+- K-W for months but no stat dif
+- didn't detect any local clusters! but did detect global. just looking at age classes? what about overall?
+- grieg 2005 for CSL satscan
+- spatiotemporal "advantages bc doesn't require controls or pop dist parameters"
+- long discussion of advantages (elliptical for elongated coastlines) and disadvantages 
+
+Pyenson 2010 
+- same as Maldini?
+- cetacean carcass/strandings in north pacific
+
+Pikesley 2011
+- "underutilized"
+
+**Peltier 2014
+- drift prediction model (MOTHY) for cetaceans in english channel
+- strandings as population indicators, though caveats and shortcomings - patchy "opportunistic" effort
+- looking at strandings as a function of (a) animal - individual's biology/mortality, abundance, (b) oceanography, and (c) "societal component" (effort) - should try and ascertain this function to derive "indicators" based on strandings to enable standardized comparisons (modeled/expected versus observed = anomaly)
+- Peltier 2013 seems important
+- develop stranding probabilities in time and space
+- really cool: "Detec- ting changes in populations by using map-based indicators is fairly uncommon, especially since map-based datasets rarely deal with time series."
+
+**Moustaka 2016
+- theory of epidemiology - aspects of the "disease" agent and environment simultaneously vary across time and space, changing the probability or vulnerability of contracting, in my case, stranding (Ward and Carpenter 2000 and Knox and Bartlett 1964)
+- rise of availability of spatio-temporal data (remote imagery, etc)
+- pitfalls of big data and what you lose in automation
+
+Paiu 2016
+- Romanian coast cetacean stranding timeseries
+- peak in spring/summer, with lots of interannual variation
+- citations for using strands (cetaceans) for estimating at-sea mortality (Peltier 2013/2012, Pyenson 2011/2010, Williams 2011) ###this looks plagiarized right from Peltier!
+- strandings = "underutilized resource" Pikesley 2011 - so much plagiarism from peltier
+
+Zeileis - strucchange
+
+#More ENSO-related
+
+Norman 2008
+- spatial ecology/epidemiology
+- Guisan 2002: spatial regression studies?
+- overall, not a lot of mapping has been done
+- kulldorf 1995 and Grieg 2005 for spatial scan stat for CSL
+- Norman in press: risk factors for lepto in CSL that contrib to regression model
+- Lack of/need for more Bayesian modeling (Fay and Punt 2006 for habitat/abundance Bayes?)
+
+Soulen 2013* 
+- Harp seals in NWA
+- recent increase on east coast
+- neonate strandigns corr to sea ice (Johnston 2012)
+- yearling with sea ice, but not adults
+- males more than females, pattern that is exacerbated by low sea ice
+- sea ice and stranding ANOMALIES
+- regressions
+- genetics (lower gen diversity in males that strand)
+- climate adaptation
+- "decoupling" of abundance and stranding trends - everything is complex and simultaneously changing
+
+Bjorge 2002
+- harbor seal fish interactions and GIS and energetics modeling
+- derived potential interaction spaces and associated fisheries
+
+Planque and Taylor 1998
+- environmental forcing and plankton connection, but depends on timing and intensity - details
+
+Hanni 1997
+- ENSO = out of habitat citations, particularly for GFS
+
+Aebischer 1990
+- similar to planq and taylor - connect multi-trophic level datasets, showing connections to abundance
+
+Truchon 2013
+- environmental changes and strandings in st lawrence
+- good references for environmental changes and oscillations
+- combing several environmental variables
+- difference between seasonal migrants and residents
+- summer/fall peak
+- low ice = more strandings
+- NAO index also correlated (lagged)
+- long-term = important - strandings enable the study?
+- complexities of strandings and oceanography
+- importance of multi-scale studies
+
+Berini 2015
+- great methods description
+- SE sperm whales
+- strandings predicted by increased wind speed, low baro pressure, fewer fronts, and higher MEI
+- stepwise regression on a GLZ using poisson distribution and log - link function
+- MEI: impacts could be biological (prey) or physical (storms, wind)
+- strandings and depth contours/shelfs
+- Wilkinson and Worthy 1999: stranding data important*
+
+Alm and Almat 2004
+- cite Planque and Taylor
+- 1 week lag
+- MEI appropriateness and applicability: Wolter and Timlin
+- Poisson for counts: Lindsey 1997
+
+Evans 2005
+- cetaceans 1920-2000
+- ~10 year cycles
+- sea level pressure, winds, and gradients
+- everything is connected
+
+
