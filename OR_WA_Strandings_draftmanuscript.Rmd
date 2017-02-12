@@ -66,6 +66,8 @@ pubfigure_theme <- function(...) {
     ...)
 }
 
+color1 <- c("#e45f56", "#a3d39c", "#4aaaa5", "#363e7e", "#f6b61c", "#3b98ee", "#999aa7")
+
 
 ```
 
@@ -200,7 +202,7 @@ species_HI_type_final <- pinnipeds_data %>%
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = 'top') + 
   #scale_fill_grey()
- scale_fill_brewer(palette = 'Set1')
+ scale_fill_manual(values = color1)
 
 species_boxplots <- plot_grid(species_all_final, species_HI_type_final, labels = "auto", align = 'v', ncol = 1, rel_heights = c(.5, 1.2), hjust = 0, label_size = 10)
 figs("species_boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for harbor seals and California sea lions; and (b) boxplot of annual human interactions by type, showing a high number of gunshot wounds for California sea lions and Steller sea lions and other cases for harbor seals.")
@@ -220,7 +222,8 @@ all_yr_final <- pinnipeds_data %>%
   scale_y_continuous(labels = comma) +
   #scale_x_continuous(breaks = c(1989:2015)) +
   pubfigure_theme(legend.position = 'top') +
-  scale_color_brewer(palette = 'Set3')
+  #scale_color_brewer(palette = 'Set3') +
+  scale_color_manual(values = color1)
 
 all_timeseries <- all_yr_final
 figs("all_timeseries", caption = "Increasing annual strandings (n = 14,167) over the study period denoted by black regression line (y = 1.1x, z = 44.7, p < 0.01) likely at least in part due to Prescott Grant Program in the mid-2000s; and increasing strandings in harbor seals (y = 3.1x, z = 55.2, p < 0.001) and California sea lions (y = 1.1x, z = 53.8, p < 0.001) and decreasing for Guadalupe fur seals (y = -11.8x, z = -23.8, p < 0.001), northern elephant seals (y = -6.2x, z = -34.9, p < 0.001), Steller sea lions (y = -2.7x, z = -26.7, p < 0.001), and northern fur seals (y = -19.8x, z = -31.5, p < 0.001). Regression lines not shown for individual species for readability.")
@@ -237,8 +240,9 @@ HI_species_final <- pinnipeds_data %>%
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set3') #+
-  #scale_color_grey()
+  #scale_color_brewer(palette = 'Set3') #+
+  #scale_color_grey() +
+  scale_color_manual(values = color1)
 
 HI_type_final <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
@@ -252,7 +256,8 @@ HI_type_final <- pinnipeds_data %>%
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set1')
+  #scale_color_brewer(palette = 'Set1') +
+  scale_color_manual(values = color1)
 
 HI_timeseries <- plot_grid(HI_species_final, HI_type_final, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
 figs("HI_timeseries", caption = "(a) Annual combined HI cases overall () and per species shows increasing for harbor seals (y = 1.9x, z = 10.5, p < 0.001) and California sea lions (y = 1.1x, z = 24.9, p < 0.001) and significantly decreasing for the other species, and (b) HI TYPES.")
@@ -281,7 +286,8 @@ HI_prev_sp_figure <- ggplot(allprev_sp, aes(Year.of.Observation, HI.Prev)) +
   geom_smooth(method = 'lm', se = F, col = "black") +
   xlab("") + ylab("Prevalence of HI") +
   pubfigure_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set3')
+  #scale_color_brewer(palette = 'Set3') +
+  scale_color_manual(values = color1)
 
 #HI prevalence by HI type
 allprev_type <- pinnipeds_data %>%
@@ -307,7 +313,8 @@ HI_type_prev_figure <-
   geom_smooth(method = 'loess', se = F, col = "black") +
   xlab("") + ylab("Prevalence of HI") +
   pubfigure_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set1')
+  #scale_color_brewer(palette = 'Set1') +
+  scale_color_manual(values = color1)
 
 HI_prev_final <- plot_grid(HI_prev_sp_figure, HI_type_prev_figure, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
 
@@ -331,8 +338,9 @@ monthly_HI_sp_final <- monthly_HI %>%
   ylab("Human Interactions") + xlab("") + 
   pubfigure_simple_theme(legend.position = 'top',
                          axis.title = element_text(size = 10)) + 
-  scale_fill_brewer(palette = 'Set3')
+  #scale_fill_brewer(palette = 'Set3')
   #scale_fill_grey()
+  scale_fill_manual(values = color1)
 
 monthly_HI_age_final <- monthly_HI %>% 
   group_by(Month.of.Observation, Age.Class) %>%
@@ -343,8 +351,9 @@ monthly_HI_age_final <- monthly_HI %>%
   ylab("Human Interactions") + xlab("") + 
   pubfigure_simple_theme(legend.position = 'top',
                          axis.title = element_text(size = 10)) + 
-  scale_fill_brewer(palette = 'Set3')
+  #scale_fill_brewer(palette = 'Set3')
   #scale_fill_grey()
+  scale_fill_manual(values = color1)
   
 monthly_HI_type_final <- monthly_HI %>% 
   filter(Interaction.Type != 'NA') %>%
@@ -355,54 +364,11 @@ monthly_HI_type_final <- monthly_HI %>%
   ylab("Human Interactions") + xlab("") + 
   pubfigure_theme(legend.position = 'top') + 
   #scale_fill_grey()
-  scale_fill_brewer(palette = 'Set3')
+  #scale_fill_brewer(palette = 'Set3')
+  scale_fill_manual(values = color1)
 
 monthly_age_HI_figure <- plot_grid(monthly_HI_sp_final, monthly_HI_age_final, monthly_HI_type_final, align = 'v', ncol = 1, label_size = 10, labels = "auto")
 figs("monthly_age_HI_figure", caption = "Sum of human interaction cases across years for each month according to (a) species; (b) age class, showing summer peak for human interaction cases for pups; and (c) human interaction type, showing a high number of fisheries cases in August and other in July.")
-
-
-##############
-
-#Monthly by species 
-# monthly_species_final <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-#   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = cnt,
-#                 #linetype = Pinniped.Common.Name,
-#                 group = Pinniped.Common.Name, 
-#                 color = Pinniped.Common.Name)) +
-#   geom_line(aes(group = Pinniped.Common.Name)) + 
-#   #geom_smooth(se = F) +
-#   ylab("All Strandings") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_simple_theme(legend.position = 'top', 
-#                          axis.title = element_text(size = 10)) + 
-#   scale_color_brewer(palette = 'Set3')
-#   #scale_color_grey()
-# 
-# #Monthly HI by species
-# monthly_HI_final <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   filter(Findings.of.Human.Interaction == 'Y') %>%
-#   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-#   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = cnt,
-#                 #linetype = Pinniped.Common.Name,
-#                 group = Pinniped.Common.Name, 
-#                 color = Pinniped.Common.Name)) +
-#   geom_line(aes(group = Pinniped.Common.Name)) + 
-#   #geom_smooth(se = F) +
-#   ylab("Human Interactions") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'none') + 
-#   #scale_color_grey()
-#   scale_color_brewer(palette = 'Set3')
-# 
-# monthly_species_final <- plot_grid(monthly_species_final, monthly_HI_final, align = 'v', ncol = 1, label_size = 10)
-# figs("monthly_species_final", caption = "Sum of cases within months across all years for each species shows (a) a summer peak in all strandings for harbor seals and (b) a summer peak in human interaction cases for harbor seals and greater variability in late spring for California sea lions.")
 
 ############
 stateboxplot <- pinnipeds_data %>%
@@ -444,9 +410,10 @@ HI_county_final <- pinnipeds_data %>%
   geom_vline(xintercept = 16.5, linetype = "dashed") +
   ylab("Human Interactions") + xlab("Counties") + 
   scale_y_continuous(labels = comma) +
-  pubfigure_theme(legend.position = 'none',
+  pubfigure_theme(legend.position = 'top',
                   plot.margin = unit(c(.1, .1, .1, .1), "cm")) + 
-  scale_fill_grey() 
+  #scale_fill_grey() +
+  scale_fill_manual(values = color1)
 
 countyfigure <- plot_grid(all_county_final, HI_county_final,
           align = 'v', ncol = 1, rel_heights = c(1, 1.6), label_size = 10)
@@ -455,319 +422,6 @@ figs("countyfigure", caption = "Total strandings (above) and human interaction c
 
 ```
 
-######
-```{r all old shared figures, echo = FALSE, results = 'hide'}
-# 
-# #Figures
-# 
-# #Species boxplots
-# species_all_final <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(Pinniped.Common.Name, cnt)) +
-#   geom_boxplot() +
-#   scale_y_continuous(labels = comma) +
-#   xlab("") + ylab("All Strandings") +
-#   pubfigure_simple_theme(axis.title = element_text(size = 10))
-#   
-# species_HI_type_final <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name, Interaction.Type) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(Pinniped.Common.Name, cnt, fill = Interaction.Type)) +
-#   geom_boxplot() +
-#   xlab("") + ylab("Human Interactions") +
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'top') + 
-#   scale_fill_grey()
-#  #pal_lancet(palette = c("lanonc"), alpha = 1)
-# 
-# species_boxplots <- plot_grid(species_all_final, species_HI_type_final, labels = "auto", align = 'v', ncol = 1, rel_heights = c(.5, 1.2), hjust = 0, label_size = 10)
-# figs("species_boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for harbor seals and California sea lions; and (b) boxplot of annual human interactions by type, showing a high number of gunshot wounds for California sea lions and Steller sea lions and other cases for harbor seals.")
-# 
-# ################
-# 
-# #annual time series
-# all_yr_final <- pinnipeds_data %>% 
-#   group_by(Year.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt)) + 
-#   geom_point(position = "identity") +
-#   geom_smooth(method = "lm", se = FALSE, col = 'black', linetype = 3) +
-#   xlab("") + ylab("All Strandings") +
-#   scale_y_continuous(labels = comma) +
-#   #scale_x_continuous(breaks = c(1989:2015)) +
-#   pubfigure_simple_theme(axis.title = element_text(size = 10)) 
-# 
-# HI_type_yr_final <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-#   group_by(Interaction.Type, Year.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt, 
-#              group = Interaction.Type, 
-#              col = Interaction.Type)) + 
-#   geom_point(position = "identity") +
-#   geom_smooth(method = "lm", se = FALSE, linetype = 1) +
-#  # scale_x_continuous(breaks = c(1989:2015)) +
-#   xlab("") + ylab("Human Interaction Cases") +
-#   pubfigure_theme(legend.position = 'top') + 
-#   scale_color_grey()
-# 
-# all_HI_timeseries <- plot_grid(all_yr_final, HI_type_yr_final, align = 'v', ncol = 1, labels = "auto", vjust = 1, label_size = 10)
-# figs("all_HI_timeseries", caption = "(a) Increasing annual strandings over the study period (y = 1.1x, z = 44.7, p < 0.01) (n = 14,167) likely at least in part due to Prescott Grant Program in the mid-2000s; and (b) increasing total annual HI cases (n = 1,513) (y = 1.1x, z = 27.2, p < 0.001), specifically increasing gunshot wounds (y = 6.5x, z = 14.8, p < 0.001), fisheries entanglements (y = 3.7x, z = 9.9, p < 0.001), and boat injuries (y = 1.1x, 25.5, p < 0.001) over the study period.")
-# 
-# ##################
-# 
-# #all and HI by species time series
-# species_all_line_final <- pinnipeds_data %>% 
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt, 
-#              col = Pinniped.Common.Name,
-#              group = Pinniped.Common.Name)) +
-#   geom_point(stat = 'identity', position = 'identity') + 
-#   geom_smooth(method = 'lm', se = F, linetype = 1) +
-#   ylab("All Strandings") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_simple_theme(legend.position = 'top',
-#                          axis.title = element_text(size = 10)) +
-#   scale_color_grey()
-# 
-# species_HI_line_final <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt, 
-#              col = Pinniped.Common.Name,
-#              group = Pinniped.Common.Name)) +
-#   geom_point(stat = 'identity', position = 'identity') + 
-#   geom_smooth(method = 'lm', se = F, linetype = 1) +
-#   ylab("Human Interaction Cases") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'none') +
-#   scale_color_grey()
-# 
-# test_all <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt)) +
-#   #geom_point(stat = 'identity', position = 'identity') + 
-#   geom_line(aes(Year.of.Observation, cnt, group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) + 
-#   geom_smooth(method = 'loess', se = F, col = "black") +
-#   ylab("All Strandings") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'top') + 
-#   scale_color_brewer(palette = 'Set3')
-# 
-# test_HI <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != 'Unidentified') %>%
-#   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = Year.of.Observation, y = cnt)) +
-#   #geom_point(stat = 'identity', position = 'identity') + 
-#   geom_line(aes(Year.of.Observation, cnt, group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) + 
-#   geom_smooth(method = 'loess', se = F, col = "black") +
-#   ylab("Human Interaction Cases") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'none') + 
-#   scale_color_brewer(palette = 'Set3') #+
-#   #scale_color_grey()
-# 
-# # species_timeseries <- plot_grid(species_all_line_final, species_HI_line_final, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
-# species_timeseries <- plot_grid(test_all, test_HI, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
-# figs("species_timeseries", caption = "Annual strandings per species shows increasing strandings in harbor seals (y = 3.1x, z = 55.2, p < 0.001) and California sea lions (y = 1.1x, z = 53.8, p < 0.001) and decreasing for Guadalupe fur seals (y = -11.8x, z = -23.8, p < 0.001), northern elephant seals (y = -6.2x, z = -34.9, p < 0.001), Steller sea lions (y = -2.7x, z = -26.7, p < 0.001), and northern fur seals (y = -19.8x, z = -31.5, p < 0.001); and (b) human interaction cases similarly increasing for harbor seals (y = 1.9x, z = 10.5, p < 0.001) and California sea lions (y = 1.1x, z = 24.9, p < 0.001) and significantly decreasing for the other species.")
-# 
-# 
-# #######
-# 
-# #HI over time - all combined HI
-# numberperyear <- pinnipeds_data %>% 
-#   group_by(Year.of.Observation) %>%
-#   summarize(yr.cnt = n_distinct(National.Database.Number))
-# 
-# allprev <- pinnipeds_data %>%
-#   group_by(Findings.of.Human.Interaction, Year.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') 
-# allprev[is.na(allprev)] <- 0
-# allprev <- allprev %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
-#   merge(numberperyear, by = 'Year.of.Observation') %>%
-#   select(Year.of.Observation, yr.cnt, HI.Prev)
-# 
-# HI_prev_figure <- pinnipeds_data %>%
-#   group_by(Year.of.Observation, Findings.of.Human.Interaction) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt')
-# HI_prev_figure[is.na(HI_prev_figure)] <- 0
-# HI_prev_figure <- HI_prev_figure %>%
-#     transform(Prop.HI = round(Y/(Y+N+CBD), 2)) %>%
-# ggplot(aes(Year.of.Observation, Prop.HI)) +
-#   geom_point(stat = 'identity') + 
-#   geom_line() +
-#   geom_smooth(method = 'lm', se = F, col = "black", linetype = 3) +
-#   xlab("") + ylab("Prevalence of HI") +
-#   pubfigure_simple_theme(legend.position = 'none',
-#                          axis.title = element_text(size = 10))
-# 
-# #HI prevalence by HI type
-# allprev_type <- pinnipeds_data %>%
-#   group_by(Interaction.Type, Year.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Year.of.Observation ~ Interaction.Type, value.var = 'cnt') 
-# allprev_type[is.na(allprev_type)] <- 0
-# allprev_type <- allprev_type %>%
-#   merge(allprev, by = 'Year.of.Observation') %>%
-#   transform(Boat = (Boat/yr.cnt), 
-#             Fisheries = (Fisheries/yr.cnt),
-#             Gunshot = (Gunshot/yr.cnt),
-#             Other = (Other/yr.cnt)) %>%
-#   select(Year.of.Observation, yr.cnt, HI.Prev, Boat, Gunshot, Fisheries, Other) %>%
-#   select(-c(yr.cnt, HI.Prev)) %>% 
-#   melt(id.vars = "Year.of.Observation")
-# 
-# HI_type_prev_figure <- 
-#   ggplot(allprev_type, aes(Year.of.Observation, value)) +
-#   #geom_point() + 
-#   #geom_smooth(aes(Year.of.Observation, value), col = 'black') +
-#   geom_line(aes(Year.of.Observation, value, group = variable, col = variable), size = 1) + 
-#   geom_smooth(method = 'loess', se = F, col = "black") +
-#   xlab("") + ylab("Prevalence of HI") +
-#   pubfigure_theme(legend.position = 'top') + 
-#   scale_color_brewer(palette = 'Set1')
-# 
-# # HI_prev_final <- plot_grid(HI_prev_figure, HI_type_prev_figure, align = 'v', ncol = 1, labels = "auto", rel_heights = c(.8, 1.3), vjust = c(1.2, .1), label_size = 10)
-# HI_prev_final <- HI_type_prev_figure
-# figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) increasing for all combined species (y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55) and (b) increasing for gunshot wounds (y = 0.03x, t = 7.5, p < 0.001), fisheries entanglements (y = 0.02x, t = 3.6, p < 0.001), boat injuries (y = 0.001x, t = 6.1, p < 0.001), and other (y = 0.03x, t = 6.1, p < 0.001).")
-# 
-# ####################
-# 
-# monthly_HI <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y') %>%
-#   group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) 
-# #limits <- aes(ymax = mean + se, ymin = mean - se)
-# 
-# #Monthly HI cases by age and HI type - mean doesn't show much of a seasonal patter, but sum does
-# monthly_HI_age_final <- monthly_HI %>% 
-#   group_by(Month.of.Observation, Age.Class) %>%
-#   summarize(mean = sum(cnt), se = sd(cnt, na.rm = T)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = mean, fill = Age.Class)) +
-#   geom_bar(stat = 'identity') +
-#   #geom_errorbar(limits) +
-#   ylab("Human Interactions") + xlab("") + 
-#   pubfigure_simple_theme(legend.position = 'top',
-#                          axis.title = element_text(size = 10)) + 
-#   scale_fill_grey()
-#   
-# monthly_HI_type_final <- monthly_HI %>% 
-#   filter(Interaction.Type != 'NA') %>%
-#   group_by(Month.of.Observation, Interaction.Type) %>%
-#   summarize(mean = sum(cnt)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = mean, fill = Interaction.Type)) +
-#   geom_bar(stat = 'identity') +
-#   ylab("Human Interactions") + xlab("") + 
-#   pubfigure_theme(legend.position = 'top') + 
-#   scale_fill_grey()
-# 
-# monthly_age_HI_figure <- plot_grid(monthly_HI_age_final, monthly_HI_type_final, align = 'v', ncol = 1, label_size = 10, labels = "auto")
-# figs("monthly_age_HI_figure", caption = "Sum of human interaction cases across years for each month according to (a) age class, showing summer peak for human interaction cases for pups; and (b) human interaction type, showing a high number of fisheries cases in August and other in July.")
-# 
-# 
-# ##############
-# 
-# #Monthly by species 
-# monthly_species_final <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-#   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = cnt,
-#                 linetype = Pinniped.Common.Name,
-#                 group = Pinniped.Common.Name, 
-#                 color = Pinniped.Common.Name)) +
-#   geom_line(aes(group = Pinniped.Common.Name)) + 
-#   #geom_smooth(se = F) +
-#   ylab("All Strandings") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_simple_theme(legend.position = 'top', 
-#                          axis.title = element_text(size = 10)) + 
-#   scale_color_grey()
-# 
-# #Monthly HI by species
-# monthly_HI_final <- pinnipeds_data %>%
-#   filter(Pinniped.Common.Name != 'Unidentified') %>%
-#   filter(Findings.of.Human.Interaction == 'Y') %>%
-#   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-#   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = factor(Month.of.Observation), y = cnt,
-#                 linetype = Pinniped.Common.Name,
-#                 group = Pinniped.Common.Name, 
-#                 color = Pinniped.Common.Name)) +
-#   geom_line(aes(group = Pinniped.Common.Name)) + 
-#   #geom_smooth(se = F) +
-#   ylab("Human Interactions") + xlab("") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'none') + 
-#   scale_color_grey()
-# 
-# monthly_species_final <- plot_grid(monthly_species_final, monthly_HI_final, align = 'v', ncol = 1, label_size = 10)
-# figs("monthly_species_final", caption = "Sum of cases within months across all years for each species shows (a) a summer peak in all strandings for harbor seals and (b) a summer peak in human interaction cases for harbor seals and greater variability in late spring for California sea lions.")
-# 
-# ############
-# stateboxplot <- pinnipeds_data %>%
-#   transform(State = ifelse(State == 'OR', 'Oregon', 'Washington')) %>%
-#   group_by(State, Year.of.Observation, Month.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = as.factor(Year.of.Observation), y = cnt, fill = State)) +
-#   geom_boxplot() +
-#   xlab("") + ylab("Mean Monthly Strandings") +
-#   pubfigure_theme(legend.position = 'top') +
-#   scale_fill_manual(values = c("grey90", "grey50"))
-# 
-# figs("stateboxplot", caption = "Boxplot of monthly strandings over the study period shows increasing average and variability in both states.")
-# 
-# ##############
-# 
-# ##all and HI cases by county
-# all_county_final <- pinnipeds_data %>% 
-#   filter(County != 'NA' & County != 'Unknown') %>% 
-#   group_by(County) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = County, y = cnt)) + 
-#   geom_bar(stat = 'identity', width = 0.6)  + 
-#   geom_vline(xintercept = 16.5, linetype = "dashed") +
-#   ylab("All Strandings") + xlab("")  +
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_simple_theme(axis.title = element_text(size = 10),
-#                          plot.margin = unit(c(.1, .1, .1, .1), "cm")) +
-#   scale_fill_grey()
-# 
-# HI_county_final <- pinnipeds_data %>% 
-#   filter(County != 'NA' & County != 'Unknown' &
-#         Findings.of.Human.Interaction == 'Y' & 
-#         Interaction.Type != 'NA') %>% 
-#   group_by(County, Interaction.Type, Year.of.Observation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
-#   geom_bar(stat = 'identity', width = 0.6)  + 
-#   geom_vline(xintercept = 16.5, linetype = "dashed") +
-#   ylab("Human Interactions") + xlab("Counties") + 
-#   scale_y_continuous(labels = comma) +
-#   pubfigure_theme(legend.position = 'none',
-#                   plot.margin = unit(c(.1, .1, .1, .1), "cm")) + 
-#   scale_fill_grey() 
-# 
-# countyfigure <- plot_grid(all_county_final, HI_county_final,
-#           align = 'v', ncol = 1, rel_heights = c(1, 1.6), label_size = 10)
-# 
-# figs("countyfigure", caption = "Total strandings (above) and human interaction cases (below) for counties in Washington (left of dashed line) and Oregon (right of dashed line) show higher strandings in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific.")
-
-```
 
 ```{r maps, results = 'hide'}
 
@@ -1003,7 +657,7 @@ species_boxplots
 
 `r figs("species_boxplots", caption = "(a) Boxplot of annual stranding cases for each species, showing higher average strandings for harbor seals and California sea lions; and (b) boxplot of annual human interactions by type, showing a high number of gunshot wounds for California sea lions and Steller sea lions and “other” cases for harbor seals.")`
 
-```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+```{r, fig.height = 5.5, fig.width = 7, fig.align = 'center'}
 all_timeseries
 ```
 
@@ -1015,7 +669,7 @@ HI_timeseries
 
 `r figs("HI_timeseries", caption = "(a) Annual combined HI cases overall () and per species shows increasing for harbor seals (y = 1.9x, z = 10.5, p < 0.001) and California sea lions (y = 1.1x, z = 24.9, p < 0.001) and significantly decreasing for the other species, and (b) HI TYPES.")`
 
-```{r, fig.height = 5, fig.width = 7, fig.align = 'center'}
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 HI_prev_final
 
 ```
