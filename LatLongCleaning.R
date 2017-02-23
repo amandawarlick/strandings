@@ -12,9 +12,11 @@ library(reshape2)
 library(stringr)
 library(magrittr)
 
+pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+
 all.data.orig <- read.csv("1989_2015_raw.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
   filter(State != 'CA') %>%
-  select(c(National.Database.Number, Genus, Common.Name, Affiliation, City...from.strandings.table, County, State, Locality.Detail,
+  select(c(National.Database.Number, Field.Number, Genus, Common.Name, Affiliation, City...from.strandings.table, County, State, Locality.Detail,
            Latitude, Latitude.Units, Longitude, Longitude.Units, Year.of.Observation, Observation.Date)) %>%
   transform(Mammal.Type = 
               ifelse(grepl('Phoca', Genus), 'Pinniped',
@@ -31,13 +33,22 @@ all.data.orig <- read.csv("1989_2015_raw.csv", header = TRUE, na.strings = "", s
                                   ifelse(grepl('PINNIPED', Common.Name), 'Pinniped', 'Cetacean'))))))))))))) %>%
   filter(Mammal.Type == 'Pinniped')
 
-all.data.orig$Longitude <- gsub("\\-", "", all.data.orig$Longitude)
-all.data.orig$Longitude <- gsub("\\-", "", all.data.orig$Longitude)
-all.data.orig$Longitude <- gsub("\\_", "", all.data.orig$Longitude)
-all.data.orig$Longitude <- gsub("\\ ", ".", all.data.orig$Longitude)
-#all.data.orig$Longitude <- gsub("<d0>", "", all.data.orig$Longitude)
-all.data.orig$Latitude <- gsub(" ", ".", all.data.orig$Latitude)
+all.data.orig$Longitude <- str_replace(all.data.orig$Longitude, "/", ".")
+all.data.orig$Longitude <- str_replace(all.data.orig$Longitude, " ", ".")
+all.data.orig$Longitude <- gsub("\\�", "", all.data.orig$Longitude)
+all.data.orig$Longitude <- gsub("\\/", "", all.data.orig$Longitude)
 
+all.data.orig$Latitude <- str_replace(all.data.orig$Latitude, "/", ".")
+all.data.orig$Latitude <- str_replace(all.data.orig$Latitude, " ", ".")
+all.data.orig$Latitude <- gsub("\\�", "", all.data.orig$Latitude)
+all.data.orig$Latitude <- gsub("\\/", "", all.data.orig$Latitude)
+
+# all.data.orig$Longitude <- gsub("\\-", "", all.data.orig$Longitude)
+# all.data.orig$Longitude <- gsub("\\-", "", all.data.orig$Longitude)
+# all.data.orig$Longitude <- gsub("\\_", "", all.data.orig$Longitude)
+#all.data.orig$Longitude <- gsub("\\ ", ".", all.data.orig$Longitude)
+
+all.data.orig$Latitude <- as.numeric(all.data.orig$Latitude)
 all.data.orig$Longitude <- as.numeric(all.data.orig$Longitude)
 all.data.orig$Longitude <- all.data.orig$Longitude * (-1)
 
@@ -46,10 +57,26 @@ sum(!is.na(all.data.orig$Latitude))
 sum(is.na(all.data.orig$Longitude))
 sum(!is.na(all.data.orig$Longitude))
 
-#all.data.orig$Latitude <- as.numeric(all.data.orig$Latitude)
+mean_lat_long <- pinnipeds_data %>%
+  filter(County != 'NA') %>%
+  transform(Latitude = as.numeric(Latitude), Longitude = as.numeric(Longitude)) %>%
+  group_by(County) %>%
+  summarize(mean_lat = mean(Latitude, na.rm = T), mean_long = mean(Longitude, na.rm = T))
 
-pinnipeds.data.raw <- all.data.orig %>% filter(Mammal.Type == 'Pinniped' & Common.Name != 'Seal, harp')
+all.data.orig <- all.data.orig %>%
+  select(-c(Latitude.Units, Longitude.Units, Genus, Mammal.Type)) %>%
+  filter(!is.na(Latitude)) %>%
+  merge(mean_lat_long, by = "County")
 
-write.csv(pinnipeds.data.raw, file = "~/Documents/R/Strandings/pinnipeds.data.raw.csv", row.names = F)
+Lat_Long_ordered <- all.data.orig %>%
+  transform(Long_error = mean_long - Longitude,
+            Lat_error = mean_lat - Latitude) %>%
+  filter(Long_error < -1.4 | Long_error > 1 | Lat_error < -.5 | 
+           Lat_error > .5 | Latitude > 49.05) %>%
+  select(Field.Number, National.Database.Number, Affiliation, Common.Name, Year.of.Observation, Observation.Date,
+         State, County, City...from.strandings.table, Locality.Detail, Latitude, mean_lat,
+         Lat_error, Longitude, mean_long, Long_error) %>%
+  arrange(Latitude)
 
+write.csv(Lat_Long_ordered, file = "~/Documents/R/Strandings/Lat_Long_ordered.csv", row.names = F)
 

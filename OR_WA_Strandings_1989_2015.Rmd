@@ -2241,4 +2241,146 @@ ggsave(WAheatmap_nel, file = "./Figures/Maps/WAheatmap_nel.pdf")
 
 ```
 
+```{r figure requests}
+
+#Lesanna 2-16
+
+#Number per year per state
+all_state_line_fig <- pinnipeds_data %>%
+  filter(State != 'CA') %>%
+  transform(State = ifelse(State == 'OR', 'Oregon', 'Washington')) %>%
+  group_by(State, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(Year.of.Observation, cnt, group = State, col = State)) + 
+  geom_point(size = 1) +
+  geom_line() +
+  geom_smooth(method = 'lm', se = F) +
+  xlab("") + ylab("Total Annual Strandings") +
+  pubfigure_theme(legend.position = 'top') +
+  scale_color_brewer(palette = 'Set1')
+
+#Number per year per species faceted per state
+all_state_sp_fig <- pinnipeds_data %>%
+  filter(State != 'CA' & Pinniped.Common.Name != 'Unidentified') %>%
+  transform(State = ifelse(State == 'OR', 'Oregon', 'Washington')) %>%
+  group_by(State, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(Year.of.Observation, cnt, group = Pinniped.Common.Name, col = Pinniped.Common.Name)) + 
+  #geom_point() +
+  geom_line() +
+  xlab("") + ylab("Total Annual Strandings") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 9),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 9), 
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(), 
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 8),
+    legend.position = 'top',
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10)) +
+  facet_wrap(~ State) +
+  scale_color_manual(values = color1)
+
+#Alt paper figures
+#species with separate regression lines
+pinnipeds_data %>% 
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(x = Year.of.Observation, y = cnt)) + 
+  #geom_point(position = "identity") +
+  geom_smooth(method = "lm", se = FALSE, col = 'black', size = 0.8) +
+  geom_line(aes(y = cnt, x = Year.of.Observation), size = .8, col = 'grey50') +
+  xlab("") + ylab("All Strandings") +
+  scale_y_continuous(labels = comma) +
+  #scale_x_continuous(breaks = c(1989:2015)) +
+  pubfigure_theme(
+    legend.position = 'top',
+    strip.text = element_text(size = 9),
+    strip.background = element_blank()) +
+  facet_wrap(~Pinniped.Common.Name)
+
+```
+
+```{r}
+#species stats
+harbors <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name == 'Harbor seal') %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+CSL <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name == 'California sea lion') %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+SSL <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name == 'Steller sea lion') %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+```
+
+```{r maps with circle size}
+
+generic_lat_long <- pinnipeds_data %>%
+  filter(County != 'NA') %>%
+  transform(Latitude = as.numeric(Latitude), Longitude = as.numeric(Longitude)) %>%
+  group_by(County) %>%
+  summarize(mean_lat = mean(Latitude, na.rm = T), mean_long = mean(Longitude, na.rm = T)) 
+
+circle_data_all <- pinnipeds_data %>%
+  filter(County != 'NA') %>%
+  group_by(County) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  merge(generic_lat_long, by = 'County') 
+
+circle_data_HI <- pinnipeds_data %>%
+  filter(County != 'NA' & Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(County, Interaction.Type) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  merge(generic_lat_long, by = 'County') 
+
+circle_map_all <- ggmap(get_map(location = WAbox, source = "google", maptype = "roadmap")) +
+  geom_point(data = circle_data_all, aes(x = mean_long, y = mean_lat, size = cnt)) + 
+  xlab("") + ylab("") +
+  #facet_wrap(~ Interaction.Type) +
+  theme(
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 5))
+
+circle_map_HI <- ggmap(get_map(location = WAbox, source = "google", maptype = "roadmap")) +
+  geom_point(data = circle_data_HI, aes(x = mean_long, y = mean_lat, size = cnt)) +
+  # geom_jitter(data = circle_data_HI, aes(x = mean_long, y = mean_lat, group = Interaction.Type, col = Interaction.Type, size = cnt), width = .1, height = .1) + 
+  xlab("") + ylab("") +
+  facet_wrap(~ Interaction.Type) +
+  theme(legend.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 5))
+  
+```
+
+```{r}
+
+#Lesanna 2-19
+live_dead <- pinnipeds_data %>%
+  filter(State == 'WA') %>%
+  transform(Status = ifelse(Observation.Status == 'ALIVE', 'Alive', 'Dead')) %>%
+  transform(Year = ifelse(Year.of.Observation > 1993 & Year.of.Observation < 2005, '1994-2004',
+                          ifelse(Year.of.Observation > 2004, '2005-2015', 'NA'))) %>%
+  filter(Year != 'NA') %>%
+  group_by(Status, Year) %>%
+  summarize(Total = n_distinct(National.Database.Number)) %>%
+  dcast(Year ~ Status)
+
+```
 

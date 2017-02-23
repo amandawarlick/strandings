@@ -172,7 +172,7 @@ Hanni 1997
 Aebischer 1990
 - similar to planq and taylor - connect multi-trophic level datasets, showing connections to abundance
 
-Truchon 2013
+*Truchon 2013
 - environmental changes and strandings in st lawrence
 - good references for environmental changes and oscillations
 - combing several environmental variables
@@ -183,6 +183,7 @@ Truchon 2013
 - long-term = important - strandings enable the study?
 - complexities of strandings and oceanography
 - importance of multi-scale studies
+- "Environmental changes are occurring worldwide and the consequences of recent climatic variability are now acknowledged as a global perturbation with geographic differences in intensity [1]."
 
 Berini 2015
 - great methods description
