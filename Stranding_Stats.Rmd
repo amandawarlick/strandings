@@ -1,24 +1,32 @@
 ---
-title: ''
+title: 'Pinniped Stranding Analysis Research Questions'
+author: Amanda Warlick, March 2017
 output:
-  pdf_document: default
-  pdf: default
+  word_document: default
+
 ---
 
-```{r}
+```{r, include = F}
+knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE)
+```
+
+
+```{r, include = F, echo = F}
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(ggmap)
 library(data.table)
 library(cowplot)
-library(stats)
-library(captioner)
 library(knitr)
 library(reshape2)
 library(stringr)
 library(magrittr)
 library(scales)
+library(stats) 
+library(PMCMR)
+library(pgirmess)  
+
 #setwd("~/Documents/R/Strandings")
 
 # Data Load 
@@ -35,7 +43,6 @@ pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observatio
 
 ```
 
-#### Questions
 
 ##Changes in total annual strandings per year  
 
@@ -52,7 +59,7 @@ data_by_year <- pinnipeds_data %>%
 timeseries_all_model <- glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = data_by_year)
 summary(lm(cnt ~ Year.of.Observation, data_by_year))
 summary(timeseries_all_model)
-autoplot(timeseries_all_model)
+#autoplot(timeseries_all_model)
 #slope of line =  exp(0.050462) = 1.05
 
 #chow test?
@@ -131,22 +138,11 @@ HI_type_by_year <- pinnipeds_data %>%
 
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -1.717e+02  1.258e+01  -13.64   <2e-16 ***
-# Year.of.Observation  8.713e-02  6.269e-03   13.90   <2e-16 ***
-# y = 1.1x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -1.763e+02  1.689e+01  -10.44   <2e-16 ***
-# Year.of.Observation  8.918e-02  8.416e-03   10.60   <2e-16 ***
-# y = 1.1x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Boat')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -189.92718   48.36681  -3.927 8.61e-05 ***
-# Year.of.Observation    0.09530    0.02407   3.959 7.53e-05 ***
-# y = 1.1x
+
 
 # (c) for individual species?  
 HI_sp <- pinnipeds_data %>%
@@ -154,30 +150,13 @@ HI_sp <- pinnipeds_data %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal')))
-#                      Estimate Std. Error z value Pr(>|z|)  
-# (Intercept)         -722.8385   286.6015  -2.522   0.0117 *
-# Year.of.Observation    0.3602     0.1426   2.527   0.0115 *
-# y = 1.4x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_sp %>% filter(Pinniped.Common.Name == 'Harbor seal')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -2.248e+02  1.143e+01  -19.67   <2e-16 ***
-# Year.of.Observation  1.138e-01  5.692e-03   19.99   <2e-16 ***
-# y = 1.1x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_sp %>% filter(Pinniped.Common.Name == 'California sea lion')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -214.04947   16.48563  -12.98   <2e-16 ***
-# Year.of.Observation    0.10810    0.00821   13.17   <2e-16 ***
-# y = 1.1x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
-#                       Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)         -201.64410   27.58271  -7.311 2.66e-13 ***
-# Year.of.Observation    0.10154    0.01373   7.396 1.40e-13 ***
-# y = 1.1x
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #Not sig
 
@@ -188,7 +167,7 @@ summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_s
 - Is the *prevalence* of human interaction cases increasing or decreasing over time for certain species? Help: Poisson isn't for proportions, so use lm() or prop.trend.test()?
 ```{r}
 
-# Is the prevalence of human interaction cases increasing or decreasing over time for certain species? 
+# Is the prevalence of human interaction cases increasing or decreasing over time for certain species?
 
 #All HI cases, species combined
 HI_prev <- pinnipeds_data %>%
@@ -313,10 +292,12 @@ HIprev_type_species <- HIprev_type_species %>%
   select(Year.of.Observation, Pinniped.Common.Name, Boat, Gunshot, Fisheries, Other) %>%
   melt(id.vars = c("Year.of.Observation", "Pinniped.Common.Name")) 
 
+# Realized I shouldn't be putting all six species in the same model, so went on to do them separately below.
 # <--- NFS fisheries, GFS fisheries increasing, HS gunshot decreasing
 # HItype_model_sp_lm <- lm(value ~ Pinniped.Common.Name*variable, data = HIprev_type_species)
 # summary(HItype_model_sp_lm)
 
+#Separate species models, is there a better way to do this if I'm really just asking the simple question of changes over time rather than a more complex best-fit model with more explanatory variables?
 summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Boat')))
 summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Fisheries'))) #Not sig
 summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Gunshot'))) #Not sig
@@ -365,6 +346,7 @@ monthly_species <- pinnipeds_data %>%
   group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
+# Again, had species combined, then separated them out below.
 # <--- Help - check interpretation of multi-factor regressions coefficients?
 # <--- CSL low in Feb, high in May and Aug-Nov; GFS high June, HS low in Nov, high Apr - Sep; NES high in Apr, low Sep-Nov; Stellers lower Sep-Oct; NFS high in May
 # monthly_all_model_sp <- glm(cnt ~ Month.of.Observation*Pinniped.Common.Name, family = poisson(link = log), data = monthly_species)
@@ -386,6 +368,7 @@ monthly_species_HI <- pinnipeds_data %>%
   group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
+# Combined species
 # <--- same as above, if correct, HS only one showing seasonal peak for HI cases June - Oct, by exp(2.1) = ~8/month
 monthly_HI_model_sp <- glm(cnt ~ Month.of.Observation*Pinniped.Common.Name, family = poisson(link = log), data = monthly_species_HI)
 summary(monthly_HI_model_sp)

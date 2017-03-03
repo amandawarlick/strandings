@@ -1595,8 +1595,9 @@ ggplot(species_sex_props, aes(Pinniped.Common.Name, cnt, fill = Sex)) +
 formerge <- species_sex_props %>% 
   dcast(Pinniped.Common.Name ~ Sex, value.var = 'cnt') %>%
   transform(Prop.Fem = round(Female/(Female+Male+Unid), 3)*100,
-            Prop.Male = round(Male/(Female+Male+Unid), 3)*100) %>%
-  select(Pinniped.Common.Name, Prop.Fem, Prop.Male)
+            Prop.Male = round(Male/(Female+Male+Unid), 3)*100,
+            Prop.Unid = round(Unid/(Female+Male+Unid), 3)*100) %>%
+  select(Pinniped.Common.Name, Prop.Fem, Prop.Male, Prop.Unid)
 
 species_props <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
@@ -1610,8 +1611,8 @@ species_props <- pinnipeds_data %>%
             Prop.ad = round(Adult/(Tot), 3)*100,
             Prop.un = round(Unid/(Tot), 3)*100) %>%
   merge(formerge, by = 'Pinniped.Common.Name') %>%
-  select(Pinniped.Common.Name, Tot, Prop.Male, Prop.Fem, Prop.pup, Prop.year, Prop.sub, Prop.ad, Prop.un)
-colnames(species_props) <- c("Species", "Total (n)", "Male (%)", "Female (%)", "Pup (%)", "Yearling (%)", "Subadult (%)", "Adult (%)", "Unidentified Age (%)")
+  select(Pinniped.Common.Name, Tot, Prop.Male, Prop.Fem, Prop.Unid, Prop.pup, Prop.year, Prop.sub, Prop.ad, Prop.un)
+colnames(species_props) <- c("Species", "Total (n)", "Male (%)", "Female (%)", "Unid. Sex (%)", "Pup (%)", "Yearling (%)", "Subadult (%)", "Adult (%)", "Unid. Age (%)")
   
 species_age_sex_composition <- write.csv(species_props, file = "./Figures/species_age_sex_composition.csv", row.names = FALSE)
 
@@ -2382,5 +2383,20 @@ live_dead <- pinnipeds_data %>%
   summarize(Total = n_distinct(National.Database.Number)) %>%
   dcast(Year ~ Status)
 
+```
+
+```{r}
+#Percent of strandings per year from DFW
+
+percdfw <- pinnipeds_data %>%
+  filter(Year.of.Observation > 2004) %>%
+  filter(Affiliation == 'Washington Department of Fish and Wildlife' |
+        Affiliation == 'WDFW/MMI' | Affiliation == 'WDFW Marine Mammal Investigations') %>%
+  #group_by(Year.of.Observation) %>%
+  summarize(cnt.dfw = n_distinct(National.Database.Number)) %>%
+  #merge(data_by_year, by = 'Year.of.Observation') %>%
+  transform(percdfw = cnt.dfw/14100)
+
+mean(percdfw$percdfw)
 ```
 

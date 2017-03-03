@@ -219,7 +219,7 @@ all_yr_final <- pinnipeds_data %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = Year.of.Observation, y = cnt)) + 
   #geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE, col = 'black', size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, col = 'black', size = 0.8, linetype = 3) +
   geom_line(aes(y = cnt, x = Year.of.Observation, 
                   group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
   xlab("") + ylab("All Strandings") +
@@ -241,7 +241,7 @@ HI_species_final <- pinnipeds_data %>%
   #geom_point(stat = 'identity', position = 'identity') + 
   geom_line(aes(Year.of.Observation, cnt, group = Pinniped.Common.Name, 
                 col = Pinniped.Common.Name), size = 1) + 
-  geom_smooth(method = 'loess', se = F, col = "black") +
+  geom_smooth(method = 'loess', se = F, col = "black", linetype = 3) +
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = 'top') + 
@@ -257,7 +257,7 @@ HI_type_final <- pinnipeds_data %>%
   #geom_point(stat = 'identity', position = 'identity') + 
   geom_line(aes(Year.of.Observation, cnt, 
                 group = Interaction.Type, col = Interaction.Type), size = 1) + 
-  geom_smooth(method = 'loess', se = F, col = "black") +
+  geom_smooth(method = 'loess', se = F, col = "black", linetype = 3) +
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = 'top') + 
@@ -286,9 +286,10 @@ allprev_sp <- allprev_sp %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
 
 HI_prev_sp_figure <- ggplot(allprev_sp, aes(Year.of.Observation, HI.Prev)) +
   #geom_point(stat = 'identity') + 
-  geom_line(aes(Year.of.Observation, HI.Prev, 
-                group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
-  geom_smooth(method = 'lm', se = F, col = "black") +
+  geom_smooth(aes(Year.of.Observation, HI.Prev, 
+                group = Pinniped.Common.Name, col = Pinniped.Common.Name), 
+              method = 'lm', size = 1, se = F) +
+  geom_smooth(method = 'lm', se = F, col = 'black', linetype = 3) +
   xlab("") + ylab("Prevalence of HI") +
   pubfigure_theme(legend.position = 'top') + 
   #scale_color_brewer(palette = 'Set3') +
@@ -315,7 +316,7 @@ HI_type_prev_figure <-
   #geom_point() + 
   #geom_smooth(aes(Year.of.Observation, value), col = 'black') +
   geom_line(aes(Year.of.Observation, value, group = variable, col = variable), size = 1) + 
-  geom_smooth(method = 'loess', se = F, col = "black") +
+  geom_smooth(method = 'loess', se = F, col = "black", linetype = 3) +
   xlab("") + ylab("Prevalence of HI") +
   pubfigure_theme(legend.position = 'top') + 
   #scale_color_brewer(palette = 'Set1') +
@@ -323,7 +324,7 @@ HI_type_prev_figure <-
 
 HI_prev_final <- plot_grid(HI_prev_sp_figure, HI_type_prev_figure, align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
 
-figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) increasing for all combined species (denoted by black regression line, y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55) and increasing for California sea lions (y = 0.003x, t = 1.9, p < 0.05) and northern fur seals (y = 0.08x, t = 1.8, p < 0.1), and decreasing for northern elephant seals (y = -0.08x, t = -2.0, p < 0.05); (b) increasing for all types combined (y = 0.005x, t = 5.8, p < 0.001) and for each HI case type: gunshot wounds (y = 0.03x, t = 7.5, p < 0.001), fisheries entanglements (y = 0.02x, t = 3.6, p < 0.001), boat injuries (y = 0.001x, t = 6.1, p < 0.001), and other (y = 0.03x, t = 6.1, p < 0.001). Regression lines not shown for individual species and HI case types.")
+figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) increasing for all combined species (denoted by black dotted, y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55) and increasing California sea lions, harbor seals, and northern elephant seals; (b) increasing for all types combined (y = 0.005x, t = 5.8, p < 0.001) and for each HI case type: gunshot wounds (y = 0.03x, t = 7.5, p < 0.001), fisheries entanglements (y = 0.02x, t = 3.6, p < 0.001), boat injuries (y = 0.001x, t = 6.1, p < 0.001), and other (y = 0.03x, t = 6.1, p < 0.001). Regression lines not shown for HI case types.")
 
 ####################
 
@@ -726,7 +727,7 @@ HI_prev_final
 
 ```
 
-`r figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) increasing for all combined species (denoted by black regression line, y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55) and increasing for California sea lions (y = 0.003x, t = 1.9, p < 0.05) and northern fur seals (y = 0.08x, t = 1.8, p < 0.1), and decreasing for northern elephant seals (y = -0.08x, t = -2.0, p < 0.05); (b) increasing for all types combined (y = 0.005x, t = 5.8, p < 0.001) and for each HI case type: gunshot wounds (y = 0.03x, t = 7.5, p < 0.001), fisheries entanglements (y = 0.02x, t = 3.6, p < 0.001), boat injuries (y = 0.001x, t = 6.1, p < 0.001), and other (y = 0.03x, t = 6.1, p < 0.001). Regression lines not shown for individual species and HI case types.")`
+`r figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) increasing for all combined species (denoted by black dotted, y = 0.005x, t = 5.8, p < 0.001, r-sq = 0.55) and increasing California sea lions, harbor seals, and northern elephant seals; (b) increasing for all types combined (y = 0.005x, t = 5.8, p < 0.001) and for each HI case type: gunshot wounds (y = 0.03x, t = 7.5, p < 0.001), fisheries entanglements (y = 0.02x, t = 3.6, p < 0.001), boat injuries (y = 0.001x, t = 6.1, p < 0.001), and other (y = 0.03x, t = 6.1, p < 0.001). Regression lines not shown for HI case types.")`
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 #monthly_age_HI_figure
