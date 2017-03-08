@@ -36,7 +36,7 @@ all_data_ca$Latitude <- as.numeric(all_data_ca$Latitude)
 
 
 all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
-  select(-c(Field.Number, Nmfs.Regional.Number, Confidence.Code, Report.Status, Latitude.Units, Longitude.Units, 
+  select(-c(Nmfs.Regional.Number, Confidence.Code, Report.Status, Latitude.Units, Longitude.Units, 
             Latitude.Actual.Estimate, Longitude.Actual.Estimate, How.lat.long.determined, Group.Event.Number,
             Examiner.Name, Stranding.Agreement.Authority, Body.of.Water, Group.Event.Flag, Group.Type..Mass.Stranding,
             Mass.Stranding.Number, Region, SW.Fishery.Type, SW.Other.Human.Int.Type, Group.Type..Cow.Calf.Pair,
@@ -72,6 +72,7 @@ all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
 
 #Only pinniped data
 
+cetaceans <- all_data %>% filter(Mammal.Type != 'Pinniped' & Common.Name != 'Seal, harp')
 pinnipeds_data_all <- all_data %>% filter(Mammal.Type == 'Pinniped' & Common.Name != 'Seal, harp')
 
 pinnipeds_data_all$Age.Class[is.na(pinnipeds_data_all$Age.Class)] <- "NA"
