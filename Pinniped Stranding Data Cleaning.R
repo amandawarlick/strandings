@@ -14,7 +14,10 @@ setwd("~/Documents/R/Strandings/")
 case <- function(x)
   paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
 
-all_data_pnw <- read.csv("Strandings1989_2015.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>% filter(State != 'CA') 
+pnw_1989_2015 <- read.csv("Strandings1989_2015.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>% filter(State != 'CA')
+pnw_2016 <- read.csv("OR_WA_2016.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+
+all_data_pnw <- bind_rows(pnw_1989_2015, pnw_2016)
 all_data_pnw$Longitude <- gsub("\\-", "", all_data_pnw$Longitude)
 all_data_pnw$Longitude <- gsub("\\-", "", all_data_pnw$Longitude)
 all_data_pnw$Longitude <- gsub("\\_", "", all_data_pnw$Longitude)
@@ -29,6 +32,8 @@ all_data_ca <- read.csv("CAdata.csv", header = TRUE, na.strings = "", stringsAsF
 all_data_ca$Longitude <- as.numeric(all_data_ca$Longitude)
 all_data_ca$Longitude <- all_data_ca$Longitude * (-1)
 all_data_ca$Latitude <- as.numeric(all_data_ca$Latitude)
+
+
 
 all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
   select(-c(Field.Number, Nmfs.Regional.Number, Confidence.Code, Report.Status, Latitude.Units, Longitude.Units, 
