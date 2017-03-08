@@ -1,11 +1,11 @@
 "County","All Strandings (%)","Human Interactions (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
 "Clackamas",0,1,0,100,0,0
-"Clatsop",16,47,14,70,6,10
+"Clatsop",16,49,14,72,5,10
 "Columbia",0,1,75,25,0,0
-"Coos",13,8,38,28,0,35
-"Curry",8,2,27,45,0,27
+"Coos",13,8,36,29,0,36
+"Curry",8,2,25,50,0,25
 "Douglas",2,1,25,50,0,25
-"Lane",7,4,58,32,0,11
-"Lincoln",44,29,47,17,7,29
+"Lane",7,4,59,27,0,14
+"Lincoln",44,27,46,19,7,28
 "Multnomah",0,1,17,83,0,0
-"Tillamook",9,6,50,37,0,13
+"Tillamook",9,6,44,41,0,15

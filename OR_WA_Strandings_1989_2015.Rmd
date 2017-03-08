@@ -2388,8 +2388,8 @@ live_dead <- pinnipeds_data %>%
 ```{r}
 #Percent of strandings per year from DFW
 
-percdfw <- pinnipeds_data %>%
-  filter(Year.of.Observation > 2004) %>%
+dfw <- pinnipeds_data %>%
+  #filter(Year.of.Observation > 2004) %>%
   filter(Affiliation == 'Washington Department of Fish and Wildlife' |
         Affiliation == 'WDFW/MMI' | Affiliation == 'WDFW Marine Mammal Investigations') %>%
   #group_by(Year.of.Observation) %>%
@@ -2397,6 +2397,16 @@ percdfw <- pinnipeds_data %>%
   #merge(data_by_year, by = 'Year.of.Observation') %>%
   transform(percdfw = cnt.dfw/14100)
 
-mean(percdfw$percdfw)
+mean(dfw$percdfw)
+
+write.csv(dfw, file = "./dfw.csv", row.names = F)
+```
+
+```{r}
+#day of week matters? more people on beaches on weekends?
+
+all_day <- pinnipeds_data %>%
+  group_by(Year.of.Observation, Month.of.Observation, Day.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
 ```
 
