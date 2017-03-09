@@ -67,8 +67,14 @@ all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
                   ifelse(Common.Name == 'Sea lion, Steller', 'Steller sea lion',
                        ifelse(Common.Name == 'Seal, Guadalupe fur', 'Guadalupe fur seal',
                              ifelse(Common.Name == 'Seal, northern elephant', 'Northern elephant seal',
-                                  ifelse(Common.Name == 'Seal, Northern fur', 'Northern fur seal', 'Unidentified'))))))) 
-
+                                  ifelse(Common.Name == 'Seal, Northern fur', 'Northern fur seal', 'Unidentified'))))))) %>%
+  transform(Water.Body = ifelse(County == 'Pacific' | County == 'Grays Harbor' | 
+                                  County == 'Clallam' & City != 'Sequim' & City != 'Port Angeles' & City != 'Port Townsend' & 
+                                    Affiliation != 'Feiro Marine Life Center' & Affiliation != 'Port Townsend Marine Science Center/ East Jefferson Co. MMSN' | 
+                                  County == 'Jefferson' & Affiliation != 'Port Townsend Marine Science Center/ East Jefferson Co. MMSN' &
+                                  City != 'Brinnon' & City != 'Quilcene' & City != 'Port Townsend', 'WA_Coast',
+                                ifelse(State == 'OR', 'OR_Coast', 
+                                       ifelse(State == 'CA', 'CA Coast', 'Inland_WA'))))
 
 #Only pinniped data
 
