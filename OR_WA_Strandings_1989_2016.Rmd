@@ -1405,7 +1405,6 @@ colnames(bigtable_WA_HI_table) <- c("County", "All Strandings (%)", "Human Inter
 
 WAcounties_table <- write.csv(bigtable_WA_HI_table, file = "./Figures/WAcounties_table.csv", row.names = F)
 
-
 #OR
 bigtable_OR <- pinnipeds_data %>% 
   filter(County != 'NA' & State == 'OR' & County != 'Unknown') %>% 
@@ -1526,7 +1525,7 @@ Sex_HI_type_table <- pinnipeds_data %>%
   select(c(Sex, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(sex_HI_prev, by = 'Sex') %>%
   select(c(Sex, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Sex_HI_type_table) <- c("Sex", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+colnames(Sex_HI_type_table) <- c("Class", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 sex_composition_table <- write.csv(Sex_HI_type_table, file = "./Figures/Sex_composition_table.csv", row.names = FALSE)
 
@@ -1564,11 +1563,16 @@ Age_HI_type_table <- pinnipeds_data %>%
   select(c(Age.Class, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(age_HI_prev, by = 'Age.Class') %>%
   select(c(Age.Class, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Age_HI_type_table) <- c("Age", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
-
 Age_HI_type_table <- Age_HI_type_table[order(Age_HI_type_table$Age),]
+colnames(Age_HI_type_table) <- c("Class", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 age_composition_table <- write.csv(Age_HI_type_table, file = "./Figures/age_composition_table.csv", row.names = FALSE)
+
+#Combinining into one larger table
+comb_age_sex_comp <- bind_rows(Sex_HI_type_table, Age_HI_type_table)
+comb_age_sex_comp[3, 1] <- "Unid. Sex"
+comb_age_sex_comp[8, 1] <- "Unid. Age"
+age_sex_composition_table <- write.csv(comb_age_sex_comp, file = "./Figures/age_sex_composition_table.csv", row.names = FALSE)
 
 #Species and age/sex composition
 species_age_props <- pinnipeds_data %>%
@@ -1648,12 +1652,16 @@ species_props_HI <- pinnipeds_data %>%
 
 #Big table for species
 state_species_prop <- pinnipeds_data %>%
-  group_by(Pinniped.Common.Name, State) %>%
+  filter(!is.na(Water.Body)) %>% # help fix these NAs
+  group_by(Pinniped.Common.Name, Water.Body) %>%
   summarize(cnt = n_distinct(National.Database.Number))  %>%
-  dcast(Pinniped.Common.Name ~ State, value.var = 'cnt') %>%
-  transform(prop.or = round(OR/(OR+WA), 2)*100,
-            prop.wa = round(WA/(OR+WA), 2)*100) %>%
-  select(Pinniped.Common.Name, prop.or, prop.wa)
+  dcast(Pinniped.Common.Name ~ Water.Body, value.var = 'cnt') 
+state_species_prop[is.na(state_species_prop)] <- 0
+state_species_prop <- state_species_prop %>%
+  transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
+            prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
+            prop.wa_coast = round(WA_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100) %>%
+  select(Pinniped.Common.Name, prop.or, prop.wa_in, prop.wa_coast)
 
 species_bigtable <- pinnipeds_data %>%
   group_by(Pinniped.Common.Name) %>%
@@ -1685,8 +1693,8 @@ species_prop_HI <- species_prop_HI %>%
             Prop.Other = round(Other/Total, 2)*100) %>%
   merge(species_HI_prev, by = 'Pinniped.Common.Name') %>%
   merge(state_species_prop, by = 'Pinniped.Common.Name') %>%
-  select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
-colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
+  select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa_coast, prop.wa_in, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
+colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA Coast (%)", "WA Inland (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 species_HI_prop_table <- write.csv(species_prop_HI, file = "./Figures/species_HI_prop_table.csv", row.names = F)
 
