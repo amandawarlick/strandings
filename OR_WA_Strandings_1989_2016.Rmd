@@ -334,11 +334,10 @@ age_sex_table <- age_sex_all %>%
             Prop.Male = round(Male/(Female + Male + Unid), 2)*100,
             Prop.Unid = round(Unid/(Female + Male + Unid), 2)*100) %>%
   select(c(Age.Class, Female, Prop.Fem, Male, Prop.Male, Unid, Prop.Unid))
-colnames(age_sex_table) <- c("Age", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
+colnames(age_sex_table) <- c("Age Class", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
 average_sex <- c(as.character("Average"), "--", mean(age_sex_table[,3]), "--", mean(age_sex_table[,5]), "--", mean(age_sex_table[,7]))
 
 age_sex_table <- rbind(age_sex_table, average_sex, stringsAsFactors = F)
-
 
 age_sex_table <- write.csv(age_sex_table, file = "./Figures/age_sex_table.csv", row.names = F)
 
@@ -1649,7 +1648,7 @@ species_props_HI <- pinnipeds_data %>%
 ##Species composition table
 
 #It looks like, for example, harbor seals comrpise the majority of all cases, but FI and HI are more evenly distributed across species?
-
+ 
 #Big table for species
 state_species_prop <- pinnipeds_data %>%
   filter(!is.na(Water.Body)) %>% # help fix these NAs

@@ -33,10 +33,8 @@ all_data_ca$Longitude <- as.numeric(all_data_ca$Longitude)
 all_data_ca$Longitude <- all_data_ca$Longitude * (-1)
 all_data_ca$Latitude <- as.numeric(all_data_ca$Latitude)
 
-
-
 all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
-  select(-c(Nmfs.Regional.Number, Confidence.Code, Report.Status, Latitude.Units, Longitude.Units, 
+  dplyr::select(-c(Nmfs.Regional.Number, Confidence.Code, Report.Status, Latitude.Units, Longitude.Units, 
             Latitude.Actual.Estimate, Longitude.Actual.Estimate, How.lat.long.determined, Group.Event.Number,
             Examiner.Name, Stranding.Agreement.Authority, Body.of.Water, Group.Event.Flag, Group.Type..Mass.Stranding,
             Mass.Stranding.Number, Region, SW.Fishery.Type, SW.Other.Human.Int.Type, Group.Type..Cow.Calf.Pair,
@@ -69,13 +67,20 @@ all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
                              ifelse(Common.Name == 'Seal, northern elephant', 'Northern elephant seal',
                                   ifelse(Common.Name == 'Seal, Northern fur', 'Northern fur seal', 'Unidentified'))))))) %>%
   transform(Water.Body = ifelse(County == 'Pacific' | County == 'Grays Harbor' | 
-                                  County == 'Clallam' & City != 'Sequim' & City != 'Port Angeles' & City != 'Port Townsend' & 
+                                  County == 'Clallam' & Affiliation == 'Makah Fisheries Management' & City == 'La Push' & City == 'Clallam Bay' & City == 'Neah Bay' & 
+                                    City == 'Olympic National Park' & City != 'Sequim' & City != 'Port Angeles' & City != 'Port Townsend' & 
                                     Affiliation != 'Feiro Marine Life Center' & Affiliation != 'Port Townsend Marine Science Center/ East Jefferson Co. MMSN' | 
                                   County == 'Jefferson' & Affiliation != 'Port Townsend Marine Science Center/ East Jefferson Co. MMSN' &
-                                  City != 'Brinnon' & City != 'Quilcene' & City != 'Port Townsend', 'WA_Coast',
+                                  City == 'Dosewallips' & City == 'Port Ludlow' & City != 'Brinnon' & City != 'Quilcene' & City != 'Port Townsend', 'WA_Coast',
                                 ifelse(State == 'OR', 'OR_Coast', 
                                        ifelse(State == 'CA', 'CA Coast', 'Inland_WA'))))
 
+#Regional ifelse statement cleaning
+test <- all_data %>%
+  filter(is.na(Water.Body)) %>%
+  summarize(n_distinct(National.Database.Number))
+  
+  
 #Only pinniped data
 
 cetaceans <- all_data %>% filter(Mammal.Type != 'Pinniped' & Common.Name != 'Seal, harp')
