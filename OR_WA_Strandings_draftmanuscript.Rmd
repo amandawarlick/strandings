@@ -249,9 +249,8 @@ HI_species_final <- ggplot(data = HI_data_sp, aes(x = Year.of.Observation, y = c
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) + 
   scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
-  pubfigure_theme(legend.position = 'top') + 
-  #scale_color_brewer(palette = 'Set3') #+
-  #scale_color_grey() +
+  pubfigure_simple_theme(legend.position = 'top',
+                         axis.title = element_text(size = 10)) +
   scale_color_manual(values = color1)
 
 HI_type_data <- pinnipeds_data %>%
@@ -294,8 +293,8 @@ HI_prev_sp_figure <- ggplot(allprev_sp, aes(Year.of.Observation, HI.Prev)) +
               method = 'lm', size = 1, se = F) +
   geom_smooth(method = 'lm', se = F, col = 'black', linetype = 3) +
   xlab("") + ylab("Prevalence of HI") +
-  pubfigure_theme(legend.position = 'top') + 
-  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  pubfigure_simple_theme(legend.position = 'top',
+                         axis.title = element_text(size = 10)) +
   scale_color_manual(values = color1)
 
 #HI prevalence by HI type
@@ -436,9 +435,9 @@ HI_county_final <- pinnipeds_data %>%
   scale_fill_manual(values = color1)
 
 countyfigure <- plot_grid(all_county_final, HI_county_final,
-          align = 'v', ncol = 1, rel_heights = c(1, 1.6), label_size = 10)
+          align = 'v', ncol = 1, rel_heights = c(1, 1.6), label_size = 10, labels = "auto")
 
-figs("countyfigure", caption = "Total strandings (above) and human interaction cases (below) for counties in Washington (left of dashed line) and Oregon (right of dashed line) show higher strandings in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific.")
+figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific.")
 
 ```
 
@@ -633,7 +632,7 @@ All stranding cases - Since 1989, the number of reported stranding cases has inc
 Human interaction cases - The overall *number* of HI cases has increased significantly from 1989-2016 (y = 1.10^x^, z = 7.8, p < 0.001), signifying a 10% increase per year. An annual average of `r year_prop_HI %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(Y), 1))` cases were documented throughout the 1990s and `r year_prop_HI %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(Y), 1))` per year since 2000. Specifically, data show an increasing number of gunshot wounds (y = 1.073^x^, z = 4.6, p < 0.001), fisheries entanglements (y = 1.090^x^, z = 8.3, p < 0.001), and boat injuries (y = 1.087^x^, z = 3.3, p < 0.01) over the study period (`r figs("HI_timeseries", display = "cite")`b). The *prevalence* of HI cases has also increased overall (y = 0.06x, z = 15.5, p < 0.001) and specifically for gunshot wounds (y = 0.039x, z = 6.4, p < 0.001), fisheries entanglements (y = 0.043x, z = 5.3, p < 0.001), and boat injuries (y = 0.087x, z = 4.2, p < 0.001), with the prevalence of combined HI cases exceeding 20% in 2012, 2013, and 2015 (`r figs("HI_prev_final", display = "cite")`b).
 
 Examining whether human interaction cases are changing over time is most meaningful at the species level. Similar to overall strandings, the *number* of documented HI cases increased for harbor seals (y = 1.114^x^, z = 8.7, p < 0.001), California sea lions (y = 1.099^x^, z = 6.3, p < 0.001), Steller sea lions (y = 1.095^x^, z = 5.3, p < 0.001), and Guadalupe fur seals (y = 1.173^x^, z = 2.1, p < 0.05) (`r figs("HI_timeseries", display = 'cite')`a). The *prevalence* of HI cases has increased for harbor seals (y = 0.06x, z = 11.4, p < 0.001), California sea lions (y = 0.03x, z = 3.8, p < 0.001), and northern elephant seals (y = 0.09x, z = 3.5, p < 0.001) (`r figs("HI_prev_final", display = "cite")`a). More specifically, data show that the prevalence of gunshot wound cases increased significantly for California sea lions, fisherines entanglement cases increased for California sea lions and harbor seals, and boat-related injuries increased for harbor seals. 
-
+ 
 On a seasonal basis, total strandings are significantly different across months of the year (chi-sq = 4615, p < 0.001), with greater total strandings occurring May through October. However, the timing of this peak is different for each species. Examining pairwise Tukey comparisons showed that harbor seal strandings are significantly higher from June through September. Though not statistically significant, California sea lion strandings exhibit a peak in May and again from August through November. The age class composition of stranded animals varies seasonally, ranging from 10-20% pups when strandings are lower in the winter to 60% when strandings are higher during July and August. The month of the stranding observation is a significant predictor of strandings by age class, with pups exhibiting significantly higher strandings from June through September (chi-sq = 503.8, p < 0.001), with the majority of these likely being harbor seals, as noted above. None of the other age classes exhibited statistically significant seasonal stranding patterns. Seasonal patterns were similar across male and female strandings.
 
 The *number* of human interactions cases peaks significantly in the summer (July), but is evident only for harbor seals and pups (`r figs("monthly_age_HI_figure_line", display = 'cite')`). The *prevalence* of HI cases shows a seasonal peak, ranging from 11% to 23% of cases depending on the month. The proportion of gunshot wounds is higher in March (constitute an average of 13% of all cases) than other months (4% of all cases), while boat injuries and gunshot wounds do not change significantly throughout the months of the year. 
@@ -731,7 +730,7 @@ stateboxplot
 countyfigure
 ```
 
-`r figs("countyfigure", caption = "Total strandings (above) and human interaction cases (below) for counties in Washington (left of dashed line) and Oregon (right of dashed line) show higher strandings in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific.")`
+`r figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific.")`
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 HI_heatmap_WA_facet
