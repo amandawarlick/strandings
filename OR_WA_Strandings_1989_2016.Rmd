@@ -1660,7 +1660,7 @@ state_species_prop <- state_species_prop %>%
   transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
             prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
             prop.wa_coast = round(WA_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100) %>%
-  select(Pinniped.Common.Name, prop.or, prop.wa_in, prop.wa_coast)
+  dplyr::select(Pinniped.Common.Name, prop.or, prop.wa_in, prop.wa_coast)
 
 species_bigtable <- pinnipeds_data %>%
   group_by(Pinniped.Common.Name) %>%
@@ -1668,14 +1668,14 @@ species_bigtable <- pinnipeds_data %>%
   transform(all.prop = round(cnt/sum(cnt), 2)*100)
 
 species_HI_prev <- pinnipeds_data %>%
-  #filter(Pinniped.Common.Name != 'Unidentified') %>% 
+  filter(Pinniped.Common.Name != 'Unidentified') %>% 
   group_by(Pinniped.Common.Name, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt')
 species_HI_prev[is.na(species_HI_prev)] <- 0
 species_HI_prev <- species_HI_prev %>%
     transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
-  select(Pinniped.Common.Name, Prev.HI) %>%
+  dplyr::select(Pinniped.Common.Name, Prev.HI) %>%
   merge(species_bigtable, by = 'Pinniped.Common.Name')
 
 species_prop_HI <- pinnipeds_data %>%
@@ -1692,7 +1692,7 @@ species_prop_HI <- species_prop_HI %>%
             Prop.Other = round(Other/Total, 2)*100) %>%
   merge(species_HI_prev, by = 'Pinniped.Common.Name') %>%
   merge(state_species_prop, by = 'Pinniped.Common.Name') %>%
-  select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa_coast, prop.wa_in, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
+  dplyr::select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa_coast, prop.wa_in, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
 colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA Coast (%)", "WA Inland (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 species_HI_prop_table <- write.csv(species_prop_HI, file = "./Figures/species_HI_prop_table.csv", row.names = F)

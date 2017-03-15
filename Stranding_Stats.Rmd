@@ -199,7 +199,7 @@ HI_yes_no <- HI_yes_no %>%
     transform(Yes = Y, No = (N+CBD)) %>%
   dplyr::select(-c(CBD, N, Y)) 
 
-#For Moni: do I needed a link = identity?
+#default is link = logit
 summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no)) 
 
 #Same as above
@@ -220,7 +220,7 @@ HI_yes_no_sp <- HI_yes_no_sp %>%
   dplyr::select(Pinniped.Common.Name, Year.of.Observation, Yes, No) 
 
 #Repeat for each species
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #y = 
+summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) 
 
 summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
@@ -290,25 +290,7 @@ summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data
 
 # summary(glm(cbind(Other, NoOther) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
-#Proportion of types per species - old, changed to yes/no counts
-# HIprev_type_species <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != "Unidentified") %>%
-#   group_by(Interaction.Type, Year.of.Observation, Pinniped.Common.Name) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Year.of.Observation + Pinniped.Common.Name ~ Interaction.Type, value.var = 'cnt') 
-# HIprev_type_species[is.na(HIprev_type_species)] <- 0
-# HIprev_type_species <- HIprev_type_species %>%
-#   merge(numberperyearperspecies, by = c('Year.of.Observation', 'Pinniped.Common.Name')) %>%
-#   transform(Boat = (Boat/yr.cnt), 
-#             Fisheries = (Fisheries/yr.cnt),
-#             Gunshot = (Gunshot/yr.cnt),
-#             Other = (Other/yr.cnt)) %>%
-#   dplyr::select(Year.of.Observation, Pinniped.Common.Name, Boat, Gunshot, Fisheries, Other) %>%
-#   melt(id.vars = c("Year.of.Observation", "Pinniped.Common.Name")) 
 
-# summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Boat')))
-# summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Fisheries'))) 
-# summary(lm(value ~ Year.of.Observation, data = HIprev_type_species %>% filter(Pinniped.Common.Name == 'California sea lion' & variable == 'Gunshot'))) 
 
 ```
 
@@ -329,20 +311,6 @@ kruskal.test(monthly_all)
 kruskalmc(monthly_all$cnt ~ monthly_all$Month.of.Observation)
 posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_all, dist = "Chisquare")
   
-#4. Is there a seasonal peak in stranding cases for certain species? 
-monthly_species <- pinnipeds_data %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-#glm with and without interaction, anova the two
-monthly_all_model_sp <- glm(cnt ~ Pinniped.Common.Name + Month.of.Observation, family = poisson(link = log), data = monthly_species)
-
-monthly_all_model_sp_int <- glm(cnt ~ Pinniped.Common.Name * Month.of.Observation, family = poisson(link = log), data = monthly_species)
-
-anova(monthly_all_model_sp, monthly_all_model_sp_int, test = 'Chisq')
-
 #Alternative parametetric pairwise method using glht
 monthly_all_glht <- glm.nb(cnt ~ Month.of.Observation, data = monthly_all)
 summary(glht(monthly_all_glht, linfct = mcp(Month.of.Observation = "Tukey")))
@@ -352,16 +320,32 @@ summary(glht(monthly_all_glht, linfct = mcp(Month.of.Observation = "Tukey")))
 - Is there a seasonal peak for certain species?
 ```{r}
 
-#For Moni - is it correct to use glm to see the specific peak for each species?
-# <--- months with significant p-values indicate months that are significantly different from the reference month (January?), either higher or lower?
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #Apr - Oct
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #Nov
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) #June
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'Northern elephant seal'))) #June
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'California sea lion'))) #May, Aug-Nov
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) #Mar
+# Is there a seasonal peak in stranding cases for certain species? 
+monthly_species <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
 
-# Same as above but for HI cases  
+# Pairwise; repeat for each species
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'Harbor seal'), dist = "Chisquare") #June - September
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'California sea lion'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'Steller sea lion'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'Northern elephant seal'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'Northern fur seal'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'), dist = "Chisquare") #not significant; no strandings Jan-Mar; Dec
+  
+#Alternative parametetric pairwise method using glht
+monthly_species_glht <- glm.nb(cnt ~ Month.of.Observation, data = monthly_species %>% filter(Pinniped.Common.Name == 'California sea lion'))
+summary(glht(monthly_species_glht, linfct = mcp(Month.of.Observation = "Tukey")))
+
+# #glm with and without interaction, anova the two
+# #help, not sure how to interpret the anova output
+# monthly_all_model_sp <- glm.nb(cnt ~ Pinniped.Common.Name + Month.of.Observation, data = monthly_species)
+# monthly_all_model_sp_int <- glm.nb(cnt ~ Pinniped.Common.Name * Month.of.Observation, data = monthly_species)
+# anova(monthly_all_model_sp, monthly_all_model_sp_int, test = 'Chisq')
+
+# HI cases  
 monthly_species_HI <- pinnipeds_data %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
@@ -369,21 +353,115 @@ monthly_species_HI <- pinnipeds_data %>%
   group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
-#Combined species
-monthly_HI_model_sp <- glm(cnt ~ Pinniped.Common.Name + Month.of.Observation, family = poisson(link = log), data = monthly_species_HI)
+# Pairwise; repeat for each species
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Harbor seal'), dist = "Chisquare") #July
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'California sea lion'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Steller sea lion'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Northern elephant seal'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Northern fur seal'), dist = "Chisquare") # not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'), dist = "Chisquare") #not sig
 
-monthly_HI_model_sp_int <- glm(cnt ~ Pinniped.Common.Name * Month.of.Observation, family = poisson(link = log), data = monthly_species_HI)
+# #Combined species; same as above, help, not sure how to interpret anova output
+# monthly_HI_model_sp <- glm(cnt ~ Pinniped.Common.Name + Month.of.Observation, data = monthly_species_HI)
+# monthly_HI_model_sp_int <- glm(cnt ~ Pinniped.Common.Name * Month.of.Observation, data = monthly_species_HI)
+# anova(monthly_HI_model_sp, monthly_HI_model_sp_int, test = 'Chisq')
 
-anova(monthly_HI_model_sp, monthly_HI_model_sp_int, test = 'Chisq')
+#types of cases?
+monthly_HI_type <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Month.of.Observation, Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
 
-#Separate species, same as above for all strandings 
-# <--- insufficient observations to look at all species
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #Jun - Oct
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #Not sig
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) #Not sig
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Northern elephant seal'))) #Not sig
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'California sea lion'))) #Not sig
-summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_species_HI %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) #March
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_HI_type %>% filter(Interaction.Type == 'Fisheries'), dist = "Chisquare") 
+```
+
+- Seasonality across age and sex classes?
+```{r}
+#age class across all strands by month? Help uncertain if I should have year here
+monthly_age <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Age.Class != 'Unid') %>%
+  group_by(Month.of.Observation, Age.Class, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+#General model - at least one age class shows month as a predictor
+age_month_model <- glm.nb(cnt ~ Age.Class + Month.of.Observation, data = monthly_age)
+age_month_model_int <- glm.nb(cnt ~ Age.Class * Month.of.Observation, data = monthly_age)
+anova(age_month_model, age_month_model_int, test = 'Chisq')
+
+kruskal.test(monthly_age %>% filter(Age.Class == 'Pup'))
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_age %>% filter(Age.Class == 'Pup'), dist = "Chisquare") #June-Sept
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_age %>% filter(Age.Class == 'Yearling'), dist = "Chisquare") #not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_age %>% filter(Age.Class == 'Subadult'), dist = "Chisquare") #not sig
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_age %>% filter(Age.Class == 'Adult'), dist = "Chisquare") #not sig
+
+#Sex
+Sex_all_mo <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Sex == 'Male' | Sex == 'Female') %>%
+  group_by(Sex, Month.of.Observation, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo %>% filter(Sex == 'Male'), dist = "Chisquare") #July only different from Jan-April
+
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo %>% filter(Sex == 'Female'), dist = "Chisquare") #July different from Jan-May and different from Nov-Dec
+```
+
+- Seasonality in HI prevalence of certain types?
+```{r}
+
+numberpermonth <- pinnipeds_data %>% 
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  group_by(Month.of.Observation) %>%
+  summarize(mo.cnt = n_distinct(National.Database.Number))
+
+HI_type_yes_no_month <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Month.of.Observation) %>%
+  summarize(Yes = n_distinct(National.Database.Number)) %>%
+  dcast(Month.of.Observation ~ Interaction.Type, value.var = 'Yes') 
+HI_type_yes_no_month[is.na(HI_type_yes_no_month)] <- 0
+HI_type_yes_no_month <- HI_type_yes_no_month %>%
+  merge(numberpermonth, by = c('Month.of.Observation')) %>%
+  transform(NoBoat = mo.cnt - Boat, 
+            NoFish = mo.cnt - Fisheries,
+            NoGun = mo.cnt - Gunshot,
+            NoOther = mo.cnt - Other) %>%
+  dplyr::select(-c(mo.cnt)) %>%
+  transform(Boat.prop = (Boat/NoBoat),
+            Fisheries.prop = (Fisheries/NoFish),
+            Gunshot.prop = (Gunshot/NoGun),
+            Other.prop = (Other/NoOther))
+
+#Proportion of types - for more descriptive analysis?
+numberperyearpermonth <- pinnipeds_data %>% 
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  group_by(Month.of.Observation, Year.of.Observation) %>%
+  summarize(mo.cnt = n_distinct(National.Database.Number))
+
+HIprev_type_mo <- pinnipeds_data %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Month.of.Observation, Interaction.Type, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Month.of.Observation + Year.of.Observation ~ Interaction.Type, value.var = 'cnt')
+HIprev_type_mo[is.na(HIprev_type_mo)] <- 0
+HIprev_type_mo <- HIprev_type_mo %>%
+  merge(numberperyearpermonth, by = c('Month.of.Observation', 'Year.of.Observation')) %>%
+  transform(Boat = (Boat/mo.cnt),
+            Fisheries = (Fisheries/mo.cnt),
+            Gunshot = (Gunshot/mo.cnt),
+            Other = (Other/mo.cnt)) %>%
+  dplyr::select(Month.of.Observation, Year.of.Observation, Boat, Gunshot, Fisheries, Other)
+
+
+
+marchgun <- HIprev_type_mo %>% filter(Month.of.Observation != 'MAR') %>%
+  summarize(mean(Gunshot))
+
+
 ```
 
 
@@ -392,7 +470,6 @@ summary(glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = mon
 - Is there a statistical difference in strandings and HI across counties? (Washington)
 ```{r}
 #6. Is there a statistical difference in strandings/HI across counties? 
-# Moni suggests anova(model, model_interaction), but same as above - can I use post hoc nemenyi
 
 #All counties all strandings
 bycounty <- pinnipeds_data %>% 
@@ -469,7 +546,7 @@ posthoc.kruskal.nemenyi.test(cnt ~ County, ORHI_bycounty, dist = "Tukey")
 Is the prevalence of HI cases higher than expected given the distribution of overall strandings?
 ```{r}
 
-#7. Is the prevalence of HI cases higher than expected given the distribution of overall strandings?
+#Is the prevalence of HI cases higher than expected given the distribution of overall strandings?
 
 # Yes, No for HI by county
 HI_yes_no_county <- pinnipeds_data %>%
@@ -482,8 +559,7 @@ HI_yes_no_county <- HI_yes_no_county %>%
   transform(Yes = Y, No = (N+CBD)) %>%
   dplyr::select(County, Yes, No) 
 
-# For Moni - struggling to implement the right test, and how to interpret the output. The counties coming up with significant p-values are compared to a reference county, right? I want the HI cases compared to the non-HI cases
-summary(glm(cbind(Yes, No) ~ County, family = binomial, data = HI_yes_no_county))
+
 
 ```
 
@@ -491,20 +567,10 @@ Extra Questions
 - Are specific types of HI cases increasing or decreasing in certain counties?
 ```{r}
 
-HI_yes_no_county_yr <- pinnipeds_data %>%
-  group_by(County, Year.of.Observation, Findings.of.Human.Interaction) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(County + Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt')
-HI_yes_no_county_yr[is.na(HI_yes_no_county_yr)] <- 0
-HI_yes_no_county_yr <- HI_yes_no_county_yr %>%
-  transform(Yes = Y, No = (N+CBD)) %>%
-  dplyr::select(County, Year.of.Observation, Yes, No) 
-
 # Are gunshot, entanglements, or boat collisions increasing in certain counties? 
 
-#Washington
-WAHI_type_yr <- pinnipeds_data %>% 
-  filter(County != 'NA' & State == 'WA' & 
+HI_type_yr <- pinnipeds_data %>% 
+  filter(County != 'NA' & 
            Findings.of.Human.Interaction == 'Y' & 
            Interaction.Type != 'NA') %>% 
   transform(County = factor(County)) %>%
@@ -512,37 +578,20 @@ WAHI_type_yr <- pinnipeds_data %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
 # <--- Shows increasing in Grays, Pacific, Pierce, CLallam, Whatcom?
-WAHI_yr_model <- glm(cnt ~ County + Year.of.Observation, family = poisson(link = log), WAHI_type_yr)
-summary(WAHI_yr_model)
-# (Intercept)         -6.830e+01  1.018e+01  -6.707 1.98e-11 ***
-# CountyGrays Harbor   7.045e-01  1.669e-01   4.221 2.43e-05 *** y = 2.02x
-# CountyPacific        7.491e-01  1.594e-01   4.699 2.61e-06 *** y = 2.1x
-# CountyPierce         8.177e-01  1.552e-01   5.270 1.36e-07 *** y = 2.3x
-# Year.of.Observation  3.431e-02  5.071e-03   6.766 1.32e-11 *** y = 1.0x
+HI_type_yr_model <- glm.nb(cnt ~ Year.of.Observation, HI_type_yr %>% filter(County == 'Pacific'))
+summary(HI_type_yr_model)
+# Pierce: y = exp(0.06673) = 6.9%; z = 3.03, p < 0.01
+# Pacific: y = 7.3%; z = 2.7, p < 0.01
+# Clatsop: y = 1.095^x = 9.5%, 3.9, p < 0.001
+# Whatcom: y = 0.06371^x = 1.066, 3.0, p < 0.001
+# King: y = 0.05124^x = 1.053, 2.74, p < 0.01
+# Jefferson: y = 0.0736^x = 1.076, 2.2, p < 0.05
+# Lincoln; Grays Harbor; San Juan; Island; Snohomish; Skagit; Thurston; Tilla; Coos: not sig
 
 # <--- Shows only "other" increasing in Pierce?
 WAHI_type_yr_model <- glm(cnt ~ County*Interaction.Type, family = poisson(link = log), WAHI_type_yr)
 summary(WAHI_type_yr_model)
 
-# Oregon
-ORHI_type_bycounty <- pinnipeds_data %>% 
-  filter(County != 'NA' & State == 'OR' & 
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  transform(County = factor(County)) %>%
-  group_by(County, Interaction.Type, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-#Increasing just in Clallam and Clatsop, not changing either way anywhere else
-ORcounty_HI_model <- glm(cnt ~ County + Year.of.Observation, family = poisson(link = log), ORHI_type_bycounty)
-summary(ORcounty_HI_model)
-
-# CountyClatsop         1.420888   0.582208   2.441   0.0147 *    y = 4.1x
-# Year.of.Observation   0.041630   0.007356   5.660 1.52e-08 ***  y = 1.0x
-
-# <--- Shows none are significant
-ORHI_type_yr_model <- glm(cnt ~ County*Interaction.Type, family = poisson(link = log), ORHI_type_bycounty)
-summary(ORHI_type_yr_model)
 
 ```
 
@@ -602,35 +651,6 @@ kruskalmc(Sex_HI_yr$cnt ~ Sex_HI_yr$Sex)
 
 ```
 
-- Is there a difference in sex of strandings across months of the year?
-```{r}
-# Is there a difference in sex of strandings in different seasons?
-
-#All strandings
-Sex_all_mo <- pinnipeds_data %>%
-  filter(Sex == 'Male' | Sex == 'Female') %>%
-  group_by(Sex, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-Sex_all_mo_male <- pinnipeds_data %>%
-  filter(Sex == 'Male') %>%
-  group_by(Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-Sex_all_mo_fem <- pinnipeds_data %>%
-  filter(Sex == 'Female') %>%
-  group_by(Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-# <--- For females, July is different from Jan through May, whereas for males, July is different from only Jan, Feb (males stranding more in late spring, so broader peak?)
-kruskal.test(Sex_all_mo_fem)
-posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo_fem, dist = "Chisquare")
-
-kruskal.test(Sex_all_mo_male)
-posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo_male, dist = "Chisquare")
-
-
-```
 
 - Is there a difference in age class of strandings and HI cases?
 ```{r}
@@ -656,29 +676,6 @@ age_HI <- pinnipeds_data %>%
 kruskal.test(age_HI)
 kruskalmc(age_HI$cnt ~ age_HI$Age.Class)
 #posthoc.kruskal.nemenyi.test(cnt ~ Age.Class, age_HI, dist = "Chisquare")
-
-```
-
-- Is there a difference in age of strandings across months of the year?
-```{r}
-# Is there a difference in age of strandings in different seasons?
-
-#All strandings
-age_all_mo <- pinnipeds_data %>%
-  group_by(Age.Class, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
- 
-kruskal.test(age_all_mo)
-posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, age_all_mo, dist = "Chisquare")
-
-
-age_all_mo_model <- glm(cnt ~ Age.Class + Month.of.Observation, data = age_all_mo)
-
-age_all_mo_model_int <- glm(cnt ~ Age.Class * Month.of.Observation, data = age_all_mo)
-summary(age_all_mo_model_int)
-
-anova(age_all_mo_model, age_all_mo_model_int, test = 'Chisq')
 
 ```
 
