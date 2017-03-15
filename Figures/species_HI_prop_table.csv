@@ -1,8 +1,7 @@
-"Species","Total (n)","All Strandings (%)","OR (%)","WA (%)","Prevalence of HI (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
-"California sea lion",2823,19,69,31,15,18,58,4,20
-"Guadalupe fur seal",165,1,61,39,14,65,4,0,30
-"Harbor seal",8730,58,15,85,10,19,21,6,55
-"Northern elephant seal",445,3,66,34,8,11,33,11,44
-"Northern fur seal",122,1,61,39,25,75,4,0,21
-"Steller sea lion",1040,7,66,34,18,16,74,2,8
-"Unidentified",1614,11,64,36,4,38,33,3,27
+"Species","Total (n)","All Strandings (%)","OR (%)","WA Coast (%)","WA Inland (%)","Prevalence of HI (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
+"California sea lion",2823,19,69,11,20,15,18,58,4,20
+"Guadalupe fur seal",165,1,61,34,5,14,65,4,0,30
+"Harbor seal",8730,58,15,7,78,10,19,21,6,55
+"Northern elephant seal",445,3,66,16,17,8,11,33,11,44
+"Northern fur seal",122,1,61,25,15,25,75,4,0,21
+"Steller sea lion",1040,7,67,17,16,18,16,74,2,8
