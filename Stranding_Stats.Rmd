@@ -13,7 +13,6 @@ knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE)
 
 ```{r, include = F, echo = F}
 library(ggplot2)
-library(dplyr)
 library(tidyr)
 library(ggmap)
 library(data.table)
@@ -28,6 +27,7 @@ library(PMCMR)
 library(pgirmess) #kruskalmc()
 library(MASS) #glm.nb()
 library(multcomp) #glht()
+library(dplyr)
 
 #setwd("~/Documents/R/Strandings")
 

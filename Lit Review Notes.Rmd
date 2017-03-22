@@ -142,6 +142,8 @@ Zeileis - strucchange
 Norman 2008
 - spatial ecology/epidemiology
 - Guisan 2002: spatial regression studies?
+Guisan A., Edwards, T.C. Jr, & Hastie T. (2002). Generalized linear and generalized additive models in studies of species distributions: setting the scene. Ecological Modelling 157:89–100.
+
 - overall, not a lot of mapping has been done
 - kulldorf 1995 and Grieg 2005 for spatial scan stat for CSL
 - Norman in press: risk factors for lepto in CSL that contrib to regression model
