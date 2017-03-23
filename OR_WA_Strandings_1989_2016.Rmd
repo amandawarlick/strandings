@@ -739,7 +739,7 @@ HI_species_prev_figure <-
   geom_smooth(aes(Year.of.Observation, Prop.HI), col = 'black') +
   geom_line(aes(Year.of.Observation, Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name)) +
   #geom_smooth(aes(Year.of.Observation, Prop.HI, group = Pinniped.Common.Name, col = Pinniped.Common.Name), se = F) +
-  xlab("") + ylab("Prevalence of HI") +
+  xlab("") + ylab("Proportion of HI") +
   pubfigure_theme(legend.position = 'top') + 
   scale_color_grey()
 ```
@@ -1393,7 +1393,7 @@ bigtable_WA_HI_table <- bigtable_WA_HI_type %>%
   select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
   merge(bigtable_WA_HI, by = 'County') %>%
   select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
-colnames(bigtable_WA_HI_table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
+colnames(bigtable_WA_HI_table) <- c("County", "All Strandings (%)", "HI Proportion (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 WAcounties_table <- write.csv(bigtable_WA_HI_table, file = "./Figures/WAcounties_table.csv", row.names = F)
 
@@ -1431,7 +1431,7 @@ bigtable_OR_HI_table <- bigtable_OR_HI_type %>%
   select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
   merge(bigtable_OR_HI, by = 'County') %>%
   select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
-colnames(bigtable_OR_HI_table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
+colnames(bigtable_OR_HI_table) <- c("County", "All Strandings (%)", "HI Proportion (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 ORcounties_table <- write.csv(bigtable_OR_HI_table, file = "./Figures/ORcounties_table.csv", row.names = F)
 ```
@@ -1517,7 +1517,7 @@ Sex_HI_type_table <- pinnipeds_data %>%
   select(c(Sex, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(sex_HI_prev, by = 'Sex') %>%
   select(c(Sex, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Sex_HI_type_table) <- c("Class", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+colnames(Sex_HI_type_table) <- c("Class", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 sex_composition_table <- write.csv(Sex_HI_type_table, file = "./Figures/Sex_composition_table.csv", row.names = FALSE)
 
@@ -1556,7 +1556,7 @@ Age_HI_type_table <- pinnipeds_data %>%
   merge(age_HI_prev, by = 'Age.Class') %>%
   select(c(Age.Class, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
 Age_HI_type_table <- Age_HI_type_table[order(Age_HI_type_table$Age),]
-colnames(Age_HI_type_table) <- c("Class", "All Strandings (%)", "Prevalence of HI (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+colnames(Age_HI_type_table) <- c("Class", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 age_composition_table <- write.csv(Age_HI_type_table, file = "./Figures/age_composition_table.csv", row.names = FALSE)
 
@@ -1686,7 +1686,7 @@ species_prop_HI <- species_prop_HI %>%
   merge(species_HI_prev, by = 'Pinniped.Common.Name') %>%
   merge(state_species_prop, by = 'Pinniped.Common.Name') %>%
   dplyr::select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa_coast, prop.wa_in, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
-colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA Coast (%)", "WA Inland (%)", "Prevalence of HI (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
+colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA Coast (%)", "WA Inland (%)", "HI Proportion (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
 
 species_HI_prop_table <- write.csv(species_prop_HI, file = "./Figures/species_HI_prop_table.csv", row.names = F)
 
