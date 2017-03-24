@@ -28,6 +28,7 @@ library(pgirmess) #kruskalmc()
 library(MASS) #glm.nb()
 library(multcomp) #glht()
 library(dplyr)
+#detach("package:MASS")
 
 #setwd("~/Documents/R/Strandings")
 
@@ -403,6 +404,10 @@ Sex_all_mo <- pinnipeds_data %>%
   group_by(Sex, Month.of.Observation, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
+sex_month_model_m <- glm.nb(cnt ~ Month.of.Observation, data = Sex_all_mo %>% filter(Sex == 'Male'))
+sex_month_model_f <- glm.nb(cnt ~ Month.of.Observation, data = Sex_all_mo %>% filter(Sex == 'Female'))
+anova(sex_month_model_m, sex_month_model_f, test = 'Chisq')
+
 posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo %>% filter(Sex == 'Male'), dist = "Chisquare") #July only different from Jan-April
 
 posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, Sex_all_mo %>% filter(Sex == 'Female'), dist = "Chisquare") #July different from Jan-May and different from Nov-Dec
@@ -456,8 +461,6 @@ HIprev_type_mo <- HIprev_type_mo %>%
             Other = (Other/mo.cnt)) %>%
   dplyr::select(Month.of.Observation, Year.of.Observation, Boat, Gunshot, Fisheries, Other)
 
-
-
 marchgun <- HIprev_type_mo %>% filter(Month.of.Observation != 'MAR') %>%
   summarize(mean(Gunshot))
 
@@ -467,9 +470,23 @@ marchgun <- HIprev_type_mo %>% filter(Month.of.Observation != 'MAR') %>%
 
 ## Spatial Patterns  
 
-- Is there a statistical difference in strandings and HI across counties? (Washington)
+- Is there a statistical difference in strandings across regions over time and HI across counties? (Washington)
 ```{r}
-#6. Is there a statistical difference in strandings/HI across counties? 
+
+# Stats for change by region
+region_yr <- pinnipeds_data %>%
+  filter(!is.na(Water.Body) & Water.Body != 'NA') %>% 
+  group_by(Water.Body, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+summary(glm.nb(cnt ~ Year.of.Observation, data = region_yr %>% filter(Water.Body == 'Inland_WA')))
+#y = exp(0.03984) = 1.040^x, z = 4.95, p < 0.001
+
+summary(glm.nb(cnt ~ Year.of.Observation, data = region_yr %>% filter(Water.Body == 'WA_Coast')))
+#y = exp(0.0714) = 1.074^x, z = 3.62, p < 0.001
+
+summary(glm.nb(cnt ~ Year.of.Observation, data = region_yr %>% filter(Water.Body == 'OR_Coast')))
+#y = exp(0.05044) = 1.052^x, z = 3.78, p < 0.001
 
 #All counties all strandings
 bycounty <- pinnipeds_data %>% 
@@ -516,25 +533,33 @@ posthoc.kruskal.nemenyi.test(cnt ~ County, WAHI_bycounty, dist = "Chisquare")
 - Is there a statistical difference in strandings and HI across counties? (Oregon)
 ```{r}
 
-#All strandings, OR
-allOR_bycounty <- pinnipeds_data %>% 
-  filter(County != 'NA' & County != 'Unknown' & State == 'OR') %>% 
+#All strandings, both states
+all_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & County != 'Unknown') %>% 
   transform(County = factor(County)) %>%
   group_by(County, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
+countylist <- all_bycounty %>% group_by(County) %>%
+  summarize(cnt = sum(cnt))
+
+# Would be best to have the control be the mean - trying "contr.sum"
+county_contrasts <- summary(glm(cnt ~ County, contrasts = list(County = 'contr.sum'), data = all_bycounty))
+
 # <--- K-W show strandings higher in Lincoln
-kruskal.test(allOR_bycounty)
-posthoc.kruskal.nemenyi.test(cnt ~ County, allOR_bycounty, dist = "Chisquare")
+# kruskal.test(allOR_bycounty)
+# posthoc.kruskal.nemenyi.test(cnt ~ County, allOR_bycounty, dist = "Chisquare")
 
 #HI strandings, OR
-ORHI_bycounty <- pinnipeds_data %>% 
-  filter(County != 'NA' & State == 'OR' & 
+HI_bycounty <- pinnipeds_data %>% 
+  filter(County != 'NA' & 
            Findings.of.Human.Interaction == 'Y' & 
            Interaction.Type != 'NA') %>% 
   transform(County = factor(County)) %>%
   group_by(County, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
+
+county_contrasts_HI <- summary(glm(cnt ~ County, contrasts = list(County = 'contr.sum'), data = HI_bycounty))
 
 # <--- K-W shows Clatsop, Lincoln
 kruskal.test(ORHI_bycounty)
