@@ -1821,6 +1821,26 @@ pinnipeds_data_mapping <- pinnipeds_data %>%
             Latitude = as.numeric(Latitude)) %>%
   filter(Longitude != 'NA')
 
+##State-based maps no longer used from manuscript:
+#OR HI - facet
+# HI_heatmap_OR_facet <-
+#   ggmap(get_map(location = allbox, source = "google", maptype = "roadmap")) +
+#   geom_point(data = pinnipeds_data_mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = Longitude, y = Latitude), bins = 4, col = 'grey20') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   theme(
+#     axis.line = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_blank()) +
+#     #panel.border = element_rect(colour = "black", size = 1)) 
+#   scale_x_continuous(limits = c(-125, -123)) + scale_y_continuous(limits = c(40, 50)) +
+#   facet_wrap(~ Interaction.Type)
+# figs("HI_heatmap_OR_facet", caption = "Kernel density plot showing hotspots of human interaction cases in Oregon, with fisheries and boat collisions distributed along the northern coast, and gunshot wounds focused near Astoria and the Columbia River.")
+
 #All strandings - black dots - stamen attempt
 # stamen <- get_stamenmap(bbox = c(-126.7, 41.79, -119.19, 50.078), maptype = "terrain", zoom = 5, size = 2, color = "bw")
 # 

@@ -73,7 +73,13 @@ all_data <- bind_rows(all_data_pnw, all_data_ca) %>%
                                   County == 'Jefferson' & Affiliation != 'Port Townsend Marine Science Center/ East Jefferson Co. MMSN' &
                                   City == 'Dosewallips' & City == 'Port Ludlow' & City != 'Brinnon' & City != 'Quilcene' & City != 'Port Townsend', 'WA_Coast',
                                 ifelse(State == 'OR', 'OR_Coast', 
-                                       ifelse(State == 'CA', 'CA Coast', 'Inland_WA'))))
+                                       ifelse(State == 'CA', 'CA Coast', 'Inland_WA')))) %>% 
+  transform(Short_name = ifelse(Pinniped.Common.Name == 'California sea lion', 'CSL', 
+                                 ifelse(Pinniped.Common.Name == 'Harbor seal', 'HS', 
+                                        ifelse(Pinniped.Common.Name == 'Guadalupe fur seal', 'GFS',
+                                               ifelse(Pinniped.Common.Name == 'Northern fur seal', 'NFS',
+                                                      ifelse(Pinniped.Common.Name == 'Steller sea lion', 'SSL',
+                                                             ifelse(Pinniped.Common.Name == 'Northern elephant seal', 'NES', 'NA')))))))
 
 #Regional ifelse statement cleaning
 test <- all_data %>%
