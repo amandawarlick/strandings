@@ -1,17 +1,16 @@
-"County","All Strandings (%)","Human Interactions (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
+"County","All Strandings (%)","HI Proportion (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
 "Clallam",6,6,14,33,5,48
 "Clark",0,1,0,100,0,0
 "Cowlitz",0,1,0,100,0,0
 "Grays Harbor",8,10,7,45,0,49
 "Island",9,5,16,43,16,25
 "Jefferson",4,4,26,13,5,55
-"Jefferson County",0,0,0,0,50,50
 "King",9,7,29,28,0,43
 "Kitsap",8,8,28,20,0,52
 "Mason",2,2,24,29,0,48
 "Pacific",6,14,18,66,1,16
 "Pierce",13,16,10,13,3,74
-"San Juan",21,8,16,24,16,45
+"San Juan",21,9,16,24,16,45
 "Skagit",2,2,18,5,9,68
 "Snohomish",3,3,22,25,3,50
 "Thurston",3,4,27,18,7,49
