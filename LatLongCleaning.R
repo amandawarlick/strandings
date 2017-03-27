@@ -66,22 +66,23 @@ mean_lat_long <- pinnipeds_data %>%
   group_by(County) %>%
   summarize(mean_lat = mean(Latitude, na.rm = T), mean_long = mean(Longitude, na.rm = T))
 
-all.data.orig <- all.data.orig %>%
-  select(-c(Latitude.Units, Longitude.Units, Genus, Mammal.Type)) %>%
-  filter(!is.na(Latitude)) %>%
-  merge(mean_lat_long, by = "County")
 
-Lat_Long_ordered <- all.data.orig %>%
-  transform(Long_error = mean_long - Longitude,
-            Lat_error = mean_lat - Latitude) %>%
-  filter(Long_error < -1.4 | Long_error > 1 | Lat_error < -.5 | 
-           Lat_error > .5 | Latitude > 49.05) %>%
-  select(Field.Number, National.Database.Number, Affiliation, Common.Name, Year.of.Observation, Observation.Date,
-         State, County, City...from.strandings.table, Locality.Detail, Latitude, mean_lat,
-         Lat_error, Longitude, mean_long, Long_error) %>%
-  arrange(Latitude)
+#Cleaning for Lauren
+# all.data.orig <- all.data.orig %>%
+#   select(-c(Latitude.Units, Longitude.Units, Genus, Mammal.Type)) %>%
+#   filter(!is.na(Latitude)) %>%
+#   merge(mean_lat_long, by = "County")
+# 
+# Lat_Long_ordered <- all.data.orig %>%
+#   transform(Long_error = mean_long - Longitude,
+#             Lat_error = mean_lat - Latitude) %>%
+#   filter(Long_error < -1.4 | Long_error > 1 | Lat_error < -.5 | 
+#            Lat_error > .5 | Latitude > 49.05) %>%
+#   select(Field.Number, National.Database.Number, Affiliation, Common.Name, Year.of.Observation, Observation.Date,
+#          State, County, City...from.strandings.table, Locality.Detail, Latitude, mean_lat,
+#          Lat_error, Longitude, mean_long, Long_error) %>%
+#   arrange(Latitude)
 
-write.csv(Lat_Long_ordered, file = "~/Documents/R/Strandings/Lat_Long_ordered.csv", row.names = F)
 
 ###California
 

@@ -83,24 +83,17 @@ setwd("./Figures")
 
 #Creating tables for inline references
 
-#HI proportion of species
-species_HI_prop_table <- read.csv("species_HI_prop_table.csv", check.names = F)
-tbls("species_HI_prop_table", caption = "Species composition of all strandings (*n* = 14,939), the prevalence of human interaction cases (HI/all cases) for each species, regional distribution, and the composition of human interaction type (number of specific type/all HI cases) for each species.")
-
-#Age class and sex proportion table
-age_sex_table <- read.csv("age_sex_table.csv", check.names = F)
-age_sex_table$Age.Class <- as.character(age_sex_table$Age.Class)
-age_sex_table[6, 1] <- "Average"
-colnames(age_sex_table) <- c("Age Class", "Total (N)", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
-tbls("age_sex_table", caption = "Number and percentage of male, female, and unidentified strandings at each age class across all years and the average sex composition of strandings across all age classes.")
-
-#Age and sex per species
-species_age_sex_composition_table <- read.csv("species_age_sex_composition.csv", check.names = F)
-tbls("species_age_sex_composition_table", caption = "Age class and sex composition of all strandings (*n* = 14,939) by species shows higher proportion of males and adults for California and Steller sea lions and a higher proportion of pups for harbor seals.")
-
 #Sex and age disposition proportion table
 age_sex_composition_table <- read.csv("age_sex_composition_table.csv", check.names = FALSE)
 tbls("age_sex_composition_table", caption = "Sex and age composition of all strandings (*n* = 14,939), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")
+
+#Age and sex per species
+species_age_sex_composition_table <- read.csv("species_age_sex_composition.csv", check.names = F)
+tbls("species_age_sex_composition_table", caption = "Age and sex composition and weighted averages of all strandings (*n* = 14,939) by species shows higher proportion of males and adults for California and Steller sea lions and a higher proportion of pups for harbor seals.")
+
+#HI proportion of species
+species_HI_prop_table <- read.csv("species_HI_prop_table.csv", check.names = F)
+tbls("species_HI_prop_table", caption = "Species composition of all strandings (*n* = 14,939), the prevalence of human interaction cases (HI/all cases) for each species, regional distribution, and the composition of human interaction type (number of specific type/all HI cases) for each species.")
 
 #Washington counties
 WAcounties_table <- read.csv("WAcounties_table.csv", check.names = FALSE)
@@ -109,6 +102,12 @@ tbls("WAcounties_table", caption = "Proportion of all strandings, proportion of 
 #Oregon counties
 ORcounties_table <- read.csv("ORcounties_table.csv", check.names = FALSE)
 tbls("ORcounties_table", caption = "Proportion of all strandings (%), the proportion of human interaction cases (%) and the composition of human interaction case types for each county in Oregon (*n* = 5,435).")
+
+#Combined with other tables, now just for inline stats
+age_sex_table <- read.csv("age_sex_table.csv", check.names = F)
+age_sex_table$Age.Class <- as.character(age_sex_table$Age.Class)
+age_sex_table[6, 1] <- "Average"
+colnames(age_sex_table) <- c("Age Class", "Total (N)", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
 
 setwd("..") 
 ```
@@ -184,6 +183,7 @@ year_prop_HI <- pinnipeds_data %>%
   dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') 
 year_prop_HI[is.na(year_prop_HI)] <- 0
 year_prop_HI <- year_prop_HI %>% transform(Prop.HI = round(Y/(Y + N + CBD), 2)*100)
+
 ```
 
 ```{r all figures, echo = FALSE, results = 'hide'}
@@ -358,7 +358,6 @@ monthly_HI <- pinnipeds_data %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
 #Species
-
 monthly_HI_sp_final_line <- monthly_HI %>% 
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
@@ -369,7 +368,7 @@ monthly_HI_sp_final_line <- monthly_HI %>%
   pubfigure_simple_theme(legend.position = c(.3, .9),
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 9),
         axis.title = element_text(size = 10)) + 
-  scale_color_manual(values = color1, guide = guide_legend(nrow = 2))
+  scale_color_manual(values = color1, guide = guide_legend(nrow = 3))
 
 #Age
 monthly_HI_age_final_line <- monthly_HI %>% 
@@ -385,7 +384,6 @@ monthly_HI_age_final_line <- monthly_HI %>%
   scale_color_manual(values = color1, guide = guide_legend(nrow = 2))
 
 #HI type
-
 monthly_HI_type_final_line <- monthly_HI %>% 
   filter(Interaction.Type != 'NA') %>%
   group_by(Month.of.Observation, Interaction.Type) %>%
@@ -458,7 +456,7 @@ HI_county_final <- pinnipeds_data %>%
 countyfigure <- plot_grid(all_county_final, HI_county_final,
           align = 'v', ncol = 1, rel_heights = c(1, 1.1), label_size = 10, labels = "auto")
 
-figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific. Asterisks represent counties where counts are significantly higher than mean strandings and HI cases.")
+figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific. Asterisks represent counties where counts are significantly higher than mean strandings and HI cases (p < 0.05).")
 
 ```
 
@@ -473,8 +471,10 @@ pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
 
 pinnipeds_data_mapping <- pinnipeds_data %>% 
   transform(Longitude = as.numeric(Longitude),
-            Latitude = as.numeric(Latitude)) %>%
-  filter(Longitude != 'NA')
+            Latitude = as.numeric(Latitude),
+            long_corr = as.numeric(long_corr),
+            lat_corr = as.numeric(lat_corr)) #%>%
+  #filter(Longitude != 'NA')
 
 pinnipeds_data_mapping_sp <- pinnipeds_data_mapping %>% filter(Pinniped.Common.Name != 'Unidentified')
 
@@ -483,13 +483,13 @@ pinnipeds_data_mapping_HI <- pinnipeds_data_mapping %>%
 
 #HI type facet map
 HI_type_facet <- ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
-  geom_point(data = pinnipeds_data_mapping_HI, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
-  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = Longitude, y = Latitude), bins = 5, col = 'grey20') +
+  geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 5, col = 'grey20') +
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   facet_wrap(~ Interaction.Type) +
-  scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.2)) +
-   theme(
+  scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.75)) +
+   theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
@@ -497,20 +497,20 @@ HI_type_facet <- ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain
     strip.background = element_blank(),
     panel.border = element_rect(colour = "black", fill = NA, size = 5))
   
-figs("HI_type_facet", caption = "Strandings (points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")
+figs("HI_type_facet", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")
 
 #All strandings - species facet
 allstrands_species <-
  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
-  geom_point(data = pinnipeds_data_mapping_sp, aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
-  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = Longitude, y = Latitude), bins = 5, col = 'grey20') +
-  # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  geom_point(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 3, col = 'grey20') +
+  # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
   # scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   facet_wrap(~ Pinniped.Common.Name) +
   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.65)) +
-   theme(
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
@@ -518,22 +518,22 @@ allstrands_species <-
     strip.background = element_blank(),
     panel.border = element_rect(colour = "black", fill = NA, size = 5))
 
-figs("allstrands_species", caption = "Kernel density plot of species stranding hotspots in Washington.")
+figs("allstrands_species", caption = "All stranding cases (grey points) and kernel density hotspot contour lines showing stranding hotspots for each species, with hotspots occurring in the Salish Sea for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")
 
 #HI and strandings - species facet, red and black
 HIstrands_species <-
  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
   geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), 
-             aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
-  geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = Longitude, y = Latitude), bins = 3, col = 'red') +
-  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = Longitude, y = Latitude), bins = 2, col = 'grey20') +
-  # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+             aes(x = long_corr, y = lat_corr), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 2, col = 'grey20') +
+  # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
   # scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) + #for color heatmap
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   facet_wrap(~ Pinniped.Common.Name) +
   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.65)) +
-   theme(
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
@@ -541,19 +541,20 @@ HIstrands_species <-
     strip.background = element_blank(),
     panel.border = element_rect(colour = "black", fill = NA, size = 5))
 
-figs("HIstrands_species", caption = "Kernel density plot of species stranding hotspots in Washington.")
+figs("HIstrands_species", caption = "Strandings (grey points) and kernel density hotspot contour lines showing overlapping hotspots for all strandings (black) and human interaction cases (red).")
 
 #Option with overlapping HI types
 HI_overlap <-
  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
   geom_point(data = pinnipeds_data_mapping_HI, 
-             aes(x = Longitude, y = Latitude), color = 'grey50', size = 0.3, alpha = 0.5)  +
-  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = Longitude, y = Latitude, col = Interaction.Type), bins = 4, size = .8) +
+             aes(x = long_corr, y = lat_corr), color = 'grey50', size = 0.3, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr, col = Interaction.Type), bins = 4, size = .8) +
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   #facet_wrap(~ Interaction.Type) +
   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.65)) +
-   theme(legend.position = 'bottom', legend.title = element_blank(),
+   theme(legend.position = 'top', legend.title = element_blank(),
+    plot.margin = unit(c(0, -5, 0, -5), "mm"),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
@@ -562,7 +563,7 @@ HI_overlap <-
     panel.border = element_rect(colour = "black", fill = NA, size = 5)) +
   scale_color_manual(values = color1)
 
-#figs("HI_overlap", caption = "Kernel density plot of species stranding hotspots in Washington.")
+figs("HI_overlap", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")
 
 ```
 
@@ -608,7 +609,10 @@ Guadalupe fur seals (*Arctocephalus townsendi*) were nearly extirpated in the la
 *Data Sources and Characterization*  
 
 [Add note - define stranding/data cleaning. Combine yearlings and subadults? Jen and Dyanna have expressed concerns about categories over time. [add note - formatting for subheadings depending on journal]] 
-Data for this analysis were drawn from the NOAA National Marine Fisheries Service national stranding database (accessed February 2017) that contains standardized "Level A" information submitted by stranding responders, including a field ID number, observation date, stranding location, latitude and longitude coordinates, age, sex, species, stranding condition (live or dead), and other observational comments including visible evidence of injury or illness. The total number of pinnipeds stranded in Oregon and Washington from 1989 to 2016 (*n* = `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` records) were characterized according to sex, age class, and species, and then aggregated by month, year, and stranding location (county). Inland Washington waters were distinguished from coastal Washington counties because the species that live and strand in these two sub-regions are very different. For this analysis, we assume stranding location can be used as a relative approximation for where strandings and human interactions occurred, though carcasses can drift for some time before making landfall, and non-lethally entangled animals can migrate with entangling debris from a different region.  
+
+Data for this analysis were drawn from the NOAA National Marine Fisheries Service national stranding database (accessed February 2017) that contains standardized "Level A" information submitted by stranding responders, including a field ID number, observation date, stranding location, latitude and longitude coordinates, age, sex, species, stranding condition (live or dead), and other observational comments including visible evidence of injury or illness. A pinniped is defined as being stranded when it is either dead or still alive on the beach but in need of medical attention or unable to return to the water on its own (Marine Mammal Protection Act of 1972). In the Pacific Northwest, animals also get reported by the public when they are simply resting, and responders often then must monitor the situation (particularly if in a populated area) and document the case in the stranding database. Therefore, reported strandings for some species in some areas (particularly harbor seal pups in inland Washington waters) may over-represent the true number of stranded animals that are sick or injured. We have not excluded these in this analysis because cases are inconsistently documented across networks and are therefore difficult to systematically extract from such a large sample size, and, they do represent the true number of cases that require time and resources from response networks. 
+
+The total number of pinnipeds reported stranded in Oregon and Washington from 1989 to 2016 (*n* = `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` records) were characterized according to sex, age class, and species, and then aggregated by month, year, and stranding location (county). Inland Washington waters were distinguished from coastal Washington counties because the species that live and strand in these two sub-regions are very different. For this analysis, we assume stranding location can be used as a relative approximation for where strandings and human interactions occurred, though carcasses can drift for some time before making landfall, and non-lethally entangled animals can migrate with entangling debris from a different region.  
 
 In addition to examining total stranding cases, the number of human interaction cases were also examined. Human interaction (HI) cases are recorded on the Level A stranding intake form, with "Yes," "No," or "could not be determined (CBD)" designations for whether there is evidence of fisheries entanglements, gunshot wounds, boat collisions, or "other" human interactions. Descriptions of "other" human interactions include but are not limited to indeterminate blunt trauma, missing body parts, dog bites, debris entanglement, oil staining, and humans harassing or illegally relocating animals. The “CBD” designation includes a variety of possible situations, ranging from an unexamined animal to an animal with suspected but unconfirmed HI. Thus, the number of confirmed HI cases is a conservative estimate. Records for dead or decomposed animals can be missing certain fields, resulting in "Unknown" or "Unidentified" age, sex, or even species designations, and were therefore only included in analyses of total strandings. 
 
@@ -619,22 +623,22 @@ Age class, sex, and species - To determine whether the number of strandings were
 
 Temporal patterns - To determine whether strandings and HI cases have changed over the study period, we examined both the *number* and *prevalence* over time. We used negative binomial general linear model (GLM) regressions (to account for overdispersion and correct for standard error estimates that might be biased downwards in a Poisson regression model; using the glm.nb function in the MASS R package) for total annual stranding cases against year. Regressions were repeated for total strandings and HI cases for each species. Regression coefficients reported using this technique were back-transformed, resulting in a "fold increase" (*e.g.*, y = 1.051^x^ being equivalent to a 5.1% increase per year). Time series figures were fit with a loess regression line ("locally weighted regression", Cleveland & Devlin, 1988) to allow for a dynamic, changing, and unknown relationship between explantory and response variables over time, which could arise from changes in stranding network capacity and reporting effort over the study period, among other things. Annual timeseries trends were also explored using Chow's breakpoint test (strucchange package in R) to determine whether interannual changes in stranding numbers reflect known changes in stranding network capacity, effort, and funding over time. To examine changes in the prevalence of HI cases, we used a binomial logistic GLM regression with the logit link function, resulting in untransformed regression coefficients. 
 
-The presence of seasonal patterns were tested using post-hoc pairwise Kruskal-Wallis Nemenyi tests, as above, with month as the independent variable and total monthly stranding cases as the dependent variable. We also tested for the presence of a seasonal effect with ANOVA comparisons of negative binomial GLM regression models with and without stranding month as an interaction term. Any monthly analyses were conducted on the subset of individuals that were recorded as being either alive or freshly dead at the time of observation in order to best capture the temporal component of the stranding event.
+The presence of seasonal patterns was tested using post-hoc pairwise Kruskal-Wallis Nemenyi tests, as above, with month as the independent variable and total monthly stranding cases as the dependent variable. We also tested for the presence of a seasonal effect with ANOVA comparisons of negative binomial GLM regression models with and without stranding month as an interaction term. Any monthly analyses were conducted on the subset of individuals that were recorded as being either alive or freshly dead at the time of observation in order to best capture the temporal component of the stranding event.
 
-Spatial patterns - To determine possible spatial patterns in overall strandings and HI cases, we again used negative binomial GLM regression and pairwise Kruskal-Wallis Nemenyi tests using stranding location (county) as the independent variable and total monthly stranding cases as the dependent variable. Stranding hotspot maps were generated with a kernel density estimation (Gatrell et al., 1996) derived from the ggplot2 function geom_density2d in R. Because this function does not take into account the fact that strandings occur only on the coast, these maps are intended as a qualitative visualization rather than a statistical probability for predicting the spatial distribution of stranding cases. Further refining the parameters of the kernel density function or using saTScan analysis (Kulldorff & Nagarwalla, 1995; Kulldorff, 2001, Kreuder et al., 2003; Kulldorf et al., 2005) could be explored in the future to refine these hotspot maps. 
+Spatial patterns - To determine possible spatial patterns in overall strandings and HI cases, we again used negative binomial GLM regression and pairwise Kruskal-Wallis Nemenyi tests using stranding location (county) as the independent variable and total monthly stranding cases as the dependent variable. Stranding hotspot maps were generated with a kernel density estimation (Gatrell et al., 1996) derived from the ggplot2 function geom_density2d in R. Because this function does not account for the fact that strandings occur only on the coast, these maps are intended as a qualitative visualization rather than a statistical probability for predicting the spatial distribution of stranding cases. Further refining the parameters of the kernel density function or using saTScan analysis (Kulldorff & Nagarwalla, 1995; Kulldorff, 2001, Kreuder et al., 2003; Kulldorf et al., 2005) could be explored in the future to refine these hotspot maps. 
 
 *Caveats*  
 Stranding response network members have grown in their capacity and coverage over the study period, particularly in the mid-2000s with the implementation of the NOAA Fisheries Prescott Grant Program^[See http://www.nmfs.noaa.gov/pr/health/prescott/ for more information.], which could in part account for a rise in reported strandings. Not all historical records prior to the implementation of this grant program have been digitized, and may therefore be excluded from this analysis. One of the challenges of using data from this compilation of stranding reports is that beach coverage, response capacity, and even data-reporting protocols vary between network members and over time. Thus, any apparent patterns must be interpreted in the context of those challenges. However, when combined, these data illustrate what is known and what remains uncertain about strandings throughout the region.
 
 **Results** 
 
-[add note - simplify stats reporting?]
+[add note - simplify stats reporting? Round percs?]
 From 1989-2016, local stranding response networks identified and recorded `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` stranded pinnipeds along the coasts and inland waters of Oregon and Washington. Approximately `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "ALIVE",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% were alive and `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "FRESH DEAD",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% were freshly dead at the time of recovery, with the remaining being in various states of decomposition. Evidence of human interaction was noted in `r round(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all stranding cases over the study period, including fisheries entanglements (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",]), big.mark = ",")`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% of all human interaction cases), gunshot wounds (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), boat collision injuries (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), and "other" (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%). 
 
 *Age Class and Sex*  
-All stranding cases - Annual strandings differed significantly by both sex (*χ*^2^ = 119.3, p < 0.001) and age class (*χ*^2^ = 232.6, p < 0.001), but remained relatively consistent throughout the study period. From 1989-2016, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Male",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Female",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Unid",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age_sex_table", display = "cite")` and `r tbls("age_sex_composition_table", display = "cite")`). Across all strandings, the majority were pups (`r age_all[age_all$Age.Class == "Pup", "prop"]`%) and adults (`r age_all[age_all$Age.Class == "Adult", "prop"]`%), with significantly fewer yearlings (`r age_all[age_all$Age.Class == "Yearling", "prop"]`%) and subadults (`r age_all[age_all$Age.Class == "Subadult", "prop"]`%), and the remainder unidentified (`r tbls("age_sex_table", display = "cite")` and `r tbls("age_sex_composition_table", display = "cite")`). Pairwise comparisons showed that annual strandings for pups and adults were significantly higher than yearlings and subadults. 
+All stranding cases - Annual strandings differed significantly by both sex (*χ*^2^ = 119.3, p < 0.001) and age class (*χ*^2^ = 232.6, p < 0.001), but remained relatively consistent throughout the study period. From 1989-2016, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Male",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Female",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Unid",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age_sex_composition_table", display = "cite")`). Across all strandings, the majority were pups (`r age_all[age_all$Age.Class == "Pup", "prop"]`%) and adults (`r age_all[age_all$Age.Class == "Adult", "prop"]`%), with significantly fewer yearlings (`r age_all[age_all$Age.Class == "Yearling", "prop"]`%) and subadults (`r age_all[age_all$Age.Class == "Subadult", "prop"]`%), and the remainder unidentified (`r tbls("age_sex_composition_table", display = "cite")`). Pairwise comparisons showed that annual strandings for pups and adults were significantly higher than yearlings and subadults. 
 
-Additionally, the sex composition of strandings varies depending on age class and species, with the proportion of females ranging from `r age_sex_table[age_sex_table$Age == 'Subadult', "Female (%)"]`% for subadults to `r age_sex_table[age_sex_table$Age == 'Pup', "Female (%)"]`% for pups and the proportion of males ranging from `r age_sex_table[age_sex_table$Age == 'Pup', "Male (%)"]`% of pups to `r age_sex_table[age_sex_table$Age == 'Adult', "Male (%)"]`% of adults (`r tbls("age_sex_table", display = "cite")`). For California sea lions, most identified strandings (those assigned a species or age class designation) were male, while the sex composition was more equal for the other species (`r tbls("species_age_sex_composition_table", display = "cite")`). For California sea lions and Steller sea lions, more than half of identified strandings were adults, while the majority for the other four species were pups and yearlings (`r species_age_sex_composition_table[species_age_sex_composition_table$Species == 'Guadalupe fur seal', "Yearling (%)"]`% for Guadalupe fur seals) (`r tbls("species_age_sex_composition_table", display = "cite")`).
+Additionally, the sex composition of strandings varies depending on age class and species, with the proportion of females ranging from `r age_sex_table[age_sex_table$Age == 'Subadult', "Female (%)"]`% for subadults to `r age_sex_table[age_sex_table$Age == 'Pup', "Female (%)"]`% for pups and the proportion of males ranging from `r age_sex_table[age_sex_table$Age == 'Pup', "Male (%)"]`% of pups to `r age_sex_table[age_sex_table$Age == 'Adult', "Male (%)"]`% of adults. For California sea lions, most identified strandings (those assigned a species or age class designation) were male, while the sex composition was more equal for the other species (`r tbls("species_age_sex_composition_table", display = "cite")`). For California sea lions and Steller sea lions, more than half of identified strandings were adults, while the majority for the other four species were pups and yearlings (`r species_age_sex_composition_table[species_age_sex_composition_table$Species == 'Guadalupe fur seal', "Yearling (%)"]`% for Guadalupe fur seals) (`r tbls("species_age_sex_composition_table", display = "cite")`).
 
 Human interaction cases - Similar to overall strandings, the *number* of HI cases is significantly higher for males compared to females (*χ*^2^ = 119.2, p < 0.001), but the proportions are similar for both sexes (~ `r age_sex_composition_table[age_sex_composition_table$Class == 'Female', "HI Proportion (%)"]`%; `r tbls("age_sex_composition_table", display = "cite")`). The prevalence of fisheries interactions and boat injuries is similar between males and females, though gunshot wounds are more prevalent for males (`r tbls("age_sex_composition_table", display = "cite")`). For specific age classes, the number and proportion of HI cases is significantly higher in pups, adults, and subadults and lowest for yearlings (`r tbls("age_sex_composition_table", display = "cite")`). Fisheries interactions are the most common type of HI case for yearlings (`r age_sex_composition_table[age_sex_composition_table$Class == 'Yearling', "Fisheries Interactions (%)"]`% of all yearling HI cases) and significantly less for pups and adults (`r age_sex_composition_table[age_sex_composition_table$Class == 'Pup', "Fisheries Interactions (%)"]`%). Gunshot wounds, however, are most prevalent in adults (`r age_sex_composition_table[age_sex_composition_table$Class == 'Adult', "Gunshots (%)"]`% of adult HI cases) and subadults (`r age_sex_composition_table[age_sex_composition_table$Class == 'Subadult', "Gunshots (%)"]`%) and less so for pups (`r age_sex_composition_table[age_sex_composition_table$Class == 'Pup', "Gunshots (%)"]`%). Boat collisions comprise a small proportion (`r min(age_sex_composition_table[4:7, "Boat Injuries (%)"])`-`r max(age_sex_composition_table[4:7, "Boat Injuries (%)"])`%) of HI cases for all age classes (`r tbls("age_sex_composition_table", display = "cite")`). 
 
@@ -644,24 +648,22 @@ The majority of total strandings were harbor seals (`r round(species[species$Pin
 The proportion of HI cases (*i.e.*, percentage of cases with evidence of human interaction divided by total number of cases), and the composition of HI cases (*i.e.*, the percentage of human interaction cases involving gunshot wounds versus fisheries entanglements) differs between species. The proportion of HI cases ranges from `r species_HI_prop_table[species_HI_prop_table$Species == 'Northern elephant seal', "HI Proportion (%)"]`% for northern elephant seals up to `r species_HI_prop_table[species_HI_prop_table$Species == 'Steller sea lion',  "HI Proportion (%)"]`% for Steller sea lions and `r species_HI_prop_table[species_HI_prop_table$Species == 'Northern fur seal',  "HI Proportion (%)"]`% for northern fur seals, the latter species occurring in lowest numbers in the study area (`r tbls("species_HI_prop_table", display = "cite")`). The composition of HI types varies considerably across species. Gunshot wounds constituted `r species_HI_prop_table[species_HI_prop_table$Species == 'Steller sea lion', "Gunshot (%)"]`% of human interaction cases for Steller sea lions and `r species_HI_prop_table[species_HI_prop_table$Species == 'California sea lion', "Gunshot (%)"]`% for California sea lions, but only `r species_HI_prop_table[species_HI_prop_table$Species == 'Harbor seal', "Gunshot (%)"]`% for harbor seals. In contrast, fisheries interactions made up a lower proportion of human interaction cases for those three species but amounted to `r species_HI_prop_table[species_HI_prop_table$Species == 'Guadalupe fur seal', "Fisheries (%)"]`% and `r species_HI_prop_table[species_HI_prop_table$Species == 'Northern fur seal', "Fisheries (%)"]`% of human interaction cases for Guadalupe and northern fur seals, respectively (`r tbls("species_HI_prop_table", display = "cite")`). Boat collision injuries are encountered much less frequently than the other types of HI cases but are most prevalent in northern elephant seals, amounting to `r species_HI_prop_table[species_HI_prop_table$Species == 'Northern elephant seal', "Boat (%)"]`% of HI cases (`r tbls("species_HI_prop_table", display = "cite")` and `r figs("species_boxplots", display = "cite")`b). The changes in these proportions over time are detailed below.
 
 *Temporal Patterns*  
-All stranding cases - Since 1989, the number of reported stranding cases increased significantly over time (y = 1.048^x^, z = 5.4, p < 0.001), suggesting a 4.8% increase per year. An annual average of `r data_by_year %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(cnt), 1))` individuals stranded per year throughout the 1990s and `r data_by_year %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(cnt), 1))` per year since 2000. However, annual strandings are changing differently over the study period for each species; significantly increasing for harbor seals (y = 1.057^x^, z = 6.2, p < 0.001), California sea lions (y = 1.098^x^, z = 7.7, p < 0.001), Steller sea lions (y = 1.143^x^, z = 8.3, p < 0.001), Guadalupe fur seals (y = 1.159^x^, z = 2.0, p < 0.05), and northern fur seals (y = 1.044^x^, z = 2.2, p < 0.05) (`r figs("all_timeseries", display = 'cite')`). Examining these trends separately for the Oregon coast, Washington coast, and inland Washington waters would likely indicate different rates of change.
+All stranding cases - Since 1989, the number of reported stranding cases increased significantly over time (y = 1.048^x^, z = 5.4, p < 0.001; suggesting a 4.8% increase per year). An annual average of `r data_by_year %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(cnt), 1))` individuals stranded per year throughout the 1990s and `r data_by_year %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(cnt), 1))` per year since 2000. However, annual strandings are changing differently over the study period for each species; significantly increasing for harbor seals (y = 1.057^x^, z = 6.2, p < 0.001), California sea lions (y = 1.098^x^, z = 7.7, p < 0.001), Steller sea lions (y = 1.143^x^, z = 8.3, p < 0.001), Guadalupe fur seals (y = 1.159^x^, z = 2.0, p < 0.05), and northern fur seals (y = 1.044^x^, z = 2.2, p < 0.05) (`r figs("all_timeseries", display = 'cite')`). Examining these trends separately for the Oregon coast, Washington coast, and inland Washington waters would likely indicate different rates of change.
 
-Human interaction cases - The overall number of HI cases increased significantly from 1989-2016 (y = 1.10^x^, z = 7.8, p < 0.001), signifying a 10% increase per year. An annual average of `r year_prop_HI %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(Y), 1))` cases were documented throughout the 1990s and `r year_prop_HI %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(Y), 1))` per year since 2000. Specifically, data show an increasing number of gunshot wounds (y = 1.073^x^, z = 4.6, p < 0.001), fisheries entanglements (y = 1.090^x^, z = 8.3, p < 0.001), and boat injuries (y = 1.087^x^, z = 3.3, p < 0.01) over the study period (`r figs("HI_timeseries", display = "cite")`b). The prevalence of HI cases has also increased overall (y = 0.06x, z = 15.5, p < 0.001) and specifically for gunshot wounds (y = 0.039x, z = 6.4, p < 0.001), fisheries entanglements (y = 0.043x, z = 5.3, p < 0.001), and boat injuries (y = 0.087x, z = 4.2, p < 0.001) (`r figs("HI_prev_final", display = "cite")`b). The prevalence of combined HI cases exceeded 20% in 2012, 2013, and 2015.
+Human interaction cases - The overall number of HI cases increased significantly from 1989-2016 (y = 1.10^x^, z = 7.8, p < 0.001; signifying a 10% increase per year). An annual average of `r year_prop_HI %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(Y), 1))` cases were documented throughout the 1990s and `r year_prop_HI %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(Y), 1))` per year since 2000. Specifically, data show an increasing number of gunshot wounds (y = 1.073^x^, z = 4.6, p < 0.001), fisheries entanglements (y = 1.090^x^, z = 8.3, p < 0.001), and boat injuries (y = 1.087^x^, z = 3.3, p < 0.01) over the study period (`r figs("HI_timeseries", display = "cite")`b). The prevalence of HI cases has also increased overall (y = 0.06x, z = 15.5, p < 0.001) and specifically for gunshot wounds (y = 0.039x, z = 6.4, p < 0.001), fisheries entanglements (y = 0.043x, z = 5.3, p < 0.001), and boat injuries (y = 0.087x, z = 4.2, p < 0.001) (`r figs("HI_prev_final", display = "cite")`b). The prevalence of combined HI cases exceeded 20% in 2012, 2013, and 2015.
 
 Examining whether human interaction cases are changing over time is most meaningful at the species level. Similar to overall strandings, the number of documented HI cases increased for harbor seals (y = 1.114^x^, z = 8.7, p < 0.001), California sea lions (y = 1.099^x^, z = 6.3, p < 0.001), Steller sea lions (y = 1.095^x^, z = 5.3, p < 0.001), and Guadalupe fur seals (y = 1.173^x^, z = 2.1, p < 0.05) (`r figs("HI_timeseries", display = 'cite')`a). The prevalence of HI cases increased for harbor seals (y = 0.06x, z = 11.4, p < 0.001), California sea lions (y = 0.03x, z = 3.8, p < 0.001), and northern elephant seals (y = 0.09x, z = 3.5, p < 0.001) (`r figs("HI_prev_final", display = "cite")`a). More specifically, the prevalence of gunshot wound cases increased significantly for California sea lions, fisheries entanglement cases increased for California sea lions and harbor seals, and boat-related injuries increased for harbor seals. 
  
-A seasonal peak in total strandings is evident, with strandings being significantly different across months of the year (*χ*^2^ = 4615, p < 0.001) and highest May through October. However, the timing of this peak is different for each species. Examining pairwise Tukey comparisons showed that harbor seal strandings are significantly higher from June through September. Though not statistically significant, California sea lion strandings exhibit a peak in May and again from August through November. The age class composition of stranded animals varies seasonally, with pups exhibiting significantly higher strandings from June through September (*χ*^2^ = 503.8, p < 0.001), the majority of these likely being harbor seals, as noted above. None of the other age classes exhibited statistically significant seasonal stranding patterns. Seasonal patterns were similar across male and female strandings (*χ*^2^ = , p = ).
+A seasonal peak in total strandings is evident, with strandings being significantly different across months of the year (*χ*^2^ = 4615, p < 0.001) and highest May through October. However, the timing of this peak is different for each species. Examining pairwise Tukey comparisons showed that harbor seal strandings are significantly higher from June through September. Though not statistically significant, California sea lion strandings exhibit a peak in May and again from August through November. The age class composition of stranded animals varies seasonally, with pups exhibiting significantly higher strandings from June through September (*χ*^2^ = 503.8, p < 0.001), the majority of these likely being harbor seals. None of the other age classes exhibited statistically significant seasonal stranding patterns. Seasonal patterns were similar across male and female strandings.
 
-The number of HI cases is significantly higher in the summer (July), but only for harbor seals, pups, and "other" human interaction types (`r figs("monthly_age_HI_figure_line", display = 'cite')`a, b, c). The prevalence of HI cases shows a seasonal peak, ranging from 11% to 23% of cases depending on the month. The proportion of gunshot wounds is higher in March (amounting to an average of 13% of all annual cases) than other months (4% of all annual cases), while boat injuries and fisheries entanglements do not change significantly throughout the year. 
+The number of HI cases is significantly higher in the summer (July), but only for harbor seals, pups, and "other" human interaction types (`r figs("monthly_age_HI_figure_line", display = 'cite')`a, b, c). The prevalence of HI cases shows a seasonal peak, ranging from 11-23% of cases depending on the month. The proportion of gunshot wounds is higher in March (amounting to an average of 13% of all annual cases) than other months (4% of all annual cases), while boat injuries and fisheries entanglements do not change significantly throughout the year. 
 
 *Spatial Patterns*  
-Over the study period, more strandings occurred in inland Washington and along the Oregon coast compared to the Washington coast (`r figs("statelineplot", display = 'cite')`). The proportion of total annual strandings occurring in Oregon ranged from `r min(data_by_year_state_prop$prop.or)`% to `r max(data_by_year_state_prop$prop.or)`%, averaging `r round(mean(data_by_year_state_prop$prop.or))`% for the whole study period. The proportion of annual strandings occurring along the Washington coast ranged from `r min(data_by_year_state_prop$prop.wa_coast)`% to `r max(data_by_year_state_prop$prop.wa_coast)`%, averaging `r round(mean(data_by_year_state_prop$prop.wa_coast))`% for the whole study period. The distribution of HI cases between these three sub-regions is similar to that of overall strandings, with `r round(mean(HI_state_prop$prop.or), 0)`% of all HI cases occurring in Oregon, `r round(mean(HI_state_prop$prop.wa_in), 0)`% in inland Washington waters, and the remaining `r round(mean(HI_state_prop$prop.wa_coast), 0)`% along the Washington coast. The distribution of specific types of HI cases is different between the three regions, with only `r HI_state_prop[HI_state_prop$Interaction.Type == 'Boat', "prop.or"]`% of boat collisions and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Other', "prop.or"]`% of "other" cases occurring in Oregon and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Boat', "prop.wa_in"]`% and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Other', "prop.wa_in"]`% occurring in inland Washington waters. The most prevalent type of human interaction case reported on the Washington coast was gunshot wounds, amounting to `r HI_state_prop[HI_state_prop$Interaction.Type == 'Gunshot', "prop.wa_coast"]`% of gunshot wounds during the study period.
+Over the study period, a higher volume and increasing number of strandings occurred in inland Washington and along the Oregon coast compared to the Washington coast (`r figs("all_timeseries", display = 'cite')`b). The proportion of total annual strandings occurring in Oregon ranged from `r min(data_by_year_state_prop$prop.or)`% to `r max(data_by_year_state_prop$prop.or)`%, averaging `r round(mean(data_by_year_state_prop$prop.or))`% for the whole study period. The proportion of annual strandings occurring along the Washington coast ranged from `r min(data_by_year_state_prop$prop.wa_coast)`% to `r max(data_by_year_state_prop$prop.wa_coast)`%, averaging `r round(mean(data_by_year_state_prop$prop.wa_coast))`% for the whole study period. The distribution of HI cases between these three sub-regions is similar to that of overall strandings, with `r round(mean(HI_state_prop$prop.or), 0)`% of all HI cases occurring in Oregon, `r round(mean(HI_state_prop$prop.wa_in), 0)`% in inland Washington waters, and the remaining `r round(mean(HI_state_prop$prop.wa_coast), 0)`% along the Washington coast. The distribution of specific types of HI cases is different between the three sub-regions, with only `r HI_state_prop[HI_state_prop$Interaction.Type == 'Boat', "prop.or"]`% of boat collisions and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Other', "prop.or"]`% of "other" cases occurring in Oregon and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Boat', "prop.wa_in"]`% and `r HI_state_prop[HI_state_prop$Interaction.Type == 'Other', "prop.wa_in"]`% occurring in inland Washington waters. Approximately `r HI_state_prop[HI_state_prop$Interaction.Type == 'Gunshot', "prop.wa_coast"]`% of gunshot wounds reported during the study period occurred along the Washington coast.
 
-At the county level, strandings were not evenly distributed along the coast (*χ*^2^ = 1191.3, p < 0.001). In Washington, strandings were highest in San Juan, Island, King, Pierce, and Grays Harbor counties (`r figs("countyfigure", display = 'cite')`a). Similarly, the number of HI cases were significantly higher in Grays Harbor, Pierce, and Pacific counties, with a disproportionately higher number of cases in Pacific county compared with all strandings, the majority of which were gunshot wounds (`r figs("countyfigure", display = 'cite')`b). Combined human interaction cases increased in Pierce (y = 1.069^x^, z = 3.0, p < 0.01) representing a 6.9% increase per year, Pacific (y = 1.073^x^, z = 2.7, p < 0.01) representing 7.3% increase per year, King (y = 1.053^x^, z = 2.7, p < 0.01), Whatcom (y = 1.066^x^, z = 3.0, p < 0.001), and Jefferson (y = 1.076^x^, z = 2.2, p < 0.05) counties. Kernel density plots show different hotspot areas for different human interaction types, with boat collision injuries and fisheries interactions largely occurring throughout the Salish Sea and gunshot wounds additionally occurring at the Columbia River (`r figs("HI_type_facet", display = 'cite')`). 
+At the county level, strandings were not evenly distributed along the coast (*χ*^2^ = 1191.3, p < 0.001). In Washington, strandings were highest in San Juan, Island, King, Pierce, and Grays Harbor counties (`r figs("countyfigure", display = 'cite')`a). Similarly, the number of HI cases were significantly higher in Grays Harbor, Pierce, and Pacific counties, with a disproportionately higher number of cases in Pacific county compared with all strandings, the majority of which were gunshot wounds (`r figs("countyfigure", display = 'cite')`b). Combined human interaction cases increased in Pierce (y = 1.069^x^, z = 3.0, p < 0.01) representing a 6.9% increase per year, Pacific (y = 1.073^x^, z = 2.7, p < 0.01; representing 7.3% increase per year), King (y = 1.053^x^, z = 2.7, p < 0.01), Whatcom (y = 1.066^x^, z = 3.0, p < 0.001), and Jefferson (y = 1.076^x^, z = 2.2, p < 0.05) counties. In Oregon, the majority of strandings occurred in Clatsop, Tillamook, Coos, and Lincoln counties (`r figs("countyfigure", display = 'cite')`a). These counties were also where the majority of HI cases occurred, though a disproportionately higher number occurred in Clatsop, the majority of which where gunshot wounds. Combined human interaction cases increased in Clatsop county (y = 1.095^x^, z = 3.9, p < 0.001; representing 9.5% increase per year). Kernel density plots show different hotspot areas for different human interaction types, with boat collision injuries and fisheries interactions largely occurring throughout the Salish Sea and around the mouth of the Columbia River, while the most significant hotspot for gunshot wounds centered around the Columbia River (`r figs("HI_type_facet", display = 'cite')`). 
 
-In Oregon, the majority of strandings occurred in Clatsop, Tillamook, Coos, and Lincoln counties (`r figs("countyfigure", display = 'cite')`a). These counties were also where the majority of HI cases occurred, though a disproportionately higher number occurred in Clatsop, the majority of which where gunshot wounds. Combined human interaction cases increased in Clatsop county (y = 1.095^x^, z = 3.9, p < 0.001), representing 9.5% increase per year. Kernel density plots show fisheries interaction and boat injury cases as being concentrated along the northern Oregon coast, while gunshot wounds are distributed further south (`r figs("HI_heatmap_OR_facet", display = 'cite')`).
-
-Species - Individual species strandings were not equally distributed between the three sub-regions. Approximately 60% of Guadalupe fur seal, northern elephant seal, and northern fur seal strandings occurred in Oregon and 40% in Washington, similar to the 70% and 30%, respectively, for California and Steller sea lions. In contrast, approximately 15% of harbor seal strandings occurred in Oregon and 85% in Washington (`r figs("countyfigure", display = 'cite')`, `r tbls("species_HI_prop_table", display = 'cite')`). Stranding hotspots were apparent in the Salish Sea, along the northern tip of the Olympic Peninsula, and at the mouth of the Columbia River for northern elephant seals, California sea lions, and Steller sea lions, whereas northern and Guadalupe fur seal strandings only exhibited hotspots along the outer coast, and harbor seals throughout inland Washington waters (`r figs("allstrands_species", display = 'cite')`). In Oregon, Guadalupe fur seals and Steller sea lion strandings were distributed along the coast while stranding hotspots for the other four species were concentrated in the northern part of the state (`r figs("ORheatmap_species_facet", display = 'cite')`).
+Species - Individual species strandings were not equally distributed between the three sub-regions. Approximately 60% of Guadalupe fur seal, northern elephant seal, and northern fur seal strandings occurred in Oregon and 40% in Washington, similar to the 70% and 30%, respectively, for California and Steller sea lions. In contrast, approximately 15% of harbor seal strandings occurred in Oregon and 85% in Washington (`r figs("countyfigure", display = 'cite')`, `r tbls("species_HI_prop_table", display = 'cite')`). Stranding hotspots were apparent in the Salish Sea for harbor seals, and distributed along the coast for the other species (`r figs("allstrands_species", display = 'cite')`). In varying degrees for all species except northern fur seals, kernel density hotspots are slightly different for all strandings versus human interaction cases (`r figs("HIstrands_species", display = 'cite')`). For example, northern elephant seal human interaction cases are centered further north than overall strandings and exhibit a hotspot in the Salish Sea. Harbor seal human interactions exhibit an additional cluster near the mouth of the Columbia River and HI cases for both Steller sea lions and Guadalupe fur seals are more tightly clustered around the mouth of the Columbia River relative to the distribution of overall strandings (`r figs("HIstrands_species", display = 'cite')`).
 
 **Discussion**  
 
@@ -682,16 +684,14 @@ These species each have different behaviors, preferred prey, foraging strategies
 *Temporal Patterns*  
 Our results indicate that total annual reported strandings significantly increased over the study period, though this pattern is different for each species. This observed increase in the number of reported strandings likely reflects increasing abundance and increasing stranding response effort rather than being symptomatic of declining population health, as noted by Huggins et al. (2015a). The noticeable and extended seasonal peak in harbor seal strandings likely reflects that these strandings are primarily pups, and pupping in Washington occurs from April to October depending on the area. 
 
-The number of HI cases increased over the study period for harbor seals, California sea lions, Steller sea lions, and Guadalupe fur seals, mirroring the rise in overall strandings. These changes in the number of certain types of cases for certain species are likely the product of both endogenous factors (those related to the animals and their environment) and exogenous factors (human activities, policies, pollution events). For example, the implementation (or the relaxation) of a policy or outreach effort can manifest itself in stranding data, such as when local law enforcement officials patrol beaches or initiate enhanced outreach efforts to fishermen. This type of activity resulted in noticeably decreased gunshot wound cases (add note - debbie provide more details here) followed by a rise shortly thereafter. Such events could also explain the noticeable spike in gunshot wound cases in the early 1990s. 
+The number of HI cases increased over the study period for harbor seals, California sea lions, Steller sea lions, and Guadalupe fur seals, mirroring the rise in overall strandings. These changes in the number of certain types of cases for certain species are likely the product of both endogenous factors (those related to the animals and their environment) and exogenous factors (human activities, policies, pollution events). For example, the implementation (or the relaxation) of a policy or outreach effort can manifest itself in stranding data, such as when local law enforcement officials patrol beaches or initiate enhanced outreach efforts to fishermen. This type of activity resulted in noticeably decreased gunshot wound cases in 20XX (add note - debbie provide more details here) followed by a rise shortly thereafter. Such events could also explain the noticeable spike in gunshot wound cases in the early 1990s. 
 
 The prevalence of HI cases have increased significantly over time for California sea lions, harbor seals, and northern elephant seals. More specifically, the prevalence of gunshot wounds increased in reported California sea lion strandings and the prevalence of fisheries entanglements increased for California sea lions and harbor seals. The prevalence of HI cases reported here is similar to the range documented in California, amounting to between 7.5% and 16% of cases (Goldstein et al., 1999; Keledjian & Mesnick, 2013). It is difficult to identify possible explanations for these observed trends as both pinniped populations and human activities can be simultaneously changing, additionally complicated by the fact that our ability to detect certain injuries or illnesses also improves over time (Gulland & Hall, 2007). However, it would be possible to compare interannual changes in the number or prevalence of HI to proxies for fishing effort or other human activities, though data over time and space can be sparse. 
 
 *Spatial Patterns*  
-Overall strandings - The number and relative distribution of species stranded along the coasts of Oregon and Washington (`r tbls("species_HI_prop_table", display = "cite")`) can be largely explained by the local abundance and demographic characteristics of each species. The number and relative distribution of strandings were different across species, and stranding hotspots are similar to those that have been previously identified for cetaceans and pinnipeds (Norman et al., 2004; Lee, 2016). In Washington, harbor seals primarily stranded along the shores of the Salish Sea due to the area having a large number of haul-outs, rookeries, and public reporting. In contrast, fewer strandings are reported along the Washington coast, largely due to the fact that many beaches are isolated or inaccessible. Guadalupe fur seal stranding hotspots occur around the mouth of the Columbia River and Willapa Bay (`r figs("allstrands_species", display = 'cite')`), as few individuals likely range farther north or into inland Washington waters. Similarly, northern fur seal strandings did not exhibit clustering in northern Washington or the Salish Sea, possibly due to individuals spending more time foraging offshore or near rookeries in Alaska. Approximately two-thirds of Steller sea lion strandings during the study period occurred in Oregon, likely due to the three large breeding sites along the coast. These results align with findings from other coastal areas where patterns in marine mammal strandings reflect either local abundance or seasonal distribution of species (Woodhouse et al., 1991; Norman et al., 2004; Maldini et al., 2005; Leeney et al., 2008; Pyenson, 2010; Peltier et al., 2013; Frungillo & Read, 2014; Pikesley et al., 2014; Johnston et al., 2015).
+Overall strandings - The number and relative distribution of species stranded along the coasts of Oregon and Washington (`r tbls("species_HI_prop_table", display = "cite")`) can be largely explained by the local abundance and demographic characteristics of each species. The number and relative distribution of strandings were different across species, and stranding hotspots are similar to those that have been previously identified for cetaceans and pinnipeds (Norman et al., 2004; Lee, 2016). In Washington, harbor seals primarily stranded along the shores of the Salish Sea due to the area having a large number of haul-outs, rookeries, and public reporting. In contrast, fewer strandings are reported along the Washington coast, largely due to the fact that many beaches are isolated or inaccessible. Guadalupe fur seal stranding hotspots occur around the mouth of the Columbia River and Willapa Bay (`r figs("allstrands_species", display = 'cite')`), likely reflecting the fact that few individuals range into inland Washington waters. Similarly, northern fur seal strandings did not exhibit clustering in northern Washington or the Salish Sea, possibly due to individuals spending more time foraging offshore or near rookeries in Alaska. Approximately two-thirds of Steller sea lion strandings during the study period occurred in Oregon, likely due to the three large breeding sites along the coast. These results align with findings from other coastal areas where patterns in marine mammal strandings reflect either local abundance or seasonal distribution of species (Woodhouse et al., 1991; Norman et al., 2004; Maldini et al., 2005; Leeney et al., 2008; Pyenson, 2010; Peltier et al., 2013; Frungillo & Read, 2014; Pikesley et al., 2014; Johnston et al., 2015).
 
-In Washington, human interactions were disproportionately higher in Pacific and Pierce counties, which accounted for `r (WAcounties_table[WAcounties_table$County == 'Pacific', 'HI Proportion (%)'] + WAcounties_table[WAcounties_table$County == 'Pierce', 'HI Proportion (%)'])`% of human interactions cases in Washington but less than `r (WAcounties_table[WAcounties_table$County == 'Pacific', 'All Strandings (%)'] + WAcounties_table[WAcounties_table$County == 'Pierce', 'All Strandings (%)'])`% of total strandings. In Pacific county, `r WAcounties_table[WAcounties_table$County == 'Pacific', 'Gunshot (%)']`% of HI cases were gunshot wounds. The higher percentage of "other" HI cases in inland Washington is likely due to the fact that the majority of those cases are harbor seal pups, and a disproportional number of harbor seal stranding occurs in Washington, as described above. The higher percentage of boat-related injuries in inland Washington could be attributed to the presence of ferry and shipping traffic and recreational boating opportunities throughout the Salish Sea. 
-
-In Oregon, human interactions were disproportionately higher in Lincoln, Tillamook, Coos, and Clatsop counties. Nearly half of all HI cases in Oregon were recorded in Clatsop, the majority of which were gunshot wounds. Clatsop county includes Astoria, an economically important fishing port, and the area has seen an increased number of fisheries interactions in recent years (Lee, 2016), particularly with animals foraging up into the Columbia River. However, this higher number of HI cases could also be attributed to the higher necropsy rate in the northern part of the state (Lee, 2016). 
+Over the study area, kernel density plots show that human interaction cases are more concentrated in specific places compared to overall strandings. In Washington, human interactions were disproportionately higher in Pacific and Pierce counties, which accounted for `r (WAcounties_table[WAcounties_table$County == 'Pacific', 'HI Proportion (%)'] + WAcounties_table[WAcounties_table$County == 'Pierce', 'HI Proportion (%)'])`% of human interactions cases in Washington but less than `r (WAcounties_table[WAcounties_table$County == 'Pacific', 'All Strandings (%)'] + WAcounties_table[WAcounties_table$County == 'Pierce', 'All Strandings (%)'])`% of total strandings. In Pacific county, `r WAcounties_table[WAcounties_table$County == 'Pacific', 'Gunshot (%)']`% of HI cases were gunshot wounds. The higher percentage of "other" HI cases in inland Washington is likely due to the fact that the majority of those cases are harbor seal pups, and a disproportional number of harbor seal stranding occurs in Washington, as described above. The higher percentage of boat-related injuries in inland Washington could be attributed to the presence of ferry and shipping traffic and recreational boating opportunities throughout the Salish Sea. In Oregon, human interactions were disproportionately higher in Lincoln, Tillamook, Coos, and Clatsop counties. Nearly half of all HI cases in Oregon were recorded in Clatsop, the majority of which were gunshot wounds. Clatsop county includes Astoria, an economically important fishing port, and the area has seen an increased number of fisheries interactions in recent years (Lee, 2016), particularly with animals foraging up into the Columbia River. However, this higher number of HI cases could also be attributed to the higher necropsy rate in the northern part of the state (Lee, 2016). 
 
 *Future Directions*  
 This characterization and hotspot mapping analysis is important for informing management and conservation measures and can support decision-making for stranding response practitioners. Though these results present one of the most comprehensive summary statistics of human interactions cases for pinnipeds in this region, further analysis of each individual species could ascertain whether it is likely that certain age classes overlap to a greater extent in time and space with anthropogenic activities in areas we identified as hotspots for human interaction cases. While strandings and human interaction cases can coincide with or have a higher reporting rate from dense human population centers, they can also occur offshore or in more isolated areas, and therefore go undetected. More refined spatio-temporal predictive modeling that includes measures of pinniped abundance, prey distribution, and proxies for oceanographic conditions (such as Evans et al., 2005, Soulen et al., 2013, Peltier et al., 2013, Truchon et al., 2013, and Berini et al., 2015) could further elucidate the spatial distribution of strandings, and therefore areas or species that are at a higher risk for human impacts and in need of management attention. 
@@ -699,12 +699,14 @@ This characterization and hotspot mapping analysis is important for informing ma
 **Conclusion**  
 Spatio-temporal patterns in the age and sex of pinniped strandings in Oregon and Washington have varied for each of the six species that are found in the study area. Patterns in the distribution and number of strandings along the coast and throughout the year are likely due to the local abundance and demographic characteristics of each species, with harbor seal pups stranding primarily throughout the Salish Sea during pupping season, and other species stranding more broadly across all age classes and along the coast. The number of strandings and the prevalence of human interaction cases increased over time, largely attributed to a combination of changing population dynamics, enhanced stranding response effort and public awareness, and continued coastal socioeconomic development. More refined spatio-temporal modeling techniques could further elucidate the connections between stranding clusters, forage species availability, prevailing oceanographic conditions, and anthropogenic activities that all impact the short and long-term health of these pinniped populations in a changing environment. Stranding hotspot maps show discrete areas of high-density strandings, which are different across species and types of human interaction cases. Stranding data may contain gaps, biases, and inconsistencies, but are an invaluable resource for conservation and management of these marine mammal species.   
 
+**Acknowledgements**  
+This research was made possible through the hard work and dedication of all stranding response network work members in the Pacific Northwest, including Seal Sitters, Olympic Coast National Marine Sanctuary, Sno-King Marine Mammal Response, MaST Center Stranding Team, Port Townsend Marine Science Center, Feiro Marine Life Center, Whatcom Marine Mammal Stranding Network, Cascadia Research Collective, Portland State University, Seaside Aquarium, Dungeness Nat’l Wildlife Refuge & Protection Island, Vashon Hydrophone Project, Central Puget Sound Marine Mammal Stranding Network, The Whale Museum, Makah Tribe, WDFW Marine Mammal Investigations, and Oregon State University Marine Mammal Institute. 
 
 \newpage
 
 **Figures and Tables**  
 
-[add note - Jen thought the legends looked suspiciously near the x-axis, but I feel like spacing will be better if it isn't on the side?]
+[add note - Jen thought the legends looked suspiciously near the x-axis, is this better?]
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 species_boxplots
 ```
@@ -748,13 +750,20 @@ monthly_age_HI_figure_line
 countyfigure
 ```
 
-`r figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific. Asterisks represent counties where counts are significantly higher than mean strandings and HI cases.")`
+`r figs("countyfigure", caption = "(a) Total strandings by species shows greater number and proportion of harbor seal strandings in Washington (left of dashed line) and more diverse species strandings in Oregon (right of dashed line); and (b) total human interaction cases higher in Lincoln, San Juan, and Pierce, and proportionally higher HI cases in Clatsop and Pacific. Asterisks represent counties where counts are significantly higher than mean strandings and HI cases (p < 0.05).")`
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 HI_type_facet
 ```
 
-`r figs("HI_type_facet", caption = "Strandings (points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")`
+`r figs("HI_type_facet", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")`
+
+```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
+# ORheatmap_species_facet
+HI_overlap
+```
+
+`r figs("HI_overlap", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")`
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
 # HI_heatmap_OR_facet
@@ -766,15 +775,27 @@ HI_type_facet
 allstrands_species
 ```
 
-`r figs("allstrands_species", caption = "Kernel density plot of species stranding hotspots in Washington.")`
+`r figs("allstrands_species", caption = "All stranding cases (grey points) and kernel density hotspot contour lines showing stranding hotspots for each species, with hotspots occurring in the Salish Sea for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")`
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
-# ORheatmap_species_facet
+HIstrands_species
 ```
 
-<!-- `r figs("ORheatmap_species_facet", caption = "Kernel density plot of species stranding hotspots in Oregon.")` -->
+`r figs("HIstrands_species", caption = "Strandings (grey points) and kernel density hotspot contour lines showing overlapping hotspots for all strandings (black) and human interaction cases (red).")`
+
 
 \newpage
+
+`r tbls("age_sex_composition_table", caption = "Sex and age composition of all strandings (*n* = 14,939), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")`
+```{r age composition table}
+kable(age_sex_composition_table, align = 'c')
+```
+
+`r tbls("species_age_sex_composition_table", caption = "Age and sex composition and weighted averages of all strandings (*n* = 14,939) by species shows higher proportion of males and adults for California and Steller sea lions and a higher proportion of pups for harbor seals.")`
+```{r}
+kable(species_age_sex_composition_table, align = 'c')
+```
+
 
 `r tbls("species_HI_prop_table", caption = "Species composition of all strandings (*n* = 14,939), the prevalence of human interaction cases (HI/all cases) for each species, and the composition of human interaction type (number of specific type/all HI cases) for each species.")`
 
@@ -783,25 +804,9 @@ kable(species_HI_prop_table, align = 'c')
 
 ```
 
-`r tbls("age_sex_table", caption = "Number and percentage of male, female, and unidentified strandings at each age class across all years and the average sex composition of strandings across all age classes.")`
-```{r age sex table, fig.height = 8.5, fig.width = 7, fig.align = 'center'}
-
-kable(age_sex_table, align = 'c')
-```
-
-`r tbls("species_age_sex_composition_table", caption = "Age class and sex composition of all strandings (*n* = 14,939) by species shows higher proportion of males and adults for California and Steller sea lions and a higher proportion of pups for harbor seals.")`
-```{r}
-kable(species_age_sex_composition_table, align = 'c')
-```
-
-`r tbls("age_sex_composition_table", caption = "Sex and age composition of all strandings (*n* = 14,939), the prevalence of human interaction cases for each age class, and the composition of human interaction type for each age class.")`
-```{r age composition table}
-kable(age_sex_composition_table, align = 'c')
-```
-
 \newpage
 
-**Appendices: Additional Tables and Statistical Analyses**
+**Supplemental Information**
 
 `r tbls("WAcounties_table", caption = "Proportion of all strandings, proportion of human interaction cases (%), and the composition of human interaction case types for each county in Washington (*n* = 9,413).")`
 ```{r wacounties}

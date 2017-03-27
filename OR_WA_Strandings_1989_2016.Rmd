@@ -1516,11 +1516,8 @@ Sex_HI_type_table <- pinnipeds_data %>%
             Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
   select(c(Sex, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(sex_HI_prev, by = 'Sex') %>%
-  select(c(Sex, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Sex_HI_type_table) <- c("Class", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
-
-sex_composition_table <- write.csv(Sex_HI_type_table, file = "./Figures/Sex_composition_table.csv", row.names = FALSE)
-
+  select(c(Sex, all.cnt, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+colnames(Sex_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 #Big table for age class
 
@@ -1540,7 +1537,7 @@ age_HI_prev[is.na(age_HI_prev)] <- 0
 age_HI_prev <- age_HI_prev %>%
     transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
   merge(Age_table, by = 'Age.Class') %>%
-  select(Age.Class, All.prop, Prev.HI)
+  select(Age.Class, all.cnt, All.prop, Prev.HI)
 
 #Adding in HI type and merging all three mini tables
 Age_HI_type_table <- pinnipeds_data %>%
@@ -1554,11 +1551,9 @@ Age_HI_type_table <- pinnipeds_data %>%
             Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
   select(c(Age.Class, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(age_HI_prev, by = 'Age.Class') %>%
-  select(c(Age.Class, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+  select(c(Age.Class, all.cnt, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
 Age_HI_type_table <- Age_HI_type_table[order(Age_HI_type_table$Age),]
-colnames(Age_HI_type_table) <- c("Class", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
-
-age_composition_table <- write.csv(Age_HI_type_table, file = "./Figures/age_composition_table.csv", row.names = FALSE)
+colnames(Age_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 #Combinining into one larger table
 comb_age_sex_comp <- bind_rows(Sex_HI_type_table, Age_HI_type_table)
@@ -1609,8 +1604,30 @@ species_props <- pinnipeds_data %>%
   merge(formerge, by = 'Pinniped.Common.Name') %>%
   select(Pinniped.Common.Name, Tot, Prop.Male, Prop.Fem, Prop.Unid, Prop.pup, Prop.year, Prop.sub, Prop.ad, Prop.un)
 colnames(species_props) <- c("Species", "Total (n)", "Male (%)", "Female (%)", "Unid. Sex (%)", "Pup (%)", "Yearling (%)", "Subadult (%)", "Adult (%)", "Unid. Age (%)")
+
+#by sex
+by_sex <- pinnipeds_data %>%
+  group_by(Sex) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+#by age
+by_age <- pinnipeds_data %>%
+  group_by(Age.Class) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+average_species_props <- c("Average", "--", 
+                round(as.numeric(by_sex[by_sex$Sex == 'Female', 'cnt']/sum(by_sex$cnt)*100),1),
+                round(as.numeric(by_sex[by_sex$Sex == 'Male', 'cnt']/sum(by_sex$cnt)*100), 1),
+                round(as.numeric(by_sex[by_sex$Sex == 'Unid', 'cnt']/sum(by_sex$cnt)*100), 1),
+                round(as.numeric(by_age[by_age$Age.Class == 'Pup', 'cnt']/sum(by_age$cnt)*100), 1),
+                round(as.numeric(by_age[by_age$Age.Class == 'Yearling', 'cnt']/sum(by_age$cnt)*100), 1),
+                round(as.numeric(by_age[by_age$Age.Class == 'Subadult', 'cnt']/sum(by_age$cnt)*100), 1),
+                round(as.numeric(by_age[by_age$Age.Class == 'Adult', 'cnt']/sum(by_age$cnt)*100), 1),
+                round(as.numeric(by_age[by_age$Age.Class == 'Unid', 'cnt']/sum(by_age$cnt)*100), 1))
+
+species_age_sex_composition <- rbind(species_props, average_species_props, stringsAsFactors = F)
   
-species_age_sex_composition <- write.csv(species_props, file = "./Figures/species_age_sex_composition.csv", row.names = FALSE)
+species_age_sex_composition <- write.csv(species_age_sex_composition, file =
+                      "./Figures/species_age_sex_composition.csv", row.names = FALSE)
 
 ########same but HI - looks very similar to all combined strandings
 formerge_HI <- pinnipeds_data %>%
@@ -1816,10 +1833,10 @@ ORbox <- c(-125, 41.91, -121.5, 46.28)
 WAbox <- c(-125.2, 46, -121.7, 49.1)
 pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
 
-pinnipeds_data_mapping <- pinnipeds_data %>% 
-  transform(Longitude = as.numeric(Longitude),
-            Latitude = as.numeric(Latitude)) %>%
-  filter(Longitude != 'NA')
+pinnipeds_data_mapping <- pinnipeds_data #%>% 
+  # transform(Longitude = as.numeric(Longitude),
+  #           Latitude = as.numeric(Latitude)) %>%
+  # filter(Longitude != 'NA')
 
 ##State-based maps no longer used from manuscript:
 #OR HI - facet
@@ -1921,17 +1938,17 @@ WAheatmap <-
 #ggsave(WAheatmap, file = "./Figures/Maps/WAheatmap.pdf")
 
 #Puget sound heatmap - all strandings, watercolor
-# pugetheatmap_water <- 
-#   ggmap(get_map(location = "Puget Sound", source = "stamen", maptype = "watercolor")) +
-#   geom_point(data = pinnipeds_data.mapping, aes(x = Longitude, y = Latitude), size = 0.7)  +
-#   stat_density2d(data = pinnipeds_data.mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
-#   scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
-#   xlab("") + ylab("") +
-#   theme(
-#     axis.ticks = element_blank(),
-#     axis.text = element_blank(),
-#     panel.border = element_rect(colour = "black", fill = "NA", size = .5))
+pugetheatmap_water <-
+  ggmap(get_map(location = "Puget Sound", source = "stamen", maptype = "watercolor")) +
+  geom_point(data = pinnipeds_data.mapping, aes(x = long_corr, y = lat_corr), size = 0.7)  +
+  stat_density2d(data = pinnipeds_data_mapping, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
 # ggsave(pugetheatmap_water, file = "./Figures/pugetheatmap_water.pdf")
 
 #Oregon coast heatmap - all strandings

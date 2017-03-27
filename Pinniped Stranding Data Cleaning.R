@@ -17,12 +17,19 @@ case <- function(x)
 pnw_1989_2015 <- read.csv("Strandings1989_2015.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>% filter(State != 'CA')
 pnw_2016 <- read.csv("OR_WA_2016.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
 
+pnw_2016$Longitude <- gsub("\\-", "", pnw_2016$Longitude)
+pnw_2016$Longitude <- gsub("\\-", "", pnw_2016$Longitude)
+pnw_2016$Longitude <- gsub("\\_", "", pnw_2016$Longitude)
+pnw_2016$Longitude <- gsub("\\ ", ".", pnw_2016$Longitude)
+pnw_2016$Latitude <- gsub(" ", ".", pnw_2016$Latitude)
+
+pnw_1989_2015$Longitude <- gsub("\\-", "", pnw_1989_2015$Longitude)
+pnw_1989_2015$Longitude <- gsub("\\-", "", pnw_1989_2015$Longitude)
+pnw_1989_2015$Longitude <- gsub("\\_", "", pnw_1989_2015$Longitude)
+pnw_1989_2015$Longitude <- gsub("\\ ", ".", pnw_1989_2015$Longitude)
+pnw_1989_2015$Latitude <- gsub(" ", ".", pnw_1989_2015$Latitude)
+
 all_data_pnw <- bind_rows(pnw_1989_2015, pnw_2016)
-all_data_pnw$Longitude <- gsub("\\-", "", all_data_pnw$Longitude)
-all_data_pnw$Longitude <- gsub("\\-", "", all_data_pnw$Longitude)
-all_data_pnw$Longitude <- gsub("\\_", "", all_data_pnw$Longitude)
-all_data_pnw$Longitude <- gsub("\\ ", ".", all_data_pnw$Longitude)
-all_data_pnw$Latitude <- gsub(" ", ".", all_data_pnw$Latitude)
 
 all_data_pnw$Longitude <- as.numeric(all_data_pnw$Longitude)
 all_data_pnw$Longitude <- all_data_pnw$Longitude * (-1)
@@ -103,7 +110,32 @@ pinnipeds_data_all$Sex <- gsub("NA", "Unid", pinnipeds_data_all$Sex)
 pinnipeds_data_all$Sex <- gsub("UNKNOWN", "Unid", pinnipeds_data_all$Sex)
 pinnipeds_data_all$Sex <- case(pinnipeds_data_all$Sex)
 
+#OR and WA only for further data cleaning
 pinnipeds_data <- pinnipeds_data_all %>% filter(State != 'CA')
+
+mean_lat_long <- pinnipeds_data %>%
+  filter(County != 'NA') %>%
+  transform(Latitude = as.numeric(Latitude), Longitude = as.numeric(Longitude)) %>%
+  group_by(County) %>%
+  summarize(mean_lat = mean(Latitude, na.rm = T), mean_long = mean(Longitude, na.rm = T))
+
+#Applying mean lat/longs for erroneous or missing
+pinnipeds_data <- pinnipeds_data %>%
+  merge(mean_lat_long, by = 'County', all = T) %>%
+  transform(Latitude = as.numeric(Latitude), Longitude = as.numeric(Longitude)) %>%
+  transform(Long_error = mean_long - as.numeric(Longitude),
+            Lat_error = mean_lat - as.numeric(Latitude)) %>%
+  transform(long_corr = ifelse(is.na(Longitude) | 
+                                 Long_error < -1.5 | Long_error > 1.2, mean_long, Longitude)) %>%
+  transform(lat_corr = ifelse(is.na(Latitude) | 
+                                Lat_error < -.5 | Lat_error > .5, mean_lat, Latitude))
+
+#only 2 missing lat/longs, most values replaced were in Island, which is only 0.5 latitude long
+# sum(is.na(pinnipeds_data$long_corr))
+# testreplace <- pinnipeds_data[pinnipeds_data$Latitude != pinnipeds_data$lat_corr,]
+# testreplace <- testreplace %>% filter(!is.na(Latitude))
+
+#California data
 pinnipeds_data_ca <- pinnipeds_data_all %>% filter(State == 'CA')
 
 write.csv(pinnipeds_data, file = "~/Documents/R/Strandings/pinnipeds_data.csv", row.names = F)
