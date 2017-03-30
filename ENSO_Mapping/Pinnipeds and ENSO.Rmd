@@ -1,6 +1,6 @@
 
 ---
-title: "Pinniped Strandings"
+title: "Pinniped ENSO Strandings"
 output: 
   word_document: 
     reference_docx: markdownstyledoc.docx
@@ -77,24 +77,108 @@ color1 <- c("#e45f56", "#a3d39c", "#4aaaa5", "#363e7e", "#f6b61c", "#3b98ee", "#
 
 ```{r load pre-cleaned data, echo = FALSE}
 
+
+
 #MEI from http://www.esrl.noaa.gov/psd/enso/mei/table.html
-MEI <- read.csv("MEI_89_15.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  melt(id.vars = "X", variable.name = "MONTH") %>%
-  rename(Year.of.Observation = X, MEI = value, Month.of.Observation = MONTH) %>%
-  transform(ENSO = ifelse(MEI < 0, "La Nina", ifelse(MEI > 0, "El Nino", '')))
+# MEI <- read.csv("MEI_89_15.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
+#   melt(id.vars = "X", variable.name = "MONTH") %>%
+#   rename(Year.of.Observation = X, MEI = value, Month.of.Observation = MONTH) %>%
+#   transform(ENSO = ifelse(MEI < 0, "La Nina", ifelse(MEI > 0, "El Nino", '')))
 
-pinnipeds_data_all <- read.csv("pinnipeds_data_all.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  merge(MEI, by = c('Year.of.Observation', 'Month.of.Observation'), all = T)
+pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
 
-pinnipeds_data_all$Month.of.Observation <- factor(pinnipeds_data_all$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
 
-pinnipeds_data$County <- factor(pinnipeds_data$County, levels = c('Whatcom', 'San Juan', 'Island', 'Skagit', 'Snohomish', 'King', 'Kitsap', 'Pierce', 'Thurston', 'Mason', 'Clallam', 'Jefferson', 'Grays Harbor', 'Pacific', 'Cowlitz', 'Clark', 'Clatsop', 'Columbia', 'Multnomah', 'Tillamook', 'Lincoln', 'Lane', 'Douglas', 'Coos', 'Curry'))
+setwd("~/Documents/R/Strandings/ENSO_Mapping/Env Data")
 
-pinnipeds_small <- pinnipeds_data_all %>%
+#Fish
+Anch_CPUE <- read.csv("Anch_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Anchovy_South <- read.csv("Anchovy_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+CBA_North <- read.csv("CBA_North.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+CBA_South <- read.csv("CBA_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Chin_growth <- read.csv("Chin_growth.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Chinook_escape <- read.csv("Chinook_escape.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+CPS_lands <- read.csv("CPS_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Herring_CPUE <- read.csv("Herring_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Salmon_lands <- read.csv("Salmon_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Sardine_CPUE <- read.csv("Sardine_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Sardine_South <- read.csv("Sardine_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Tot_lands <- read.csv("Tot_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+
+fish <- Anch_CPUE %>% merge(Anchovy_South, by = 'Date', all = T) %>%
+  merge(CBA_North, by = 'Date', all = T) %>% merge(CBA_South, by = 'Date', all = T) %>%
+  merge(Chin_growth, by = 'Date', all = T) %>% merge(Chinook_escape, by = 'Date', all = T) %>% 
+  merge(CPS_lands, by = 'Date', all = T) %>% merge(Herring_CPUE, by = 'Date', all = T) %>% 
+  merge(Salmon_lands, by = 'Date', all = T) %>% merge(Sardine_South, by = 'Date', all = T) %>% 
+  merge(Sardine_CPUE, by = 'Date', all = T) %>% merge(Tot_lands, by = 'Date', all = T) %>%
+  transform(Date = as.Date(Date)) 
+fish$Year.of.Observation <- as.numeric(format(as.Date(fish$Date, format = "%Y-%M-%D"),"%Y"))
+fish$Mo <- as.numeric(format(as.Date(fish$Date, format = "%Y-%m-%D"),"%m"))
+fish <- fish %>% filter(Year.of.Observation > 1988) %>%
+  transform(Month.of.Observation = ifelse(Mo == 1, 'JAN', 
+              ifelse(Mo == 2, 'FEB',
+                     ifelse(Mo == 3, 'MAR',
+                            ifelse(Mo == 4, 'APR',
+                                   ifelse(Mo == 5, 'MAY',
+                                          ifelse(Mo == 6, 'JUN',
+                                                 ifelse(Mo == 7, 'JUL',
+                                                        ifelse(Mo == 8, 'AUG',
+                                                               ifelse(Mo == 9, 'SEP',
+                                                                      ifelse(Mo == 10, 'OCT',
+                                                                      ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
+  select(-Mo)
+                                                                                  
+
+#Ocean
+MEI <- read.csv("MEI.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+NPGO <- read.csv("NPGO.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+PDO <- read.csv("PDO.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+SST_39 <- read.csv("SST_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+SST_44 <- read.csv("SST_44.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Upwell_39 <- read.csv("Upwell_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Upwell_45 <- read.csv("Upwell_45.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Wind_39 <- read.csv("Wind_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+Wind_44 <- read.csv("Wind_44.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+
+ocean <- MEI %>% merge(NPGO, by = 'Date', all = T) %>%
+  merge(PDO, by = 'Date', all = T) %>% merge(SST_39, by = 'Date', all = T) %>%
+  merge(SST_44, by = 'Date', all = T) %>% merge(Upwell_39, by = 'Date', all = T) %>% 
+  merge(Upwell_45, by = 'Date', all = T) %>% merge(Wind_39, by = 'Date', all = T) %>% 
+  merge(Wind_44, by = 'Date', all = T) %>%
+  transform(Date = as.Date(Date)) %>%
+  transform(ENSO_cat = ifelse(MEI < 0, "La Nina", ifelse(MEI > 0, "El Nino", '')))
+ocean$Year.of.Observation <- as.numeric(format(as.Date(ocean$Date, format = "%Y-%M-%D"),"%Y"))
+ocean$Mo <- as.numeric(format(as.Date(ocean$Date, format = "%Y-%m-%D"),"%m"))
+ocean <- ocean %>% filter(Year.of.Observation > 1988) %>%
+  transform(Month.of.Observation = ifelse(Mo == 1, 'JAN', 
+              ifelse(Mo == 2, 'FEB',
+                     ifelse(Mo == 3, 'MAR',
+                            ifelse(Mo == 4, 'APR',
+                                   ifelse(Mo == 5, 'MAY',
+                                          ifelse(Mo == 6, 'JUN',
+                                                 ifelse(Mo == 7, 'JUL',
+                                                        ifelse(Mo == 8, 'AUG',
+                                                               ifelse(Mo == 9, 'SEP',
+                                                                      ifelse(Mo == 10, 'OCT',
+                                                                      ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
+  select(-Mo)
+
+# pinnipeds_data$County <- factor(pinnipeds_data$County, levels = c('Whatcom', 'San Juan', 'Island', 'Skagit', 'Snohomish', 'King', 'Kitsap', 'Pierce', 'Thurston', 'Mason', 'Clallam', 'Jefferson', 'Grays Harbor', 'Pacific', 'Cowlitz', 'Clark', 'Clatsop', 'Columbia', 'Multnomah', 'Tillamook', 'Lincoln', 'Lane', 'Douglas', 'Coos', 'Curry'))
+
+pinnipeds_ocean <- pinnipeds_data %>%
   filter(Pinniped.Common.Name == 'Harbor seal' | Pinniped.Common.Name == 'California sea lion' |
            Pinniped.Common.Name == 'Steller sea lion') %>%
-  select(-c(Affiliation, Common.Name, Genus, Species, Country, Restrand, Gear.Collection.Flag, Gear.Disposition.Flag, Other.Findings.upon.Level.Y.N, Other.Findings...Illness.Flag, Other.Findings...Injury.Flag, Other.Findings...Pregnant.Flag, How.Observed))
+  select(-c(Affiliation, Locality.Detail, Field.Number, Mammal.Type, Day.of.Observation, City...from.strandings.table, Common.Name, Genus, Species, Country, Restrand, Entangled.Flag, Gear.Collection.Flag, Gear.Disposition.Flag, Other.Findings.upon.Level.Y.N, Other.Findings...Illness.Flag, Other.Findings...Injury.Flag, Other.Findings...Pregnant.Flag, How.Observed)) %>%
+  merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'), all = T) %>%
+  merge(fish, by = c('Year.of.Observation', 'Month.of.Observation'), all = T) %>%
+  select(-c(Date.x, Date.y)) %>%
+  transform(Season = 
+        ifelse(Month.of.Observation == 'DEC' | Month.of.Observation == 'JAN' | Month.of.Observation == 'FEB', 'Winter', 
+        ifelse(Month.of.Observation == 'MAR' | Month.of.Observation == 'APR' | Month.of.Observation == 'MAY', 'Spring', 
+        ifelse(Month.of.Observation == 'JUN' | Month.of.Observation == 'JUL' | Month.of.Observation == 'AUG', 'Summer', 'Fall'))))
+  
 
+setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
 ```
 
@@ -104,17 +188,17 @@ pinnipeds_small <- pinnipeds_data_all %>%
 #Do more pinnipeds strand (or HI/FI cases) during EN compared to LN conditions?
 
 #All species combined
-ENSO.all <- pinnipeds_small %>% 
+ENSO.all <- pinnipeds_ocean %>% 
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(ENSO, Month.of.Observation) %>%
+  group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
 ENSO.all.figure <- 
-  ggplot(ENSO.all, aes(x = ENSO, y = cnt, fill = ENSO)) +
+  ggplot(ENSO.all, aes(x = ENSO_cat, y = cnt, fill = ENSO_cat)) +
   geom_boxplot() +
   xlab(" ") + ylab("Monthly Stranding Cases") +
   scale_y_continuous(labels = comma) +
-  facet_grid(Pinniped.Common.Name)
+  facet_grid(~Pinniped.Common.Name) +
   plot_theme() +
   scale_fill_manual(values = color1)
 
