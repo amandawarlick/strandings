@@ -1,9 +1,9 @@
-"Class","All Strandings (%)","HI Proportion (%)","Fisheries Interactions (%)","Gunshots (%)","Boat Injuries (%)","Other (%)"
-"Female",17,16,18,32,5,44
-"Male",34,17,15,47,5,33
-"Unid. Sex",49,5,35,19,3,42
-"Pup",28,11,17,4,7,72
-"Yearling",7,8,39,21,5,35
-"Subadult",6,16,21,51,5,23
-"Adult",23,17,16,58,5,21
-"Unid. Age",36,7,27,41,2,30
+"Class","Total (n)","All Strandings (%)","HI Proportion (%)","Fisheries Interactions (%)","Gunshots (%)","Boat Injuries (%)","Other (%)"
+"Female",2570,17,16,18,32,5,44
+"Male",5021,34,17,15,47,5,33
+"Unid. Sex",7348,49,5,35,19,3,42
+"Pup",4242,28,11,17,4,7,72
+"Yearling",998,7,8,39,21,5,35
+"Subadult",936,6,16,21,51,5,23
+"Adult",3444,23,17,16,58,5,21
+"Unid. Age",5319,36,7,27,41,2,30

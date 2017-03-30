@@ -1,4 +1,4 @@
-"Species","Total (n)","All Strandings (%)","OR (%)","WA Coast (%)","WA Inland (%)","Prevalence of HI (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
+"Species","Total (n)","All Strandings (%)","OR (%)","WA Coast (%)","WA Inland (%)","HI Proportion (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
 "California sea lion",2823,19,69,11,20,15,18,58,4,20
 "Guadalupe fur seal",165,1,61,34,5,14,65,4,0,30
 "Harbor seal",8730,58,15,7,78,10,19,21,6,55
