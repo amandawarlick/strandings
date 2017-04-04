@@ -28,6 +28,8 @@ library(pgirmess) #kruskalmc()
 library(MASS) #glm.nb()
 library(multcomp) #glht()
 library(dplyr)
+detach("package:multcomp")
+detach("package:TH.data")
 detach("package:MASS")
 
 #setwd("~/Documents/R/Strandings")
@@ -653,6 +655,7 @@ kruskalmc(species_HI$cnt ~ species_HI$Pinniped.Common.Name)
  
 #All strandings
 Sex_all_yr <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name == 'Steller sea lion') %>%
   filter(Sex == 'Male' | Sex == 'Female') %>%
   group_by(Sex, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 

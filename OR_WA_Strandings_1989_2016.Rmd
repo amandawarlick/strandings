@@ -1482,7 +1482,7 @@ Sex_table <- pinnipeds_data %>%
   group_by(Sex) %>%
   summarize(all.cnt = n_distinct(National.Database.Number))
 
-Sex_table$All.prop <- round(Sex_table$all.cnt/sum(Sex_table$all.cnt), 2)*100
+Sex_table$All.prop <- round(Sex_table$all.cnt/sum(Sex_table$all.cnt), 3)*100
 
 #Adding in HI proportion
 Sex_HI_table <- pinnipeds_data %>%
@@ -1493,6 +1493,16 @@ Sex_HI_table <- pinnipeds_data %>%
 
 Sex_HI_table$HI.prop <- round(Sex_HI_table$HI.cnt/sum(Sex_HI_table$HI.cnt), 2)*100
 
+sex_region <- pinnipeds_data %>%
+  filter(Water.Body != 'NA') %>%
+  group_by(Sex, Water.Body) %>%
+  summarize(reg.cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Sex ~ Water.Body, value.var = 'reg.cnt') %>%
+  transform(OR_Coast_p = round(OR_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
+            WA_Coast_p = round(WA_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
+            Inland_WA_p = round(Inland_WA/(Inland_WA+OR_Coast+WA_Coast)*100, 1)) %>%
+  select(Sex, OR_Coast_p, WA_Coast_p, Inland_WA_p)
+
 #prevalence
 sex_HI_prev <- pinnipeds_data %>%
   group_by(Sex, Findings.of.Human.Interaction) %>%
@@ -1500,7 +1510,7 @@ sex_HI_prev <- pinnipeds_data %>%
   dcast(Sex ~ Findings.of.Human.Interaction, value.var = 'cnt')
 sex_HI_prev[is.na(sex_HI_prev)] <- 0
 sex_HI_prev <- sex_HI_prev %>%
-    transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
+    transform(Prev.HI = round(Y/(Y+N+CBD), 3)*100) %>%
   select(Sex, Prev.HI) %>%
   merge(Sex_HI_table, by = 'Sex')
 
@@ -1510,23 +1520,33 @@ Sex_HI_type_table <- pinnipeds_data %>%
   group_by(Sex, Interaction.Type) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Sex ~ Interaction.Type, value.var = 'cnt') %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
+  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100, 1)) %>%
   select(c(Sex, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(sex_HI_prev, by = 'Sex') %>%
-  select(c(Sex, all.cnt, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
-colnames(Sex_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+  merge(sex_region, by = 'Sex') %>%
+  select(c(Sex, all.cnt, All.prop, OR_Coast_p, WA_Coast_p, Inland_WA_p, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+colnames(Sex_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "OR Coast (%)", "WA Coast (%)", "WA Inland (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 #Big table for age class
 
 Age_table <- pinnipeds_data %>%
-  #filter(Age.Class != 'Unid') %>%
   group_by(Age.Class) %>%
   summarize(all.cnt = n_distinct(National.Database.Number))
 
 Age_table$All.prop <- round(Age_table$all.cnt/sum(Age_table$all.cnt), 2)*100
+
+age_region <- pinnipeds_data %>%
+  filter(Water.Body != 'NA') %>%
+  group_by(Age.Class, Water.Body) %>%
+  summarize(reg.cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Age.Class ~ Water.Body, value.var = 'reg.cnt') %>%
+  transform(OR_Coast_p = round(OR_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
+            WA_Coast_p = round(WA_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
+            Inland_WA_p = round(Inland_WA/(Inland_WA+OR_Coast+WA_Coast)*100, 1)) %>%
+  select(Age.Class, OR_Coast_p, WA_Coast_p, Inland_WA_p)
 
 #Prevalence
 age_HI_prev <- pinnipeds_data %>%
@@ -1535,7 +1555,7 @@ age_HI_prev <- pinnipeds_data %>%
   dcast(Age.Class ~ Findings.of.Human.Interaction, value.var = 'cnt')
 age_HI_prev[is.na(age_HI_prev)] <- 0
 age_HI_prev <- age_HI_prev %>%
-    transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
+    transform(Prev.HI = round(Y/(Y+N+CBD), 3)*100) %>%
   merge(Age_table, by = 'Age.Class') %>%
   select(Age.Class, all.cnt, All.prop, Prev.HI)
 
@@ -1545,15 +1565,16 @@ Age_HI_type_table <- pinnipeds_data %>%
   group_by(Age.Class, Interaction.Type) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Age.Class ~ Interaction.Type, value.var = 'cnt') %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
+  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100, 1),
+            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100, 1)) %>%
   select(c(Age.Class, Prop.boat, Prop.fish, Prop.shot, Prop.other)) %>%
   merge(age_HI_prev, by = 'Age.Class') %>%
-  select(c(Age.Class, all.cnt, All.prop, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
+  merge(age_region, by = 'Age.Class') %>%
+  select(c(Age.Class, all.cnt, All.prop, OR_Coast_p, WA_Coast_p, Inland_WA_p, Prev.HI, Prop.fish, Prop.shot, Prop.boat, Prop.other))
 Age_HI_type_table <- Age_HI_type_table[order(Age_HI_type_table$Age),]
-colnames(Age_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
+colnames(Age_HI_type_table) <- c("Class", "Total (n)", "All Strandings (%)", "OR Coast (%)", "WA Coast (%)", "WA Inland (%)", "HI Proportion (%)", "Fisheries Interactions (%)", "Gunshots (%)", "Boat Injuries (%)", "Other (%)")
 
 #Combinining into one larger table
 comb_age_sex_comp <- bind_rows(Sex_HI_type_table, Age_HI_type_table)
@@ -1667,15 +1688,15 @@ state_species_prop <- pinnipeds_data %>%
   dcast(Pinniped.Common.Name ~ Water.Body, value.var = 'cnt') 
 state_species_prop[is.na(state_species_prop)] <- 0
 state_species_prop <- state_species_prop %>%
-  transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
-            prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
-            prop.wa_coast = round(WA_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100) %>%
+  transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 3)*100,
+            prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 3)*100,
+            prop.wa_coast = round(WA_Coast/(OR_Coast + WA_Coast + Inland_WA), 3)*100) %>%
   dplyr::select(Pinniped.Common.Name, prop.or, prop.wa_in, prop.wa_coast)
 
 species_bigtable <- pinnipeds_data %>%
   group_by(Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(all.prop = round(cnt/sum(cnt), 2)*100)
+  transform(all.prop = round(cnt/sum(cnt), 3)*100)
 
 species_HI_prev <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>% 
@@ -1684,7 +1705,7 @@ species_HI_prev <- pinnipeds_data %>%
   dcast(Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt')
 species_HI_prev[is.na(species_HI_prev)] <- 0
 species_HI_prev <- species_HI_prev %>%
-    transform(Prev.HI = round(Y/(Y+N+CBD), 2)*100) %>%
+    transform(Prev.HI = round(Y/(Y+N+CBD), 3)*100) %>%
   dplyr::select(Pinniped.Common.Name, Prev.HI) %>%
   merge(species_bigtable, by = 'Pinniped.Common.Name')
 
@@ -1696,14 +1717,39 @@ species_prop_HI <- pinnipeds_data %>%
 species_prop_HI[is.na(species_prop_HI)] <- 0
 species_prop_HI <- species_prop_HI %>%
   transform(Total = Boat + Gunshot + Fisheries + Other) %>%
-  transform(Prop.Boat = round(Boat/Total, 2)*100,
-            Prop.Fisheries = round(Fisheries/Total, 2)*100,
-            Prop.Gunshot = round(Gunshot/Total, 2)*100,
-            Prop.Other = round(Other/Total, 2)*100) %>%
+  transform(Prop.Boat = round(Boat/Total, 3)*100,
+            Prop.Fisheries = round(Fisheries/Total, 3)*100,
+            Prop.Gunshot = round(Gunshot/Total, 3)*100,
+            Prop.Other = round(Other/Total, 3)*100) %>%
   merge(species_HI_prev, by = 'Pinniped.Common.Name') %>%
   merge(state_species_prop, by = 'Pinniped.Common.Name') %>%
   dplyr::select(Pinniped.Common.Name, cnt, all.prop, prop.or, prop.wa_coast, prop.wa_in, Prev.HI, Prop.Fisheries, Prop.Gunshot, Prop.Boat, Prop.Other) 
 colnames(species_prop_HI) <- c("Species", "Total (n)", "All Strandings (%)", "OR (%)", "WA Coast (%)", "WA Inland (%)", "HI Proportion (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
+
+#Calculating averages for average line
+#by region
+region <- pinnipeds_data %>%
+  filter(Water.Body != 'NA') %>% group_by(Water.Body) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+HI <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  summarize(cnt = round((n_distinct(National.Database.Number)/14939*100), 1))
+HI_type_p <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) 
+
+average_species_prop_HI <- c("Average", "--", "--",
+        round(as.numeric(region[region$Water.Body == 'OR_Coast', 'cnt']/sum(region$cnt)*100), 1),
+        round(as.numeric(region[region$Water.Body == 'WA_Coast', 'cnt']/sum(region$cnt)*100), 1),
+        round(as.numeric(region[region$Water.Body == 'Inland_WA', 'cnt']/sum(region$cnt)*100), 1),
+        as.numeric(HI$cnt),
+        round(as.numeric(HI_type_p[HI_type_p$Interaction.Type == 'Fisheries', 'cnt']/sum(HI_type_p$cnt)*100), 1),
+        round(as.numeric(HI_type_p[HI_type_p$Interaction.Type == 'Gunshot', 'cnt']/sum(HI_type_p$cnt)*100), 1),
+        round(as.numeric(HI_type_p[HI_type_p$Interaction.Type == 'Boat', 'cnt']/sum(HI_type_p$cnt)*100), 1),
+        round(as.numeric(HI_type_p[HI_type_p$Interaction.Type == 'Other', 'cnt']/sum(HI_type_p$cnt)*100), 1))
+
+species_prop_HI <- rbind(species_prop_HI, average_species_prop_HI, stringsAsFactors = F)
 
 species_HI_prop_table <- write.csv(species_prop_HI, file = "./Figures/species_HI_prop_table.csv", row.names = F)
 
