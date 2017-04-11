@@ -7,7 +7,24 @@ output: word_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Notes - general strandings
+## Notes - from stranding network members
+
+Erin d'Agnese
+
+* seasonality and migratory patterns - season takes over everything
+* Bill Peterson, retiring, reference for oceangraphic
+    * PDO better for PNW, though very correlated with MEI?
+* Copepod density/biomass diversity index: Northern increased in summer, related to increased emaciation but not overall cases; Southern is higher during winter, dependent on ocean conditions
+    
+* Overfitting = overinflation of variable(s) impacts, negative binomial must be zero inflated to account for missing observations, relevant for small sample sizes
+* HS more impacted by conditions since they are resident? as opposed to migrating CSLs?
+* Spearman and Kendall rank test
+* Vuong test - check for model fitting/goodness of fit between model types
+* Do multivariate choosing significant bivariates, or put all in model and do backwards stepwise since have large N; age*month interaction
+* Peak years probably means not linear in final model
+* Big colinearity problem - strandings and ocean conditions related and interactive
+    
+## Literature - general strandings
 
 Frungillo 2014
 - examining strandings to identify competition between species; grey seals increase, decreasing or stable in harbor seals - reflects local abundance
@@ -139,7 +156,8 @@ Zeileis - strucchange
 
 #More ENSO-related
 
-Norman 2008
+Norman 2008**
+Norman, S.A. (2008). Spatial epidemiology and GIS in marine mammal conservation medicine and disease research. Ecohealth 5:257–267.
 - spatial ecology/epidemiology
 - Guisan 2002: spatial regression studies?
 Guisan A., Edwards, T.C. Jr, & Hastie T. (2002). Generalized linear and generalized additive models in studies of species distributions: setting the scene. Ecological Modelling 157:89–100.

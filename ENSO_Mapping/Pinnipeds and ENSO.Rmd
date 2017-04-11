@@ -75,982 +75,385 @@ color1 <- c("#e45f56", "#a3d39c", "#4aaaa5", "#363e7e", "#f6b61c", "#3b98ee", "#
 
 ```
 
-```{r load pre-cleaned data, echo = FALSE}
+```{r load pre-built data, echo = FALSE}
 
-
-
-#MEI from http://www.esrl.noaa.gov/psd/enso/mei/table.html
-# MEI <- read.csv("MEI_89_15.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-#   melt(id.vars = "X", variable.name = "MONTH") %>%
-#   rename(Year.of.Observation = X, MEI = value, Month.of.Observation = MONTH) %>%
-#   transform(ENSO = ifelse(MEI < 0, "La Nina", ifelse(MEI > 0, "El Nino", '')))
-
-pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) 
 
 pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
 
-setwd("~/Documents/R/Strandings/ENSO_Mapping/Env Data")
 
-#Fish
-Anch_CPUE <- read.csv("Anch_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Anchovy_South <- read.csv("Anchovy_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-CBA_North <- read.csv("CBA_North.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-CBA_South <- read.csv("CBA_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Chin_growth <- read.csv("Chin_growth.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Chinook_escape <- read.csv("Chinook_escape.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-CPS_lands <- read.csv("CPS_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Herring_CPUE <- read.csv("Herring_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Salmon_lands <- read.csv("Salmon_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Sardine_CPUE <- read.csv("Sardine_CPUE.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Sardine_South <- read.csv("Sardine_South.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Tot_lands <- read.csv("Tot_lands.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
 
-fish <- Anch_CPUE %>% merge(Anchovy_South, by = 'Date', all = T) %>%
-  merge(CBA_North, by = 'Date', all = T) %>% merge(CBA_South, by = 'Date', all = T) %>%
-  merge(Chin_growth, by = 'Date', all = T) %>% merge(Chinook_escape, by = 'Date', all = T) %>% 
-  merge(CPS_lands, by = 'Date', all = T) %>% merge(Herring_CPUE, by = 'Date', all = T) %>% 
-  merge(Salmon_lands, by = 'Date', all = T) %>% merge(Sardine_South, by = 'Date', all = T) %>% 
-  merge(Sardine_CPUE, by = 'Date', all = T) %>% merge(Tot_lands, by = 'Date', all = T) %>%
-  transform(Date = as.Date(Date)) 
-fish$Year.of.Observation <- as.numeric(format(as.Date(fish$Date, format = "%Y-%M-%D"),"%Y"))
-fish$Mo <- as.numeric(format(as.Date(fish$Date, format = "%Y-%m-%D"),"%m"))
-fish <- fish %>% filter(Year.of.Observation > 1988) %>%
-  transform(Month.of.Observation = ifelse(Mo == 1, 'JAN', 
-              ifelse(Mo == 2, 'FEB',
-                     ifelse(Mo == 3, 'MAR',
-                            ifelse(Mo == 4, 'APR',
-                                   ifelse(Mo == 5, 'MAY',
-                                          ifelse(Mo == 6, 'JUN',
-                                                 ifelse(Mo == 7, 'JUL',
-                                                        ifelse(Mo == 8, 'AUG',
-                                                               ifelse(Mo == 9, 'SEP',
-                                                                      ifelse(Mo == 10, 'OCT',
-                                                                      ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
-                                                                                  
+ocean <- read.csv("ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Date = as.Date(Date, format = "%Y-%m-%d"),
+            Date_lag1 = as.Date(Date, format = "%Y-%m-%d"),
+            Date_lag2 = as.Date(Date, format = "%Y-%m-%d"),
+            Date_lag3 = as.Date(Date, format = "%Y-%m-%d"))
+ocean
 
-#Ocean
-MEI <- read.csv("MEI.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-NPGO <- read.csv("NPGO.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-PDO <- read.csv("PDO.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-SST_39 <- read.csv("SST_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-SST_44 <- read.csv("SST_44.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Upwell_39 <- read.csv("Upwell_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Upwell_45 <- read.csv("Upwell_45.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Wind_39 <- read.csv("Wind_39.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
-Wind_44 <- read.csv("Wind_44.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) 
+fish <- read.csv("fish.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Date = as.Date(Date, format = "%Y-%m-%d"))
 
-ocean <- MEI %>% merge(NPGO, by = 'Date', all = T) %>%
-  merge(PDO, by = 'Date', all = T) %>% merge(SST_39, by = 'Date', all = T) %>%
-  merge(SST_44, by = 'Date', all = T) %>% merge(Upwell_39, by = 'Date', all = T) %>% 
-  merge(Upwell_45, by = 'Date', all = T) %>% merge(Wind_39, by = 'Date', all = T) %>% 
-  merge(Wind_44, by = 'Date', all = T) %>%
-  transform(Date = as.Date(Date)) %>%
-  transform(ENSO_cat = ifelse(MEI < 0, "La Nina", ifelse(MEI > 0, "El Nino", '')))
-ocean$Year.of.Observation <- as.numeric(format(as.Date(ocean$Date, format = "%Y-%M-%D"),"%Y"))
-ocean$Mo <- as.numeric(format(as.Date(ocean$Date, format = "%Y-%m-%D"),"%m"))
-ocean <- ocean %>% filter(Year.of.Observation > 1988) %>%
-  transform(Month.of.Observation = ifelse(Mo == 1, 'JAN', 
-              ifelse(Mo == 2, 'FEB',
-                     ifelse(Mo == 3, 'MAR',
-                            ifelse(Mo == 4, 'APR',
-                                   ifelse(Mo == 5, 'MAY',
-                                          ifelse(Mo == 6, 'JUN',
-                                                 ifelse(Mo == 7, 'JUL',
-                                                        ifelse(Mo == 8, 'AUG',
-                                                               ifelse(Mo == 9, 'SEP',
-                                                                      ifelse(Mo == 10, 'OCT',
-                                                                      ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
-
-# pinnipeds_data$County <- factor(pinnipeds_data$County, levels = c('Whatcom', 'San Juan', 'Island', 'Skagit', 'Snohomish', 'King', 'Kitsap', 'Pierce', 'Thurston', 'Mason', 'Clallam', 'Jefferson', 'Grays Harbor', 'Pacific', 'Cowlitz', 'Clark', 'Clatsop', 'Columbia', 'Multnomah', 'Tillamook', 'Lincoln', 'Lane', 'Douglas', 'Coos', 'Curry'))
-
+#Full data set
 pinnipeds_ocean <- pinnipeds_data %>%
   filter(Pinniped.Common.Name == 'Harbor seal' | Pinniped.Common.Name == 'California sea lion' |
            Pinniped.Common.Name == 'Steller sea lion') %>%
+  filter(National.Database.Number != 'NA' | !is.na(National.Database.Number)) %>%
   select(-c(Affiliation, Locality.Detail, Field.Number, Mammal.Type, Day.of.Observation, City...from.strandings.table, Common.Name, Genus, Species, Country, Restrand, Entangled.Flag, Gear.Collection.Flag, Gear.Disposition.Flag, Other.Findings.upon.Level.Y.N, Other.Findings...Illness.Flag, Other.Findings...Injury.Flag, Other.Findings...Pregnant.Flag, How.Observed)) %>%
   merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'), all = T) %>%
   merge(fish, by = c('Year.of.Observation', 'Month.of.Observation'), all = T) %>%
-  select(-c(Date.x, Date.y)) %>%
   transform(Season = 
         ifelse(Month.of.Observation == 'DEC' | Month.of.Observation == 'JAN' | Month.of.Observation == 'FEB', 'Winter', 
         ifelse(Month.of.Observation == 'MAR' | Month.of.Observation == 'APR' | Month.of.Observation == 'MAY', 'Spring', 
         ifelse(Month.of.Observation == 'JUN' | Month.of.Observation == 'JUL' | Month.of.Observation == 'AUG', 'Summer', 'Fall'))))
   
+pinnipeds_ocean$Month.of.Observation <- factor(pinnipeds_ocean$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
 
-setwd("~/Documents/R/Strandings/ENSO_Mapping")
-
-```
-
-
-```{r ENSO}
-
-#Do more pinnipeds strand (or HI/FI cases) during EN compared to LN conditions?
-
-#All species combined
-ENSO.all <- pinnipeds_ocean %>% 
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.all.figure <- 
-  ggplot(ENSO.all, aes(x = ENSO_cat, y = cnt, fill = ENSO_cat)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Stranding Cases") +
-  scale_y_continuous(labels = comma) +
-  facet_grid(~Pinniped.Common.Name) +
-  plot_theme() +
-  scale_fill_manual(values = color1)
-
-summary(aov(cnt ~ ENSO, data = ENSO.all))
-kruskal.test(ENSO.all)
-kruskalmc(cnt ~ ENSO, ENSO.all)
-
-ENSO_yr <- pinnipeds_small %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Pinniped.Common.Name, ENSO, Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO_sp_figure <- ggplot(data = ENSO_yr, aes(x = Pinniped.Common.Name, y = cnt, group = ENSO, fill = ENSO)) +
-  geom_boxplot(group = 'ENSO')
-
-ENSO_model <- glm(cnt ~ ENSO + Pinniped.Common.Name, family = poisson(link = log), data = ENSO_yr)
-summary(ENSO_model)
-posthoc.kruskal.nemenyi.test()
-kruskalmc(ENSO_model$cnt ~ ENSO_model$ENSO)
-summary(aov(cnt ~ Pinniped.Common.Name*ENSO, data = ENSO_yr))
-
-MEI_yr <- pinnipeds_small %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Pinniped.Common.Name, ENSO, MEI, Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-MEI_model <- lm(cnt ~ MEI*Pinniped.Common.Name + Year.of.Observation + Month.of.Observation, data = MEI_yr)
-summary <- summary(MEI_model)
-autoplot(MEI_model)
+#setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
 ```
 
 ```{r}
-#All species combined - HI
-ENSO.HI <- pinnipeds.data %>% 
+##Annual anomalies
+
+#Annual mean strandings
+annual_mean <- pinnipeds_ocean %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name) %>%
+  summarize(mean_strand = mean(cnt))
+
+#Anomalies dataframe 
+annual_anom_strands <- pinnipeds_ocean %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  filter(Pinniped.Common.Name != 'NA' | !is.na(Pinniped.Common.Name)) %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  merge(annual_mean, by = 'Pinniped.Common.Name') %>%
+  transform(strand_anom = cnt - mean_strand)
+
+anom_strand_plot <- ggplot(annual_anom_strands, aes(Year.of.Observation, strand_anom, fill = Pinniped.Common.Name)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  xlab("") + ylab("Stranding Anomalies") +
+  plot_theme(legend.position = 'top')
+
+#Annual mean ocean anomalies
+annual_mean_ocean <- ocean %>%
+  select(-matches("_cat")) %>%
+  select(-matches("_lag")) %>%
+  select(-c(Date, Month.of.Observation)) %>%
+  melt(id.vars = 'Year.of.Observation') %>%
+  group_by(Year.of.Observation, variable) %>%
+  summarize(mean = mean(value, na.rm = T)) %>%
+  dcast(Year.of.Observation ~ variable, value.var = 'mean')
+
+#Anomalies - separate species, annual, melt 
+annual_anom <- annual_anom_strands %>%
+  select(-mean_strand) %>%
+  merge(annual_mean_ocean, by = 'Year.of.Observation') %>%
+  melt(id.vars = c('Year.of.Observation', 'Pinniped.Common.Name'))
+
+annual_anom_plot <- ggplot(annual_anom %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
+  geom_line() +
+  xlab("") + ylab("Mean Annual Anomalies") +
+  facet_grid(~Pinniped.Common.Name) +
+  plot_theme(legend.position = 'top')
+
+#Anomalies - combined species, annual
+annual_anom_comb <- annual_anom %>%
+  group_by(Year.of.Observation, variable) %>%
+  summarize(value = mean(value))
+
+annual_anom_comb_plot <- ggplot(annual_anom_comb %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
+  geom_line() +
+  xlab("") + ylab("Mean Annual Anomalies") +
+  plot_theme(legend.position = 'top')
+
+```
+
+```{r}
+##Monthly anomalies - all species combined 
+
+#Monthly mean - HI
+monthly_mean_HI_comb <- pinnipeds_ocean %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  group_by(ENSO, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.HI.figure <- 
-  ggplot(ENSO.HI, aes(x = ENSO, y = cnt, fill = ENSO)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Stranding Cases") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ENSO.species.figure, file = "~/Documents/R/Strandings/Figures/ENSO.HI.figure.pdf")
-
-summary(aov(cnt ~ ENSO, data = ENSO.HI))
-
-#All species combined - FI and gunshots
-ENSO.Fish <- pinnipeds.data %>% 
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  filter(Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type == 'Fisheries' | Interaction.Type == 'Gunshot') %>%
-  group_by(ENSO, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.Fish.figure <- 
-  ggplot(ENSO.Fish, aes(x = ENSO, y = cnt, fill = ENSO)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Stranding Cases") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ENSO.species.figure, file = "~/Documents/R/Strandings/Figures/ENSO.Fish.figure.pdf")
-
-#Gunshots sig dif by itself, and combined = sig, fisheries not sig dif alone
-summary(aov(cnt ~ ENSO, data = ENSO.Fish))
-
-#Boxplot per EN/LN per species
-
-ENSO.species <- pinnipeds.data %>% 
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Pinniped.Common.Name, ENSO, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.species.figure <- 
-  ggplot(ENSO.species, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Stranding Cases") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ENSO.species.figure, file = "~/Documents/R/Strandings/Figures/ENSO.species.figure.pdf")
-
-#Suggests no difference in strandings between EN/LN
-summary(aov(cnt ~ Pinniped.Common.Name + ENSO, data = ENSO.species))
-
-##THIS NEEDS HELP
-##Trying to do anova.... does it matter if I just have total EN/LN per species, or whether the anova (I'm assuming) takes an average of the monthly EN/LN count (output is different if I use ENSO.species vs ENSO.anova)
-# ENSO.species.anova <- pinnipeds.data %>%
-#   group_by(Pinniped.Common.Name, ENSO) %>%
-#   summarize(cnt = n_distinct(National.Database.Number))
-# 
-# summary(aov(cnt ~ Pinniped.Common.Name + ENSO, data = ENSO.species.anova))
-# #Help - why no p values
-# TukeyHSD(aov(cnt ~ ENSO + Pinniped.Common.Name*ENSO, data = ENSO.species.anova))
-
-##HELP! How do I show that for EACH species, is there a difference between LN/EN?? t or lapply pairwise for each species? Doesn't look like there is a difference
-CSL <- ENSO.species %>% filter(Pinniped.Common.Name == 'California sea lion') 
-pairwise.t.test(CSL$cnt, CSL$ENSO)
-
-HS <- ENSO.species %>% filter(Pinniped.Common.Name == 'Harbor seal') 
-pairwise.t.test(HS$cnt, HS$ENSO)
-
-```
-
-```{r all HI FI ENSO categorical}
-
-#HI strandings
-ENSO.species.HI <- pinnipeds.data %>% 
-  filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != 'Unidentified') %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Pinniped.Common.Name, ENSO, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.species.HI.figure <- 
-  ggplot(ENSO.species.HI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Human Interaction Cases") +
-  plot_theme() +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ENSO.species.HI.figure, file = "~/Documents/R/Strandings/Figures/ENSO.species.HI.figure.pdf")
-
-##Same as above for all cases - needs help
-# summary(aov(cnt ~ Pinniped.Common.Name + ENSO, data = ENSO.species.HI))
-# 
-CSL <- ENSO.species.HI %>% filter(Pinniped.Common.Name == 'California sea lion')
-pairwise.t.test(CSL$cnt, CSL$ENSO)
-
-HS <- ENSO.species.HI %>% filter(Pinniped.Common.Name == 'Harbor seal')
-pairwise.t.test(HS$cnt, HS$ENSO)
-
-#FI
-ENSO.species.FI <- pinnipeds.data %>% 
-  filter(Fishery.Interaction == 'Y' | Shot == 'Y') %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Pinniped.Common.Name, ENSO, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ENSO.species.FI.figure <- ggplot(ENSO.species.FI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO)) +
-  geom_boxplot() +
-  xlab(" ") + ylab("Monthly Fisheries Interaction and Gunshot Cases") +
-  plot_theme() +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ENSO.species.FI.figure, file = "~/Documents/R/Strandings/Figures/ENSO.species.FI.figure.pdf")
-
-##Same as above for all cases - needs help
-summary(aov(cnt ~ Pinniped.Common.Name + ENSO, data = ENSO.species.FI))
-
-CSL <- ENSO.species.FI %>% filter(Pinniped.Common.Name == 'California sea lion')
-pairwise.t.test(CSL$cnt, CSL$ENSO)
-
-HS <- ENSO.species.FI %>% filter(Pinniped.Common.Name == 'Harbor seal')
-pairwise.t.test(HS$cnt, HS$ENSO)
-```
-
-```{r all cases HI FI numeric MEI, eval = FALSE, echo = FALSE}
-#Regression with numeric MEI - all cases
-
-basic.regression <- pinnipeds.data %>%
-  #filter(Pinniped.Common.Name == 'Harbor seal') %>%
-  group_by(MEI) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ggplot(basic.regression, aes(MEI, cnt)) +
-  geom_point(position = 'identity') +
-  geom_smooth(method = "lm") +
-  plot_theme()
-
-summary(lm(MEI ~ cnt, data = basic.regression))
-
-#Regression with numeric MEI - HI
-
-basic.regression.HI <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  group_by(MEI) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ggplot(basic.regression.HI, aes(MEI, cnt)) +
-  geom_point(position = 'jitter') +
-  geom_smooth(method = "lm") +
-  plot_theme()
-
-summary(lm(MEI ~ cnt, data = basic.regression.HI))
-
-#Regression with numeric MEI - FI
-
-basic.regression.FI <- pinnipeds.data %>%
-  filter(Fishery.Interaction == 'Y' | Shot == 'Y') %>%
-  group_by(MEI) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-ggplot(basic.regression.FI, aes(MEI, cnt)) +
-  geom_point(position = 'jitter') +
-  geom_smooth(method = "lm") +
-  plot_theme()
-
-summary(lm(MEI ~ cnt, data = basic.regression.FI))
-
-```
-
-```{r numeric MEI for each species, eval = FALSE, echo = FALSE}
-
-#Higher strandings for any of the species during ENSO?
-species.regression <- pinnipeds.data %>%
-   group_by(MEI, Pinniped.Common.Name) %>%
-   summarize(cnt = n_distinct(National.Database.Number))
-
- ggplot(species.regression, aes(MEI, cnt, group = Pinniped.Common.Name, col = Pinniped.Common.Name)) +
-   geom_point(position = 'jitter') +
-   geom_smooth(method = "lm", se = F) +
-   plot_theme(legend.position = 'top') +
-   scale_color_brewer(palette = 'Set1')
-
-#summary(lm(cnt ~ Pinniped.Common.Name + MEI, data = species.regression))
-```
-
-```{r all strandings over time}
-
-#Are the number of cases of all combined species increasing or decreasing over time?
-
-data.by.year <- pinnipeds.data %>% 
-  group_by(Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-#Statistically significant change in all stranding cases in OR and WA combined over time (p < 0.05, 25 strandings per year increase).
-summary(lm(cnt ~ Year.of.Observation, data = data.by.year))
-
-all.yr.figure <- 
-  ggplot(data.by.year, aes(x = Year.of.Observation, y = cnt)) + 
-  geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE, col = 'black', linetype = 3) +
-  xlab("") + ylab("Annual Strandings") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() +
-  scale_color_brewer(palette = 'Set1') 
-ggsave(all.yr.figure, file = "~/Documents/R/Strandings/Figures/all.year.figure.pdf")
-
-```
-
-```{r HI and FI number of cases over time}
-
-#Are the number of HI cases of all combined species increasing or decreasing over time?
-
-HI.by.year <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  group_by(Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-#Regression shows significant increase (6/yr) of all HI cases, p < 0.05
-summary(lm(cnt ~ Year.of.Observation, data = HI.by.year))
-
-#anova confirms years are different, p-val < 0.05
-summary(aov(cnt ~ Year.of.Observation, data = HI.by.year))
-
-HI.year.figure <- 
-  ggplot(HI.by.year, aes(x = Year.of.Observation, y = cnt)) + 
-  geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE, col = 'black', linetype = 3) +
-  xlab("") + ylab("Annual Human Interaction Cases") +
-  scale_y_continuous(labels = comma) +
-  #scale_x_continuous(breaks = c(1989:2015)) +
-  plot_theme(legend.position = 'top') +
-  scale_color_brewer(palette = 'Set1')
-ggsave(HI.year.figure, file = "~/Documents/R/Strandings/Figures/HI.year.figure.pdf")
-```
-
-```{r HI types over time}
-#Are specific types of HI cases changing over time?
-
-HI.by.year.type <- pinnipeds.data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  group_by(Interaction.Type, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-#Regression shows there is an effect of year for all HI types, that they are increasing over time (gunshot by 22/yr).
-summary(lm(cnt ~ Year.of.Observation + Interaction.Type, data = HI.by.year.type))
-
-#Tukey shows average annual HI types are not all different from one another
-TukeyHSD(aov(cnt ~ Interaction.Type, data = HI.by.year.type))
-
-HI.type.year.figure <- 
-  ggplot(HI.by.year.type, aes(x = Year.of.Observation, y = cnt, 
-                              group = Interaction.Type, col = Interaction.Type)) + 
-  geom_point(position = "identity") +
-  geom_smooth(method = "lm", se = FALSE) +
-  xlab("") + ylab("Human Interaction Cases") +
-  plot_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set1')
-ggsave(HI.type.year.figure, file = "~/Documents/R/Strandings/Figures/HI.type.year.figure.pdf")
-
-```
-
-```{r monthly all HI FI}
-
-#Are there seasonal patterns in all stranding cases? Only alive and fresh dead because timing matters - hard to tell when decomposed individuals stranded
-monthly.all <- pinnipeds.data %>%
-  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Year.of.Observation, Month.of.Observation, Sex, Age.Class) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-#Help - does this show that Aug, Dec, Jun, July, May, Oct, Sep are different from one another?
-summary(lm(cnt ~ Month.of.Observation, data = monthly.all))
-
-#Overall anova and pairwise tests show that there is a seasonal peak (ie some months are different than others)
-TukeyHSD(aov(cnt ~ Month.of.Observation, data = monthly.all))
-#pairwise.t.test(monthly.all$cnt, monthly.all$Month.of.Observation, p.adj = "none")
-
-#All monthly cases by sex
-monthly.sex.figure <- 
-  monthly.all %>% group_by(Month.of.Observation, Sex) %>%
-  summarize(sum = sum(cnt)) %>%
-ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Sex)) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Strandings") + xlab("") + 
-  scale_y_continuous(labels = comma) +
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.sex.figure, file = "~/Documents/R/Strandings/Figures/monthly.sex.figure.pdf")
-
-#Monthly strandings by age class
-monthly.age.figure <- monthly.all %>% 
-  group_by(Month.of.Observation, Age.Class) %>%
-  summarize(sum = sum(cnt)) %>%
-  ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = as.factor(Age.Class))) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Strandings") + xlab("") + 
-  scale_y_continuous(labels = comma) +
-  plot_theme(legend.position = 'top', 
-             legend.text = element_text(size = 8)) + 
-  scale_fill_brewer(palette = 'Set3')
-ggsave(monthly.age.figure, file = "~/Documents/R/Strandings/Figures/monthly.age.figure.pdf")
-
-#Peaks by the years
-monthly.years.figure <- 
-  ggplot(monthly.all, aes(x = factor(Month.of.Observation), y = cnt, 
-        group = factor(Year.of.Observation), color = factor(Year.of.Observation))) +
-  #geom_area() +
-  geom_line(aes(group = factor(Year.of.Observation))) + 
-  #geom_smooth(se = F) +
-  ylab("Strandings per Month") + xlab("") + 
-  scale_y_continuous(labels = comma) +
-  plot_theme() #+ 
-  #scale_color_brewer()
-ggsave(monthly.years.figure, file = "~/Documents/R/Strandings/Figures/monthly.years.figure.pdf")
-
-#Are there seasonal patterns in HI cases?
-
-monthly.HI <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-monthly.HI.yr.mo <- pinnipeds.data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
+  filter(Water.Body != 'Inland_WA') %>%
   group_by(Month.of.Observation, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-#Regression shows different in Jan and summer
-summary(lm(cnt ~ Month.of.Observation, data = monthly.HI.yr.mo))
-
-summary(aov(cnt ~ Month.of.Observation, data = monthly.HI.yr.mo))
-
-monthly.HI.YNCBD <- pinnipeds.data %>% 
-  group_by(Findings.of.Human.Interaction, Month.of.Observation) %>% 
-  summarize(cnt = n_distinct(National.Database.Number)) 
-
-monthly.HI.YNCBD.prop <- pinnipeds.data %>% 
-  group_by(Findings.of.Human.Interaction, Month.of.Observation) %>% 
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(Month.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') %>%
-  transform(prop.Y = round(Y/(CBD+N+Y), 2)*100)
-
-#Bar chart showing proportion of Y, N, and CBD HI cases
-ggplot(monthly.HI.YNCBD, aes(x = factor(Month.of.Observation), y = cnt, fill = Findings.of.Human.Interaction)) +
-  geom_bar(stat = 'identity') + 
-  ylab("Total Human Interaction Cases") + xlab("") + 
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1') 
-
-#Bar chart showing only HI cases - sum of total ever cases in each month
-monthly.HI.figure <- monthly.HI %>%
+  summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
   group_by(Month.of.Observation) %>%
-  summarize(cnt = sum(cnt)) %>%
-  ggplot(aes(x = factor(Month.of.Observation), y = cnt)) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Human Interaction Cases") + xlab("") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.figure.pdf")
+  summarize(mean_HI = mean(cnt_HI))
 
-#Bar chart showing monthly strandings by interaction type
-monthly.HI.figure.stacked <- monthly.HI %>% 
-  filter(Interaction.Type != 'NA') %>%
-  group_by(Month.of.Observation, Interaction.Type) %>%
-  summarize(sum = sum(cnt)) %>%
-  ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Interaction.Type)) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Human Interaction Cases") + xlab("") + 
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.figure.stacked, file = "~/Documents/R/Strandings/Figures/monthly.HI.figure.stacked.pdf")
+#HI Anomalies
+monthly_anom_HI_comb <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Month.of.Observation, Year.of.Observation) %>%
+  summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_HI_comb, by = c('Month.of.Observation'), all = T) %>%
+  transform(strand_anom_HI = cnt_HI - mean_HI)
 
-#Bar chart showing monthly strandings by sex
-monthly.HI %>% group_by(Month.of.Observation, Sex) %>%
-  summarize(sum = sum(cnt)) %>%
-ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Sex)) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Human Interaction Cases") + xlab("") + 
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1')
+#Monthly mean - FI + Gun
+monthly_mean_FI_comb <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Month.of.Observation, Year.of.Observation) %>%
+  summarize(cnt_FI = n_distinct(National.Database.Number)) %>%
+  group_by(Month.of.Observation) %>%
+  summarize(mean_FI = mean(cnt_FI))
 
-#Monthly HI strandings by age class
-monthly.HI.age.figure <- monthly.HI %>% group_by(Month.of.Observation, Age.Class) %>%
-  summarize(sum = sum(cnt)) %>%
-ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Age.Class)) +
-  geom_bar(stat = 'identity') +
-  ylab("Total Human Interaction Cases") + xlab("") + 
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(monthly.HI.age.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.age.figure.pdf")
+#HI Anomalies - FI + Gun
+monthly_anom_FI_comb <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Month.of.Observation, Year.of.Observation) %>%
+  summarize(cnt_FI = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_FI_comb, by = c('Month.of.Observation'), all = T) %>%
+  transform(strand_anom_FI = cnt_FI - mean_FI)
 
-#Peaks by the years
-monthly.HI.year.figure <- 
-  ggplot(monthly.HI, aes(x = factor(Month.of.Observation), y = cnt, group = factor(Year.of.Observation), color = factor(Year.of.Observation))) +
-  #geom_line(aes(group = factor(Year.of.Observation))) + 
-  geom_smooth(se = F) +
-  ylab("Monthly Human Interaction Cases") + xlab("") + 
-  plot_theme() #+ 
-  #scale_color_brewer(palette = 'Set3')
-ggsave(monthly.HI.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.HI.year.figure.pdf")
+#Monthly mean - all
+monthly_mean_all_comb <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Month.of.Observation, Year.of.Observation) %>%
+  summarize(cnt_all = n_distinct(National.Database.Number)) %>%
+  group_by(Month.of.Observation) %>%
+  summarize(mean_all = mean(cnt_all))
 
-#Is there an effect of month on FI?
-monthly.FI <- pinnipeds.data %>%
-  filter(Fishery.Interaction == 'Y') %>%
+#Anomalies dataframe - combined species
+monthly_anom_comb <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
   group_by(Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  summarize(cnt_all = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_all_comb, by = c('Month.of.Observation'), all = T) %>%
+  transform(strand_anom_all = cnt_all - mean_all) %>%
+  merge(monthly_anom_HI_comb, by = c('Month.of.Observation', 'Year.of.Observation'), all = T) %>%
+  merge(monthly_anom_FI_comb, by = c('Month.of.Observation', 'Year.of.Observation'), all = T) %>%
+  merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'))
 
-#Regression output shows some months dif than others
-summary(lm(cnt ~ Month.of.Observation, data = monthly.FI))
+#Anomaies melt - combined species
+monthly_anom_comb_melt <- monthly_anom_comb %>%
+  select(-matches("lag")) %>%
+  select(-matches("cat")) %>%
+  melt(id.vars = c('Date', 'Year.of.Observation', 'Month.of.Observation'))
 
-summary(aov(cnt ~ Month.of.Observation, data = monthly.FI))
+#Anomalies plot, combined species, strandings only
+strand_comb_plot <- ggplot(monthly_anom_comb, aes(Date, strand_anom_all)) + 
+  geom_line() +
+  geom_line(aes(Date, strand_anom_HI), col = 'red') + 
+  geom_line(aes(Date, strand_anom_FI), col = 'blue') + 
+  geom_line(aes(y = 0), col = 'grey60') + 
+  xlab("") + ylab("Monthly Stranding Anomalies") +
+  plot_theme()
 
-#Peaks by the years
-monthly.FI.year.figure <- 
-  ggplot(monthly.FI, aes(x = factor(Month.of.Observation), y = cnt, 
-              group = factor(Year.of.Observation), color = factor(Year.of.Observation))) +
-  geom_line(aes(group = factor(Year.of.Observation))) + 
-  geom_smooth(se = F) +
-  ylab("Monthly Fisheries Interactions") + xlab("") + 
-  plot_theme() #+ 
- # scale_color_brewer(palette = 'Set3')
-ggsave(monthly.FI.year.figure, file = "~/Documents/R/Strandings/Figures/monthly.FI.year.figure.pdf")
-```
+anom_comb_plot_data <- monthly_anom_comb_melt %>%
+  filter(variable == 'strand_anom_all' | variable == 'strand_anom_HI' |
+        variable == 'MEI' | variable == 'PDO' | variable == 'NPGO')
 
-```{r spatial state}
-#All by state
-year.month.state <- pinnipeds.data %>%
-  group_by(State, Year.of.Observation, Month.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
-
-year.state.boxplot <- 
-  ggplot(year.month.state, aes(x = as.factor(Year.of.Observation), y = cnt, fill = State)) +
-  geom_boxplot() +
-  xlab("") + ylab("Monthly Strandings") +
+anom_comb_plot <- ggplot(anom_comb_plot_data, aes(Date, value, group = variable, col = variable)) +
+  geom_line() +
+  #geom_line(aes(y = 0), col = 'grey60') + 
+  xlab("") + ylab("Monthly Anomalies") +
+  #facet_grid(~variable) +
   plot_theme(legend.position = 'top') +
-  scale_fill_brewer(palette = 'Set1')
-ggsave(year.state.boxplot, file = "~/Documents/R/Strandings/Figures/year.state.boxplot.pdf")
+  scale_color_manual(values = color1)
 
-year.state.prop <- pinnipeds.data %>%
-  group_by(State, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(Year.of.Observation ~ State, value.var = 'cnt') %>%
-  transform(prop.or = round(OR/(OR+WA), 2)*100)
-  
-mean(year.state.prop$prop.or)
-sum(year.state.prop$OR)/sum(year.state$cnt)
+```
 
-#When accounting for differences across years, states are different
-summary(lm(cnt ~ Year.of.Observation + State, year.month.state))
+```{r }
 
-#Tukey - average annual strandings in states are significantly different from each other
-summary(aov(cnt ~ Year.of.Observation + State, data = year.month.state))
+##Monthly anomalies - by species
 
-#Bar chart of strandings by state shows slightly more in WA, but similar trends through time. Higher in OR in 2015 and higher in WA in 2010.
-all.state.figure <- pinnipeds.data %>% 
-  group_by(State, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-ggplot(aes(x = factor(Year.of.Observation), y = cnt, fill = State)) +
-  geom_bar(stat = 'identity', position = position_dodge(width = 0.8), width = 0.6) + 
-   ylab("Total Annual Strandings") + xlab("") + 
-   plot_theme() + 
-   scale_fill_brewer(palette = 'Set1') 
-ggsave(all.state.figure, file = "~/Documents/R/Strandings/Figures/all.state.figure.pdf")
-
-#HI by state
-HI.year.state <- pinnipeds.data %>%
+#Monthly mean - HI
+monthly_mean_HI <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  group_by(State, Year.of.Observation, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  group_by(Month.of.Observation, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name, Month.of.Observation) %>%
+  summarize(mean_HI = mean(cnt_HI))
 
-HI.state.prop <- HI.year.state %>%
-  group_by(State, Interaction.Type) %>%
-  summarize(cnt = sum(cnt)) %>%
-  dcast(Interaction.Type ~ State, value.var = 'cnt') %>%
-  transform(prop.or = round(OR/(OR+WA), 2)*100)
-  
-mean(HI.state.prop$prop.or)
-sum(HI.state.prop$OR)/sum(HI.year.state$cnt)
-
-#When accounting for differences across years, states are different
-summary(lm(cnt ~ Year.of.Observation + State, HI.year.state))
-
-#Tukey - average annual strandings in states are significantly different from each other
-summary(aov(cnt ~ Year.of.Observation + State, data = HI.year.state))
-
-#Bar chart of HI strandings by state shows growing number in OR
-HI.state.year.figure <- pinnipeds.data %>% 
+#HI Anomalies
+monthly_anom_HI <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  group_by(State, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-    
-ggplot(aes(x = factor(Year.of.Observation), y = cnt, fill = State)) +
-  geom_bar(stat = 'identity', position = position_dodge(width = 0.8), width = 0.6) + 
-   ylab("Annual Human Interaction Cases") + xlab("") + 
-   plot_theme() + 
-   scale_fill_brewer(palette = 'Set1') 
-ggsave(HI.state.year.figure, file = "~/Documents/R/Strandings/Figures/HI.state.year.figure.pdf")
+  group_by(Month.of.Observation, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_HI, by = c('Pinniped.Common.Name', 'Month.of.Observation'), all = T) %>%
+  transform(strand_anom_HI = cnt_HI - mean_HI)
 
-#Species by state
+#Monthly mean - FI + Gun
+monthly_mean_FI <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
+  group_by(Month.of.Observation, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_FI = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name, Month.of.Observation) %>%
+  summarize(mean_FI = mean(cnt_FI))
 
-state.species <- pinnipeds.data %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  group_by(Pinniped.Common.Name, State) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+#HI Anomalies - FI + Gun
+monthly_anom_FI <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
+  group_by(Month.of.Observation, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_FI = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_FI, by = c('Pinniped.Common.Name', 'Month.of.Observation'), all = T) %>%
+  transform(strand_anom_FI = cnt_FI - mean_FI)
 
-#Bar chart
-state.species.prop.figure <- 
-  ggplot(state.species, aes(Pinniped.Common.Name, cnt, fill = State)) + 
-  geom_bar(stat = 'identity', position = position_dodge(width = 0.8), width = 0.6) +
-  xlab("") + ylab("Total Strandings") +
-  scale_y_continuous(labels = comma) +
-  plot_theme() + 
-   scale_fill_brewer(palette = 'Set1')
-ggsave(state.species.prop.figure, file = "~/Documents/R/Strandings/Figures/state.species.prop.figure.pdf")
+#Monthly mean - all
+monthly_mean_all <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  group_by(Month.of.Observation, Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_all = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name, Month.of.Observation) %>%
+  summarize(mean_all = mean(cnt_all))
 
-#100% stacked
-state.species.prop.figure <- 
-  ggplot(state.species, aes(Pinniped.Common.Name, cnt, fill = State)) + 
-  geom_bar(stat = 'identity', position = 'fill') +
-  xlab("") + ylab("Proportion of Strandings") +
-  plot_theme() + 
-   scale_fill_brewer(palette = 'Set1')
-ggsave(state.species.prop.figure, file = "~/Documents/R/Strandings/Figures/state.species.prop.figure.pdf")
+#Anomalies dataframe
+monthly_anom <- pinnipeds_ocean %>%
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Pinniped.Common.Name != 'NA' | !is.na(Pinniped.Common.Name)) %>%
+  group_by(Year.of.Observation, Month.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt_all = n_distinct(National.Database.Number)) %>%
+  merge(monthly_mean_all, by = c('Pinniped.Common.Name', 'Month.of.Observation'), all = T) %>%
+  transform(strand_anom_all = cnt_all - mean_all) %>%
+  merge(monthly_anom_HI, by = c('Pinniped.Common.Name', 'Month.of.Observation', 'Year.of.Observation'), all = T) %>%
+  merge(monthly_anom_FI, by = c('Pinniped.Common.Name', 'Month.of.Observation', 'Year.of.Observation'), all = T) %>%
+  merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'))
+
+monthly_anom_melt <- monthly_anom %>%
+  select(-matches("lag")) %>%
+  select(-matches("cat")) %>%
+  select(-matches("_all")) %>%
+  select(-matches("mean")) %>%
+  select(-matches("cnt")) %>%
+  melt(id.vars = c('Date', 'Year.of.Observation', 'Month.of.Observation', 'Pinniped.Common.Name'))
+
+#Strandings anomalies plot - separate species
+strand_plot <- ggplot(monthly_anom, aes(Date, strand_anom_all, col = Pinniped.Common.Name)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Stranding Anomalies") +
+  plot_theme(legend.position = 'top')
+
+#Strandings and ocean anomalies plot - separate species
+anom_plot <- ggplot(monthly_anom_melt %>% 
+                      # filter(variable == 'strand_anom_all' |
+                      #        variable == 'MEI' | variable == 'NPGO' |
+                      #        variable == 'PDO'), 
+                      aes(Date, value, col = variable)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Anomalies") +
+  plot_theme(legend.position = 'top')
 
 ```
 
-```{r WA counties}
-#all strandings by county - WA
+```{r}
 
-allWA.bycounty <- pinnipeds.data %>% 
-  filter(County != 'NA' & County != 'Unknown' & State == 'WA') %>% 
-  group_by(County, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+#ocean indicators anomalies plot
+ocean_plot_data <- ocean %>%
+  filter(-matches("lag")) %>%
+  melt(id.vars = 'Date')
 
-allWA.bycounty.figure <- ggplot(allWA.bycounty, aes(x = County, y = cnt)) + 
-  geom_bar(stat = 'identity')  + 
-  ylab("Total Strandings") + xlab("") + 
-  scale_y_continuous(labels = comma) +
-  plot_theme() + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(allWA.bycounty.figure, file = "~/Documents/R/Strandings/Figures/allWA.bycounty.figure.pdf")
+ocean_plot <- ggplot(data = ocean_plot_data %>% 
+                       filter(!grepl("SST", variable) & !grepl("welling", variable) & !grepl("Wind", variable)),
+                     aes(Date, value, group = variable, col = variable)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
+  plot_theme(legend.position = 'top') +
+  scale_color_manual(values = color1)
 
-#Some counties have higher/lower strandings compared to others
-summary(aov(cnt ~ County, allWA.bycounty))
+```
 
-#Increasing in Pierce, San Juan, Grays Harbor, decreasing in Clark, Mason, Skagit?
-summary(lm(cnt ~ County + Year.of.Observation, allWA.bycounty))
+```{r}
 
 
-#all HI by county - WA
+```
 
-WAHI.bycounty <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'WA' & 
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County, Interaction.Type, Year.of.Observation) %>%
+
+
+```{r}
+
+#Do more pinnipeds strand (or HI/FI cases) during EN compared to LN conditions?
+
+#All strandings
+ENSO_all <- pinnipeds_ocean %>% 
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-WAHI.bycounty.figure <- 
-  ggplot(WAHI.bycounty, aes(x = County, y = cnt, fill = Interaction.Type)) + 
-  geom_bar(stat = 'identity')  + 
-  ylab("Total Human Interaction Cases") + xlab("") + 
+ENSO_all_figure <- 
+  ggplot(ENSO_all, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
+  geom_boxplot() +
+  xlab(" ") + ylab("Monthly Stranding Cases") +
   scale_y_continuous(labels = comma) +
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1') 
-ggsave(WAHI.bycounty.figure, file = "~/Documents/R/Strandings/Figures/WAHI.bycounty.figure.pdf")
+  plot_theme() +
+  scale_fill_manual(values = color1)
 
-#Interaction types different
-summary(aov(cnt ~ County + Interaction.Type + Year.of.Observation, WAHI.bycounty))
+#Stellers and CSLs sig at p < 0.1 when all included
+#Excluding inland waters, all combined significant, and all but CSL
+summary(aov(cnt ~ ENSO_cat, data = ENSO_all))
+summary(aov(cnt ~ ENSO_cat, data = ENSO_all %>% filter(Pinniped.Common.Name == 'California sea lion'))) 
+kruskal.test(ENSO_all)
+kruskalmc(cnt ~ ENSO_cat, ENSO_all %>% filter(Pinniped.Common.Name == 'Steller sea lion'))
 
-#Does this by by any chance show that Pacific, Pierce, and Gunshots are increasing over time??
-summary(lm(cnt ~ County + Interaction.Type + Year.of.Observation, WAHI.bycounty))
-
-```
-
-```{r OR counties}
-
-#all strandings by county - OR
-
-allOR.bycounty <- pinnipeds.data %>% 
-  filter(County != 'NA' & County != 'Unknown' & State == 'OR') %>% 
-  group_by(County, Year.of.Observation) %>%
+#All HI cases
+ENSO_HI <- pinnipeds_ocean %>% 
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-allOR.bycounty.figure <- 
-  ggplot(allOR.bycounty, aes(x = County, y = cnt)) + 
-  geom_bar(stat = 'identity')  + 
-  ylab("Total Strandings") + xlab("") + 
+ENSO_HI_figure <- 
+  ggplot(ENSO_HI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
+  geom_boxplot() +
+  xlab(" ") + ylab("Monthly Stranding Cases") +
   scale_y_continuous(labels = comma) +
-  plot_theme() + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(allOR.bycounty.figure, file = "~/Documents/R/Strandings/Figures/allOR.bycounty.figure.pdf")
+  plot_theme() +
+  #facet_grid(~Pinniped.Common.Name) +
+  scale_fill_manual(values = color1)
 
-#Significant differences across counties
-summary(aov(cnt ~ County, allOR.bycounty))
+#Seems less differences when exclude inland for HI
+summary(aov(cnt ~ ENSO_cat, data = ENSO_HI))
 
-#Increasing in Clatsop, Coos, and Lincoln
-summary(lm(cnt ~ County + Year.of.Observation, allOR.bycounty))
+#FI and gunshots
+#Interesting that there is greater variation during EN months
+ENSO_FI <- pinnipeds_ocean %>% 
+  filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
 
-#all HI by county - OR
+ENSO_FI_gun_figure <- 
+  ggplot(data = ENSO_FI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
+  geom_boxplot() +
+  xlab(" ") + ylab("Monthly Stranding Cases") +
+  scale_y_continuous(labels = comma) +
+  plot_theme() +
+  #facet_grid(~Pinniped.Common.Name) +
+  scale_fill_manual(values = color1)
 
-ORHI.bycounty <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'OR' & 
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County, Interaction.Type, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
-  
-ORHI.bycounty.figure <- 
-  ggplot(ORHI.bycounty, aes(x = County, y = cnt, fill = Interaction.Type)) + 
-  geom_bar(stat = 'identity')  + 
-  ylab("Human Interaction Cases") + xlab("") + 
-  plot_theme(legend.position = 'top') + 
-  scale_fill_brewer(palette = 'Set1')
-ggsave(ORHI.bycounty.figure, file = "~/Documents/R/Strandings/Figures/ORHI.bycounty.figure.pdf")
+#Gunshots sig dif by itself, and combined = sig, fisheries not sig dif alone, looks like
+#driven by HS, though they were least sig different for overall strandings
+#less significance when exclude inland - prob bc of Columbia River
+summary(aov(cnt ~ ENSO_cat, data = ENSO_FI %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
-#Interaction types different
-#HELP need to refocus here - looking to show which counties in which types are increasing or decreasing over time.
-# summary(aov(cnt ~ County + Interaction.Type + Year.of.Observation, ORHI.bycounty))
-# TukeyHSD(aov(cnt ~ County + Interaction.Type + Year.of.Observation, ORHI.bycounty))
-# summary(lm(cnt ~ County + Interaction.Type + Year.of.Observation, ORHI.bycounty))
 
 ```
 
-```{r big counties tables}
 
-#Washington
-bigtable.WA <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'WA' & County != 'Unknown') %>% 
-  group_by(County) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(all.prop = round(cnt/sum(cnt), 2)*100)
-
-bigtable.WA.HI <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'WA' & County != 'Unknown' & 
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(HI.prop = round(cnt/sum(cnt), 2)*100) %>%
-  merge(bigtable.WA, by = 'County')
-
-bigtable.WA.HI.type <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'WA' & County != 'Unknown' &
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(County ~ Interaction.Type, value.var = 'cnt') 
-
-bigtable.WA.HI.type[is.na(bigtable.WA.HI.type)] <- 0
-
-bigtable.WA.HI.table <- bigtable.WA.HI.type %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
-  select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
-  merge(bigtable.WA.HI, by = 'County') %>%
-  select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
-colnames(bigtable.WA.HI.table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
-
-WAcounties.table <- write.csv(bigtable.WA.HI.table, file = "~/Documents/R/Strandings/Figures/WAcounties.table.csv", row.names = F)
-
-
-#OR
-bigtable.OR <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'OR' & County != 'Unknown') %>% 
-  group_by(County) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(all.prop = round(cnt/sum(cnt), 2)*100)
-
-bigtable.OR.HI <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'OR' & County != 'Unknown' &
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  transform(HI.prop = round(cnt/sum(cnt), 2)*100) %>%
-  merge(bigtable.OR, by = 'County')
-
-bigtable.OR.HI.type <- pinnipeds.data %>% 
-  filter(County != 'NA' & State == 'OR' & County != 'Unknown' &
-           Findings.of.Human.Interaction == 'Y' & 
-           Interaction.Type != 'NA') %>% 
-  group_by(County, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(County ~ Interaction.Type, value.var = 'cnt') 
-
-bigtable.OR.HI.type[is.na(bigtable.OR.HI.type)] <- 0
-
-bigtable.OR.HI.table <- bigtable.OR.HI.type %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
-  select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
-  merge(bigtable.OR.HI, by = 'County') %>%
-  select(County, all.prop, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
-colnames(bigtable.OR.HI.table) <- c("County", "All Strandings (%)", "Human Interactions (%)", "Fisheries (%)", "Gunshot (%)", "Boat (%)", "Other (%)")
-
-ORcounties.table <- write.csv(bigtable.OR.HI.table, file = "~/Documents/R/Strandings/Figures/ORcounties.table.csv", row.names = F)
-```
-
-```{r weight length, eval = FALSE, echo = FALSE}
-
-#Anything interesting here?
-
-# weightlength <- pinnipeds.data %>% 
-#   filter(Length != 'NA' & Weight != 'NA') %>% filter(Length > 0 & Weight > 0) %>%
-#   select(National.Database.Number, Year.of.Observation, Month.of.Observation, Age.Class, Sex, County, Findings.of.Human.Interaction, Interaction.Type, Pinniped.Common.Name, Latitude, Longitude , Length, Length.Units, Weight, Weight.Units) 
-# 
-# weightlength$Length <- as.numeric(weightlength$Length)
-# weightlength$Weight <- as.numeric(weightlength$Weight)
-# weightlength$Length.in <- ifelse(weightlength$Length.Units == 'cm', as.integer(weightlength$Length/2.54), 
-#                                ifelse(weightlength$Length.Units == 'in', weightlength$Length, ''))
-# weightlength$Weight.lbs <- ifelse(weightlength$Weight.Units == 'kg', as.integer(weightlength$Weight/0.453), 
-#                                   ifelse(weightlength$Weight.Units == 'lb', weightlength$Weight, ''))
-# 
-# ggplot(weightlength, aes(Weight.lbs, Length.in)) +
-#   geom_point(position = 'jitter') +
-#   xlab("Weight (lbs)") + ylab("Length") +
-#   plot_theme()
-# 
-# qplot(weightlength$Weight.lbs)
-# qplot(weightlength$Length.in)
-# 
-# ggplot(weightlength, aes(Weight.lbs)) + geom_histogram(stat = 'identity', binwidth = 20)
+```{r}
 
 ```
 
-```{r mapping, echo = FALSE, eval = FALSE}
-##MAPPING
-
-box <- c(-126.7, 41.79, -119.19, 50.078)
-pugetbox <- c(-125.5, 46.79, -121.5, 49.28)
-
-#All strandings - black dots - stamen attempt
-# stamen <- get_stamenmap(bbox = c(-126.7, 41.79, -119.19, 50.078), maptype = "terrain", zoom = 5, size = 2, color = "bw")
-# 
-# ggmap(stamen) +
-#    geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude)) +
-# scale_alpha(range = c(0, 0.3), guide = FALSE) +
-#   xlab("") + ylab("") +
-#   theme(
-#     axis.ticks = element_blank(),
-#     axis.text = element_blank())
-
-#All WA OR - all strandings - black dots
-ggmap(get_map(location = box, source = "stamen", maptype = "terrain")) +
-   geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude)) +
-scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
-  theme(
-    axis.ticks = element_blank(),
-    axis.text = element_blank())
-
-#Greater Puget Sound all strandings - black dots
-ggmap(get_map(location = pugetbox, source = "osm")) +
-  geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude)) +
-#scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
-  plot_theme(
-    legend.key = element_blank(),
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
-    legend.position = 'top',
-    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
-
-#All strandings heatmap
-ggmap(get_map(location = box, source = "osm")) +
-  geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude))  +
-  stat_density2d(data = pinnipeds.data, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
-
-  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-  scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
-  theme(
-    axis.ticks = element_blank(),
-    axis.text = element_blank())
-
-#Puget sound heatmap - all strandings
-ggmap(get_map(location = "Puget Sound", source = "stamen", maptype = "watercolor")) +
-  geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude))  +
-  stat_density2d(data = pinnipeds.data, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
-
-  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-  scale_alpha(range = c(0, 0.1), guide = FALSE) +
-  xlab("") + ylab("") +
-  theme(
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
-    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
-
-#Oregon coast heatmap - all strandings
-ggmap(get_map(location = c(-123.627933, 44.163370), source = "google", maptype = "roadmap", zoom = 7)) +
-  geom_point(data = pinnipeds.data, aes(x = Longitude, y = Latitude))  +
-  stat_density2d(data = pinnipeds.data, aes(x = Longitude, y = Latitude, fill = ..level.., alpha = ..level..), size = 0.01, bins = 60, geom = "polygon") +
-
-  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-  scale_alpha(range = c(0, 0.3), guide = FALSE)
-
-#Human interactions - dots by HI type
-pinniped.HI.map.data <- pinnipeds.data %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
-
-ggmap(get_map(location = box, source = "osm")) +
-  geom_point(data = pinniped.HI.map.data, aes(x = Longitude, y = Latitude, color = Interaction.Type)) +
-scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  xlab("") + ylab("") +
-  plot_theme(
-    legend.key = element_blank(),
-    axis.ticks = element_blank(),
-    axis.text = element_blank(),
-    legend.position = 'top',
-    panel.border = element_rect(colour = "black", fill = "NA", size = .5))
-
-```
 
