@@ -88,7 +88,6 @@ ocean <- read.csv("ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactor
             Date_lag1 = as.Date(Date, format = "%Y-%m-%d"),
             Date_lag2 = as.Date(Date, format = "%Y-%m-%d"),
             Date_lag3 = as.Date(Date, format = "%Y-%m-%d"))
-ocean
 
 fish <- read.csv("fish.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
   transform(Date = as.Date(Date, format = "%Y-%m-%d"))
@@ -107,6 +106,8 @@ pinnipeds_ocean <- pinnipeds_data %>%
         ifelse(Month.of.Observation == 'JUN' | Month.of.Observation == 'JUL' | Month.of.Observation == 'AUG', 'Summer', 'Fall'))))
   
 pinnipeds_ocean$Month.of.Observation <- factor(pinnipeds_ocean$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+
+write.csv(pinnipeds_ocean, "pinnipeds_ocean.csv", row.names = F)
 
 #setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
@@ -372,11 +373,6 @@ ocean_plot <- ggplot(data = ocean_plot_data %>%
 
 ```
 
-```{r}
-
-
-```
-
 
 
 ```{r}
@@ -451,9 +447,5 @@ summary(aov(cnt ~ ENSO_cat, data = ENSO_FI %>% filter(Pinniped.Common.Name == 'H
 
 ```
 
-
-```{r}
-
-```
 
 

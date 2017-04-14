@@ -11,15 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - Y/N stranding network member rates
 - read multivariate/backwards
-- contact stats UW
 - ENSO cat lag
-- SAN edits 4/11
 - stats table update?
 - explore satScan
-- Recirculate draft 4/9ish
 - Spearman and Kendall rank test; Vuong test
 - Maps: kernel density: overall vs. LN/EN; satscan: overall as background, LN/EN
 - Get inland buoy data?
 - Derive lags: 6, mixed, fixed
 - Split 2004 break
 - Menza et al 2016 for local harbor seal abundance?
+
+##Project Activities Log
+
+- 4/10/17: separated data compiling into separate cleaning script
+- 4/14/17: created ENSO stranding stats Rmd

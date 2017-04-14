@@ -1,0 +1,133 @@
+---
+title: 'Pinniped Stranding and Oceanographic Index Modeling Analysis and Research Questions'
+author: Amanda Warlick, March 2017
+output:
+  word_document:
+    reference_docx: mytemplate.docx
+
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE)
+```
+ 
+
+```{r, include = F, echo = F}
+library(ggplot2)
+library(tidyr)
+library(ggmap)
+library(data.table)
+library(cowplot)
+library(knitr)
+library(reshape2)
+library(stringr)
+library(magrittr)
+library(scales)
+library(stats) 
+library(PMCMR)
+library(pgirmess) #kruskalmc()
+library(MASS) #glm.nb()
+library(multcomp) #glht()
+library(dplyr)
+# detach("package:multcomp")
+# detach("package:TH.data")
+# detach("package:MASS")
+
+#setwd("~/Documents/R/Strandings")
+
+# Data Load 
+###############################################################################
+pinnipeds_ocean <- read.csv("pinnipeds_ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  # transform(Decade = ifelse(Year.of.Observation < 2000, '1990s', 
+  #                           ifelse(Year.of.Observation < 2010, '2000s', '2010s'))) %>%
+  transform(Period = ifelse(Year.of.Observation < 2005, 'Pre_Prescott', 'Post_Prescott'))
+
+# Set Up Factors
+# pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
+#                                    levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+
+pinnipeds_ocean_small <- pinnipeds_ocean %>%
+  
+```
+
+##Methodological Questions
+
+- Appropriate to apply breakpoint and then two different means for more even anomalies over time?
+- What are the things I should be cognizant of that are particular to my data? 
+- How to deal with colinearity of oceanographic conditions, and seasonality of all strandings?
+- Is applying a timeseries monthly average (all Januaries) to each month the appropriate way to derive monthly anomalies?
+- How will the models deal with certain oceanographic variables not being available for the whole time series?
+
+##Research Questions
+
+1. Are strandings (and or HI cases) for combined or individual species correlated with certain oceanographic indices?
+
+1a. All cases
+```{r}
+
+# (a) Strandings for combined species 
+
+# (b) Strandings for separate species
+
+```
+
+1b. HI cases
+```{r}
+# (a) HI cases for combined species 
+
+# (b) HI cases for separate species
+
+```
+
+2. Are stranding anomalies correlated with certain oceanographic indices?
+
+2a. All cases
+```{r}
+
+# (a) Stranding anoms for combined species 
+
+# (b) Stranding anoms for separate species
+
+```
+
+2b. HI cases
+```{r}
+
+# (a) HI case anoms for combined species 
+
+# (b) HI case anoms for separate species
+
+```
+
+3. Is there a detectable and appropriate lag time where oceanographic indices correlate more strongly with strandings or stranding anomalies?
+
+3a. 
+```{r}
+
+#All strandings combined species
+
+#All stranding anomalies combined species
+
+#All HI cases combined species
+
+#all HI anomalies combined species
+
+#Separate species?
+```
+
+4. Are there different models that are a better fit for different species (i.e., are species impacted differently by the same ocean conditions?)
+```{r}
+
+```
+
+5. Are stranding hotspots different during EN vs LN conditions? Or some other metric?
+```{r}
+
+# (a) All strandings
+
+# (b) HI cases combined
+
+# (c) HI case types
+```
+
+
