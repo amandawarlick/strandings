@@ -72,6 +72,10 @@ tbls <- captioner(prefix="Table")
 
 color1 <- c("#e45f56", "#a3d39c", "#4aaaa5", "#363e7e", "#f6b61c", "#3b98ee", "#999aa7")
 
+# Read Me Notes
+# ***Indicates important dataframe
+# Remember to check whether live/fresh dead or all
+# Remember to check whether inland excluded
 
 ```
 
@@ -88,6 +92,17 @@ ocean <- read.csv("ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactor
             Date_lag1 = as.Date(Date, format = "%Y-%m-%d"),
             Date_lag2 = as.Date(Date, format = "%Y-%m-%d"),
             Date_lag3 = as.Date(Date, format = "%Y-%m-%d"))
+
+#Derive SST anomalies from temp values
+meanSST <- ocean %>%
+  select(matches("SST"), Month.of.Observation, -matches("_lag")) %>%
+  group_by(Month.of.Observation) %>%
+  summarize(SST_39_mean = mean(SST_39, na.rm = T),
+            SST_44_mean = mean(SST_44, na.rm = T))
+
+ocean <- ocean %>%
+  merge(meanSST, by = Month.of.Observation)
+  
 
 fish <- read.csv("fish.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
   transform(Date = as.Date(Date, format = "%Y-%m-%d"))
@@ -113,32 +128,8 @@ write.csv(pinnipeds_ocean, "pinnipeds_ocean.csv", row.names = F)
 
 ```
 
-```{r}
-##Annual anomalies
-
-#Annual mean strandings
-annual_mean <- pinnipeds_ocean %>%
-  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  filter(Water.Body != 'Inland_WA') %>%
-  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  group_by(Pinniped.Common.Name) %>%
-  summarize(mean_strand = mean(cnt))
-
-#Anomalies dataframe 
-annual_anom_strands <- pinnipeds_ocean %>%
-  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  filter(Water.Body != 'Inland_WA') %>%
-  filter(Pinniped.Common.Name != 'NA' | !is.na(Pinniped.Common.Name)) %>%
-  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  merge(annual_mean, by = 'Pinniped.Common.Name') %>%
-  transform(strand_anom = cnt - mean_strand)
-
-anom_strand_plot <- ggplot(annual_anom_strands, aes(Year.of.Observation, strand_anom, fill = Pinniped.Common.Name)) +
-  geom_bar(stat = 'identity', position = 'dodge') +
-  xlab("") + ylab("Stranding Anomalies") +
-  plot_theme(legend.position = 'top')
+```{r, annual sep sp}
+##Annual anomalies separate species; outer coast only, ALL observation statuses
 
 #Annual mean ocean anomalies
 annual_mean_ocean <- ocean %>%
@@ -150,20 +141,51 @@ annual_mean_ocean <- ocean %>%
   summarize(mean = mean(value, na.rm = T)) %>%
   dcast(Year.of.Observation ~ variable, value.var = 'mean')
 
-#Anomalies - separate species, annual, melt 
-annual_anom <- annual_anom_strands %>%
+#Annual mean strandings
+annual_mean <- pinnipeds_ocean %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name) %>%
+  summarize(mean_strand = mean(cnt))
+
+#***Annual anomalies dataframe; separate species
+annual_anom_strands <- pinnipeds_ocean %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  filter(Pinniped.Common.Name != 'NA' | !is.na(Pinniped.Common.Name)) %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  merge(annual_mean, by = 'Pinniped.Common.Name') %>%
+  transform(strand_anom = cnt - mean_strand)
+
+#Annual anomalies dataframe from above, melted 
+annual_anom_melt <- annual_anom_strands %>%
   select(-mean_strand) %>%
   merge(annual_mean_ocean, by = 'Year.of.Observation') %>%
   melt(id.vars = c('Year.of.Observation', 'Pinniped.Common.Name'))
 
-annual_anom_plot <- ggplot(annual_anom %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
+#Stranding anomalies only
+anom_strand_plot <- ggplot(annual_anom_strands, aes(Year.of.Observation, strand_anom, fill = Pinniped.Common.Name)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  xlab("") + ylab("Stranding Anomalies") +
+  plot_theme(legend.position = 'top')
+
+#Stranding and ocean anomalies
+annual_anom_plot <- ggplot(annual_anom_melt %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
   geom_line() +
   xlab("") + ylab("Mean Annual Anomalies") +
   facet_grid(~Pinniped.Common.Name) +
   plot_theme(legend.position = 'top')
 
-#Anomalies - combined species, annual
-annual_anom_comb <- annual_anom %>%
+```
+
+```{r, annual comb sp}
+#Annual anomalies with combined species
+
+#***Stranding and ocean anomalies - combined species, annual
+annual_anom_comb <- annual_anom_melt %>%
   group_by(Year.of.Observation, variable) %>%
   summarize(value = mean(value))
 
@@ -174,7 +196,8 @@ annual_anom_comb_plot <- ggplot(annual_anom_comb %>% filter(variable != 'cnt'), 
 
 ```
 
-```{r}
+```{r, monthly comb sp}
+
 ##Monthly anomalies - all species combined 
 
 #Monthly mean - HI
@@ -217,7 +240,7 @@ monthly_anom_FI_comb <- pinnipeds_ocean %>%
   merge(monthly_mean_FI_comb, by = c('Month.of.Observation'), all = T) %>%
   transform(strand_anom_FI = cnt_FI - mean_FI)
 
-#Monthly mean - all
+#Monthly mean - all strandings
 monthly_mean_all_comb <- pinnipeds_ocean %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Water.Body != 'Inland_WA') %>%
@@ -226,7 +249,7 @@ monthly_mean_all_comb <- pinnipeds_ocean %>%
   group_by(Month.of.Observation) %>%
   summarize(mean_all = mean(cnt_all))
 
-#Anomalies dataframe - combined species
+#***Monthly anomalies dataframe - combined species
 monthly_anom_comb <- pinnipeds_ocean %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Water.Body != 'Inland_WA') %>%
@@ -238,7 +261,7 @@ monthly_anom_comb <- pinnipeds_ocean %>%
   merge(monthly_anom_FI_comb, by = c('Month.of.Observation', 'Year.of.Observation'), all = T) %>%
   merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'))
 
-#Anomaies melt - combined species
+#Anomalies from above melted - combined species
 monthly_anom_comb_melt <- monthly_anom_comb %>%
   select(-matches("lag")) %>%
   select(-matches("cat")) %>%
@@ -267,9 +290,9 @@ anom_comb_plot <- ggplot(anom_comb_plot_data, aes(Date, value, group = variable,
 
 ```
 
-```{r }
+```{r, monthly sep sp}
 
-##Monthly anomalies - by species
+##Monthly anomalies - separate species
 
 #Monthly mean - HI
 monthly_mean_HI <- pinnipeds_ocean %>%
@@ -315,7 +338,7 @@ monthly_mean_all <- pinnipeds_ocean %>%
   group_by(Pinniped.Common.Name, Month.of.Observation) %>%
   summarize(mean_all = mean(cnt_all))
 
-#Anomalies dataframe
+#***Anomalies dataframe, monthly separate species
 monthly_anom <- pinnipeds_ocean %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Pinniped.Common.Name != 'NA' | !is.na(Pinniped.Common.Name)) %>%
@@ -327,10 +350,11 @@ monthly_anom <- pinnipeds_ocean %>%
   merge(monthly_anom_FI, by = c('Pinniped.Common.Name', 'Month.of.Observation', 'Year.of.Observation'), all = T) %>%
   merge(ocean, by = c('Year.of.Observation', 'Month.of.Observation'))
 
+#Monthly separate species from above, melted, simplifying variables for plotting
 monthly_anom_melt <- monthly_anom %>%
   select(-matches("lag")) %>%
   select(-matches("cat")) %>%
-  select(-matches("_all")) %>%
+  select(-matches("_all")) %>% 
   select(-matches("mean")) %>%
   select(-matches("cnt")) %>%
   melt(id.vars = c('Date', 'Year.of.Observation', 'Month.of.Observation', 'Pinniped.Common.Name'))
@@ -343,10 +367,11 @@ strand_plot <- ggplot(monthly_anom, aes(Date, strand_anom_all, col = Pinniped.Co
   plot_theme(legend.position = 'top')
 
 #Strandings and ocean anomalies plot - separate species
-anom_plot <- ggplot(monthly_anom_melt %>% 
-                      # filter(variable == 'strand_anom_all' |
-                      #        variable == 'MEI' | variable == 'NPGO' |
-                      #        variable == 'PDO'), 
+anom_plot <- ggplot(monthly_anom_melt 
+                    %>%
+                    filter(variable == 'strand_anom_all' |
+                           variable == 'MEI' | variable == 'NPGO' |
+                           variable == 'PDO'),
                       aes(Date, value, col = variable)) +
   geom_line() +
   geom_line(aes(y = 0), col = 'grey60') +
@@ -355,15 +380,38 @@ anom_plot <- ggplot(monthly_anom_melt %>%
 
 ```
 
-```{r}
+```{r, monthly ocean only visualization}
 
-#ocean indicators anomalies plot
+#ocean indicators anomalies plot data
 ocean_plot_data <- ocean %>%
-  filter(-matches("lag")) %>%
+  select(-matches("lag")) %>%
+  select(-matches("ENSO")) %>%
+  select(-c(Year.of.Observation, Month.of.Observation)) %>%
   melt(id.vars = 'Date')
 
-ocean_plot <- ggplot(data = ocean_plot_data %>% 
+#MEI, NPGO, PDO only - MEI and PDO covariance
+ocean_plot_small <- ggplot(data = ocean_plot_data %>% 
                        filter(!grepl("SST", variable) & !grepl("welling", variable) & !grepl("Wind", variable)),
+                     aes(Date, value, group = variable, col = variable)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
+  plot_theme(legend.position = 'top') +
+  scale_color_manual(values = color1)
+
+#SST and wind generally same between buoys
+ocean_plot_big <- ggplot(data = ocean_plot_data %>% 
+                           filter(variable != 'MEI' & variable != 'PDO' & variable != 'NPGO' & !grepl("pwelling", variable)),
+                     aes(Date, value, group = variable, col = variable)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
+  plot_theme(legend.position = 'top') +
+  scale_color_manual(values = color1)
+
+#Upwelling buys mirror each other, but 39N is much higher in value, 45N is more negative
+ocean_plot_biggest <- ggplot(data = ocean_plot_data %>% 
+                           filter(grepl("pwelling", variable)),
                      aes(Date, value, group = variable, col = variable)) +
   geom_line() +
   geom_line(aes(y = 0), col = 'grey60') +
@@ -373,6 +421,21 @@ ocean_plot <- ggplot(data = ocean_plot_data %>%
 
 ```
 
+```{r fish only visualization}
+#fish indices anomalies plot data
+fish_plot_data <- fish %>%
+  filter(Year.of.Observation > 1995) %>%
+  melt(id.vars = 'Date') %>%
+  filter(grepl("CBA", variable)) ##CBA only one that is consistently available monthly
+
+
+fish_plot <- ggplot(data = fish_plot_data, aes(Date, as.numeric(value), group = variable, col = variable)) +
+  geom_line() +
+  geom_line(aes(y = 0), col = 'grey60') +
+  xlab("") + ylab("Monthly Copepod Biomass Anomalies") +
+  plot_theme(legend.position = 'top') +
+  scale_color_manual(values = color1)
+```
 
 
 ```{r}
