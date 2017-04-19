@@ -1,0 +1,1067 @@
+"Year.of.Observation","Pinniped.Common.Name","variable","value"
+1989,"California sea lion","cnt",8
+1989,"Harbor seal","cnt",11
+1989,"Steller sea lion","cnt",1
+1990,"Steller sea lion","cnt",10
+1990,"California sea lion","cnt",22
+1990,"Harbor seal","cnt",41
+1991,"Steller sea lion","cnt",1
+1991,"California sea lion","cnt",24
+1991,"Harbor seal","cnt",42
+1992,"Steller sea lion","cnt",3
+1992,"Harbor seal","cnt",76
+1992,"California sea lion","cnt",16
+1993,"Steller sea lion","cnt",11
+1993,"Harbor seal","cnt",59
+1993,"California sea lion","cnt",25
+1994,"Harbor seal","cnt",55
+1994,"Steller sea lion","cnt",4
+1994,"California sea lion","cnt",13
+1995,"Harbor seal","cnt",25
+1995,"California sea lion","cnt",11
+1996,"Steller sea lion","cnt",12
+1996,"Harbor seal","cnt",19
+1996,"California sea lion","cnt",11
+1997,"Steller sea lion","cnt",10
+1997,"Harbor seal","cnt",31
+1997,"California sea lion","cnt",22
+1998,"Harbor seal","cnt",25
+1998,"Steller sea lion","cnt",6
+1998,"California sea lion","cnt",53
+1999,"California sea lion","cnt",19
+1999,"Steller sea lion","cnt",1
+1999,"Harbor seal","cnt",44
+2000,"Harbor seal","cnt",24
+2000,"California sea lion","cnt",27
+2001,"Steller sea lion","cnt",1
+2001,"Harbor seal","cnt",22
+2001,"California sea lion","cnt",14
+2002,"Steller sea lion","cnt",1
+2002,"Harbor seal","cnt",6
+2002,"California sea lion","cnt",14
+2003,"California sea lion","cnt",40
+2003,"Harbor seal","cnt",38
+2003,"Steller sea lion","cnt",16
+2004,"California sea lion","cnt",103
+2004,"Harbor seal","cnt",73
+2004,"Steller sea lion","cnt",22
+2005,"Steller sea lion","cnt",17
+2005,"California sea lion","cnt",44
+2005,"Harbor seal","cnt",48
+2006,"Steller sea lion","cnt",39
+2006,"Harbor seal","cnt",124
+2006,"California sea lion","cnt",116
+2007,"California sea lion","cnt",108
+2007,"Harbor seal","cnt",104
+2007,"Steller sea lion","cnt",111
+2008,"Harbor seal","cnt",101
+2008,"California sea lion","cnt",120
+2008,"Steller sea lion","cnt",76
+2009,"Steller sea lion","cnt",73
+2009,"California sea lion","cnt",363
+2009,"Harbor seal","cnt",125
+2010,"Steller sea lion","cnt",64
+2010,"Harbor seal","cnt",128
+2010,"California sea lion","cnt",370
+2011,"Steller sea lion","cnt",45
+2011,"Harbor seal","cnt",141
+2011,"California sea lion","cnt",120
+2012,"Steller sea lion","cnt",74
+2012,"California sea lion","cnt",82
+2012,"Harbor seal","cnt",140
+2013,"Harbor seal","cnt",89
+2013,"Steller sea lion","cnt",70
+2013,"California sea lion","cnt",101
+2014,"Harbor seal","cnt",95
+2014,"Steller sea lion","cnt",64
+2014,"California sea lion","cnt",94
+2015,"Steller sea lion","cnt",78
+2015,"Harbor seal","cnt",117
+2015,"California sea lion","cnt",158
+2016,"California sea lion","cnt",155
+2016,"Steller sea lion","cnt",54
+2016,"Harbor seal","cnt",128
+1989,"California sea lion","strand_anom",-72.4642857142857
+1989,"Harbor seal","strand_anom",-57.9642857142857
+1989,"Steller sea lion","strand_anom",-32.2307692307692
+1990,"Steller sea lion","strand_anom",-23.2307692307692
+1990,"California sea lion","strand_anom",-58.4642857142857
+1990,"Harbor seal","strand_anom",-27.9642857142857
+1991,"Steller sea lion","strand_anom",-32.2307692307692
+1991,"California sea lion","strand_anom",-56.4642857142857
+1991,"Harbor seal","strand_anom",-26.9642857142857
+1992,"Steller sea lion","strand_anom",-30.2307692307692
+1992,"Harbor seal","strand_anom",7.03571428571429
+1992,"California sea lion","strand_anom",-64.4642857142857
+1993,"Steller sea lion","strand_anom",-22.2307692307692
+1993,"Harbor seal","strand_anom",-9.96428571428571
+1993,"California sea lion","strand_anom",-55.4642857142857
+1994,"Harbor seal","strand_anom",-13.9642857142857
+1994,"Steller sea lion","strand_anom",-29.2307692307692
+1994,"California sea lion","strand_anom",-67.4642857142857
+1995,"Harbor seal","strand_anom",-43.9642857142857
+1995,"California sea lion","strand_anom",-69.4642857142857
+1996,"Steller sea lion","strand_anom",-21.2307692307692
+1996,"Harbor seal","strand_anom",-49.9642857142857
+1996,"California sea lion","strand_anom",-69.4642857142857
+1997,"Steller sea lion","strand_anom",-23.2307692307692
+1997,"Harbor seal","strand_anom",-37.9642857142857
+1997,"California sea lion","strand_anom",-58.4642857142857
+1998,"Harbor seal","strand_anom",-43.9642857142857
+1998,"Steller sea lion","strand_anom",-27.2307692307692
+1998,"California sea lion","strand_anom",-27.4642857142857
+1999,"California sea lion","strand_anom",-61.4642857142857
+1999,"Steller sea lion","strand_anom",-32.2307692307692
+1999,"Harbor seal","strand_anom",-24.9642857142857
+2000,"Harbor seal","strand_anom",-44.9642857142857
+2000,"California sea lion","strand_anom",-53.4642857142857
+2001,"Steller sea lion","strand_anom",-32.2307692307692
+2001,"Harbor seal","strand_anom",-46.9642857142857
+2001,"California sea lion","strand_anom",-66.4642857142857
+2002,"Steller sea lion","strand_anom",-32.2307692307692
+2002,"Harbor seal","strand_anom",-62.9642857142857
+2002,"California sea lion","strand_anom",-66.4642857142857
+2003,"California sea lion","strand_anom",-40.4642857142857
+2003,"Harbor seal","strand_anom",-30.9642857142857
+2003,"Steller sea lion","strand_anom",-17.2307692307692
+2004,"California sea lion","strand_anom",22.5357142857143
+2004,"Harbor seal","strand_anom",4.03571428571429
+2004,"Steller sea lion","strand_anom",-11.2307692307692
+2005,"Steller sea lion","strand_anom",-16.2307692307692
+2005,"California sea lion","strand_anom",-36.4642857142857
+2005,"Harbor seal","strand_anom",-20.9642857142857
+2006,"Steller sea lion","strand_anom",5.76923076923077
+2006,"Harbor seal","strand_anom",55.0357142857143
+2006,"California sea lion","strand_anom",35.5357142857143
+2007,"California sea lion","strand_anom",27.5357142857143
+2007,"Harbor seal","strand_anom",35.0357142857143
+2007,"Steller sea lion","strand_anom",77.7692307692308
+2008,"Harbor seal","strand_anom",32.0357142857143
+2008,"California sea lion","strand_anom",39.5357142857143
+2008,"Steller sea lion","strand_anom",42.7692307692308
+2009,"Steller sea lion","strand_anom",39.7692307692308
+2009,"California sea lion","strand_anom",282.535714285714
+2009,"Harbor seal","strand_anom",56.0357142857143
+2010,"Steller sea lion","strand_anom",30.7692307692308
+2010,"Harbor seal","strand_anom",59.0357142857143
+2010,"California sea lion","strand_anom",289.535714285714
+2011,"Steller sea lion","strand_anom",11.7692307692308
+2011,"Harbor seal","strand_anom",72.0357142857143
+2011,"California sea lion","strand_anom",39.5357142857143
+2012,"Steller sea lion","strand_anom",40.7692307692308
+2012,"California sea lion","strand_anom",1.53571428571429
+2012,"Harbor seal","strand_anom",71.0357142857143
+2013,"Harbor seal","strand_anom",20.0357142857143
+2013,"Steller sea lion","strand_anom",36.7692307692308
+2013,"California sea lion","strand_anom",20.5357142857143
+2014,"Harbor seal","strand_anom",26.0357142857143
+2014,"Steller sea lion","strand_anom",30.7692307692308
+2014,"California sea lion","strand_anom",13.5357142857143
+2015,"Steller sea lion","strand_anom",44.7692307692308
+2015,"Harbor seal","strand_anom",48.0357142857143
+2015,"California sea lion","strand_anom",77.5357142857143
+2016,"California sea lion","strand_anom",74.5357142857143
+2016,"Steller sea lion","strand_anom",20.7692307692308
+2016,"Harbor seal","strand_anom",59.0357142857143
+1989,"California sea lion","MEI",-0.53975
+1989,"Harbor seal","MEI",-0.53975
+1989,"Steller sea lion","MEI",-0.53975
+1990,"Steller sea lion","MEI",0.412583333333333
+1990,"California sea lion","MEI",0.412583333333333
+1990,"Harbor seal","MEI",0.412583333333333
+1991,"Steller sea lion","MEI",0.8065
+1991,"California sea lion","MEI",0.8065
+1991,"Harbor seal","MEI",0.8065
+1992,"Steller sea lion","MEI",1.309
+1992,"Harbor seal","MEI",1.309
+1992,"California sea lion","MEI",1.309
+1993,"Steller sea lion","MEI",1.1125
+1993,"Harbor seal","MEI",1.1125
+1993,"California sea lion","MEI",1.1125
+1994,"Harbor seal","MEI",0.7545
+1994,"Steller sea lion","MEI",0.7545
+1994,"California sea lion","MEI",0.7545
+1995,"Harbor seal","MEI",0.227166666666667
+1995,"California sea lion","MEI",0.227166666666667
+1996,"Steller sea lion","MEI",-0.312083333333333
+1996,"Harbor seal","MEI",-0.312083333333333
+1996,"California sea lion","MEI",-0.312083333333333
+1997,"Steller sea lion","MEI",1.571
+1997,"Harbor seal","MEI",1.571
+1997,"California sea lion","MEI",1.571
+1998,"Harbor seal","MEI",0.902083333333333
+1998,"Steller sea lion","MEI",0.902083333333333
+1998,"California sea lion","MEI",0.902083333333333
+1999,"California sea lion","MEI",-0.886666666666667
+1999,"Steller sea lion","MEI",-0.886666666666667
+1999,"Harbor seal","MEI",-0.886666666666667
+2000,"Harbor seal","MEI",-0.503666666666667
+2000,"California sea lion","MEI",-0.503666666666667
+2001,"Steller sea lion","MEI",-0.13025
+2001,"Harbor seal","MEI",-0.13025
+2001,"California sea lion","MEI",-0.13025
+2002,"Steller sea lion","MEI",0.642166666666667
+2002,"Harbor seal","MEI",0.642166666666667
+2002,"California sea lion","MEI",0.642166666666667
+2003,"California sea lion","MEI",0.494416666666667
+2003,"Harbor seal","MEI",0.494416666666667
+2003,"Steller sea lion","MEI",0.494416666666667
+2004,"California sea lion","MEI",0.453166666666667
+2004,"Harbor seal","MEI",0.453166666666667
+2004,"Steller sea lion","MEI",0.453166666666667
+2005,"Steller sea lion","MEI",0.356333333333333
+2005,"California sea lion","MEI",0.356333333333333
+2005,"Harbor seal","MEI",0.356333333333333
+2006,"Steller sea lion","MEI",0.333333333333333
+2006,"Harbor seal","MEI",0.333333333333333
+2006,"California sea lion","MEI",0.333333333333333
+2007,"California sea lion","MEI",-0.316583333333333
+2007,"Harbor seal","MEI",-0.316583333333333
+2007,"Steller sea lion","MEI",-0.316583333333333
+2008,"Harbor seal","MEI",-0.6485
+2008,"California sea lion","MEI",-0.6485
+2008,"Steller sea lion","MEI",-0.6485
+2009,"Steller sea lion","MEI",0.4085
+2009,"California sea lion","MEI",0.4085
+2009,"Harbor seal","MEI",0.4085
+2010,"Steller sea lion","MEI",-0.365833333333333
+2010,"Harbor seal","MEI",-0.365833333333333
+2010,"California sea lion","MEI",-0.365833333333333
+2011,"Steller sea lion","MEI",-0.9075
+2011,"Harbor seal","MEI",-0.9075
+2011,"California sea lion","MEI",-0.9075
+2012,"Steller sea lion","MEI",0.169166666666667
+2012,"California sea lion","MEI",0.169166666666667
+2012,"Harbor seal","MEI",0.169166666666667
+2013,"Harbor seal","MEI",-0.103583333333333
+2013,"Steller sea lion","MEI",-0.103583333333333
+2013,"California sea lion","MEI",-0.103583333333333
+2014,"Harbor seal","MEI",0.491666666666667
+2014,"Steller sea lion","MEI",0.491666666666667
+2014,"California sea lion","MEI",0.491666666666667
+2015,"Steller sea lion","MEI",1.63758333333333
+2015,"Harbor seal","MEI",1.63758333333333
+2015,"California sea lion","MEI",1.63758333333333
+2016,"California sea lion","MEI",0.896
+2016,"Steller sea lion","MEI",0.896
+2016,"Harbor seal","MEI",0.896
+1989,"California sea lion","NPGO",0.6122406175
+1989,"Harbor seal","NPGO",0.6122406175
+1989,"Steller sea lion","NPGO",0.6122406175
+1990,"Steller sea lion","NPGO",-0.201546121666667
+1990,"California sea lion","NPGO",-0.201546121666667
+1990,"Harbor seal","NPGO",-0.201546121666667
+1991,"Steller sea lion","NPGO",-0.498914717666667
+1991,"California sea lion","NPGO",-0.498914717666667
+1991,"Harbor seal","NPGO",-0.498914717666667
+1992,"Steller sea lion","NPGO",-1.0949188725
+1992,"Harbor seal","NPGO",-1.0949188725
+1992,"California sea lion","NPGO",-1.0949188725
+1993,"Steller sea lion","NPGO",-1.9019926225
+1993,"Harbor seal","NPGO",-1.9019926225
+1993,"California sea lion","NPGO",-1.9019926225
+1994,"Harbor seal","NPGO",-1.211598785
+1994,"Steller sea lion","NPGO",-1.211598785
+1994,"California sea lion","NPGO",-1.211598785
+1995,"Harbor seal","NPGO",-1.03920855916667
+1995,"California sea lion","NPGO",-1.03920855916667
+1996,"Steller sea lion","NPGO",-0.972836595
+1996,"Harbor seal","NPGO",-0.972836595
+1996,"California sea lion","NPGO",-0.972836595
+1997,"Steller sea lion","NPGO",-0.657690609166667
+1997,"Harbor seal","NPGO",-0.657690609166667
+1997,"California sea lion","NPGO",-0.657690609166667
+1998,"Harbor seal","NPGO",0.544553275166667
+1998,"Steller sea lion","NPGO",0.544553275166667
+1998,"California sea lion","NPGO",0.544553275166667
+1999,"California sea lion","NPGO",1.51578051666667
+1999,"Steller sea lion","NPGO",1.51578051666667
+1999,"Harbor seal","NPGO",1.51578051666667
+2000,"Harbor seal","NPGO",1.8858613
+2000,"California sea lion","NPGO",1.8858613
+2001,"Steller sea lion","NPGO",2.08069336666667
+2001,"Harbor seal","NPGO",2.08069336666667
+2001,"California sea lion","NPGO",2.08069336666667
+2002,"Steller sea lion","NPGO",1.4735939275
+2002,"Harbor seal","NPGO",1.4735939275
+2002,"California sea lion","NPGO",1.4735939275
+2003,"California sea lion","NPGO",0.9585072025
+2003,"Harbor seal","NPGO",0.9585072025
+2003,"Steller sea lion","NPGO",0.9585072025
+2004,"California sea lion","NPGO",0.209460254416667
+2004,"Harbor seal","NPGO",0.209460254416667
+2004,"Steller sea lion","NPGO",0.209460254416667
+2005,"Steller sea lion","NPGO",-1.381917955
+2005,"California sea lion","NPGO",-1.381917955
+2005,"Harbor seal","NPGO",-1.381917955
+2006,"Steller sea lion","NPGO",-0.555042004166667
+2006,"Harbor seal","NPGO",-0.555042004166667
+2006,"California sea lion","NPGO",-0.555042004166667
+2007,"California sea lion","NPGO",0.593098209166667
+2007,"Harbor seal","NPGO",0.593098209166667
+2007,"Steller sea lion","NPGO",0.593098209166667
+2008,"Harbor seal","NPGO",1.45527457083333
+2008,"California sea lion","NPGO",1.45527457083333
+2008,"Steller sea lion","NPGO",1.45527457083333
+2009,"Steller sea lion","NPGO",0.73691483
+2009,"California sea lion","NPGO",0.73691483
+2009,"Harbor seal","NPGO",0.73691483
+2010,"Steller sea lion","NPGO",1.3685688725
+2010,"Harbor seal","NPGO",1.3685688725
+2010,"California sea lion","NPGO",1.3685688725
+2011,"Steller sea lion","NPGO",0.857692195833333
+2011,"Harbor seal","NPGO",0.857692195833333
+2011,"California sea lion","NPGO",0.857692195833333
+2012,"Steller sea lion","NPGO",1.4765224
+2012,"California sea lion","NPGO",1.4765224
+2012,"Harbor seal","NPGO",1.4765224
+2013,"Harbor seal","NPGO",0.34436469
+2013,"Steller sea lion","NPGO",0.34436469
+2013,"California sea lion","NPGO",0.34436469
+2014,"Harbor seal","NPGO",-0.251159114166667
+2014,"Steller sea lion","NPGO",-0.251159114166667
+2014,"California sea lion","NPGO",-0.251159114166667
+2015,"Steller sea lion","NPGO",-1.39691805
+2015,"Harbor seal","NPGO",-1.39691805
+2015,"California sea lion","NPGO",-1.39691805
+2016,"California sea lion","NPGO",-0.0616944364166667
+2016,"Steller sea lion","NPGO",-0.0616944364166667
+2016,"Harbor seal","NPGO",-0.0616944364166667
+1989,"California sea lion","PDO",-0.179166666666667
+1989,"Harbor seal","PDO",-0.179166666666667
+1989,"Steller sea lion","PDO",-0.179166666666667
+1990,"Steller sea lion","PDO",-0.355833333333333
+1990,"California sea lion","PDO",-0.355833333333333
+1990,"Harbor seal","PDO",-0.355833333333333
+1991,"Steller sea lion","PDO",-0.419166666666667
+1991,"California sea lion","PDO",-0.419166666666667
+1991,"Harbor seal","PDO",-0.419166666666667
+1992,"Steller sea lion","PDO",0.928333333333333
+1992,"Harbor seal","PDO",0.928333333333333
+1992,"California sea lion","PDO",0.928333333333333
+1993,"Steller sea lion","PDO",1.41666666666667
+1993,"Harbor seal","PDO",1.41666666666667
+1993,"California sea lion","PDO",1.41666666666667
+1994,"Harbor seal","PDO",-0.151666666666667
+1994,"Steller sea lion","PDO",-0.151666666666667
+1994,"California sea lion","PDO",-0.151666666666667
+1995,"Harbor seal","PDO",0.6425
+1995,"California sea lion","PDO",0.6425
+1996,"Steller sea lion","PDO",0.640833333333333
+1996,"Harbor seal","PDO",0.640833333333333
+1996,"California sea lion","PDO",0.640833333333333
+1997,"Steller sea lion","PDO",1.46083333333333
+1997,"Harbor seal","PDO",1.46083333333333
+1997,"California sea lion","PDO",1.46083333333333
+1998,"Harbor seal","PDO",0.245833333333333
+1998,"Steller sea lion","PDO",0.245833333333333
+1998,"California sea lion","PDO",0.245833333333333
+1999,"California sea lion","PDO",-1.06333333333333
+1999,"Steller sea lion","PDO",-1.06333333333333
+1999,"Harbor seal","PDO",-1.06333333333333
+2000,"Harbor seal","PDO",-0.59
+2000,"California sea lion","PDO",-0.59
+2001,"Steller sea lion","PDO",-0.5625
+2001,"Harbor seal","PDO",-0.5625
+2001,"California sea lion","PDO",-0.5625
+2002,"Steller sea lion","PDO",0.220833333333333
+2002,"Harbor seal","PDO",0.220833333333333
+2002,"California sea lion","PDO",0.220833333333333
+2003,"California sea lion","PDO",0.969166666666667
+2003,"Harbor seal","PDO",0.969166666666667
+2003,"Steller sea lion","PDO",0.969166666666667
+2004,"California sea lion","PDO",0.345
+2004,"Harbor seal","PDO",0.345
+2004,"Steller sea lion","PDO",0.345
+2005,"Steller sea lion","PDO",0.375
+2005,"California sea lion","PDO",0.375
+2005,"Harbor seal","PDO",0.375
+2006,"Steller sea lion","PDO",0.190833333333333
+2006,"Harbor seal","PDO",0.190833333333333
+2006,"California sea lion","PDO",0.190833333333333
+2007,"California sea lion","PDO",-0.195833333333333
+2007,"Harbor seal","PDO",-0.195833333333333
+2007,"Steller sea lion","PDO",-0.195833333333333
+2008,"Harbor seal","PDO",-1.2925
+2008,"California sea lion","PDO",-1.2925
+2008,"Steller sea lion","PDO",-1.2925
+2009,"Steller sea lion","PDO",-0.6125
+2009,"California sea lion","PDO",-0.6125
+2009,"Harbor seal","PDO",-0.6125
+2010,"Steller sea lion","PDO",-0.3125
+2010,"Harbor seal","PDO",-0.3125
+2010,"California sea lion","PDO",-0.3125
+2011,"Steller sea lion","PDO",-1.23083333333333
+2011,"Harbor seal","PDO",-1.23083333333333
+2011,"California sea lion","PDO",-1.23083333333333
+2012,"Steller sea lion","PDO",-1.1
+2012,"California sea lion","PDO",-1.1
+2012,"Harbor seal","PDO",-1.1
+2013,"Harbor seal","PDO",-0.5175
+2013,"Steller sea lion","PDO",-0.5175
+2013,"California sea lion","PDO",-0.5175
+2014,"Harbor seal","PDO",1.13083333333333
+2014,"Steller sea lion","PDO",1.13083333333333
+2014,"California sea lion","PDO",1.13083333333333
+2015,"Steller sea lion","PDO",1.63416666666667
+2015,"Harbor seal","PDO",1.63416666666667
+2015,"California sea lion","PDO",1.63416666666667
+2016,"California sea lion","PDO",1.5425
+2016,"Steller sea lion","PDO",1.5425
+2016,"Harbor seal","PDO",1.5425
+1989,"California sea lion","SST_39",11.4776363636364
+1989,"Harbor seal","SST_39",11.4776363636364
+1989,"Steller sea lion","SST_39",11.4776363636364
+1990,"Steller sea lion","SST_39",11.8460833333333
+1990,"California sea lion","SST_39",11.8460833333333
+1990,"Harbor seal","SST_39",11.8460833333333
+1991,"Steller sea lion","SST_39",11.3732
+1991,"California sea lion","SST_39",11.3732
+1991,"Harbor seal","SST_39",11.3732
+1992,"Steller sea lion","SST_39",13.29425
+1992,"Harbor seal","SST_39",13.29425
+1992,"California sea lion","SST_39",13.29425
+1993,"Steller sea lion","SST_39",12.3974444444444
+1993,"Harbor seal","SST_39",12.3974444444444
+1993,"California sea lion","SST_39",12.3974444444444
+1994,"Harbor seal","SST_39",11.57525
+1994,"Steller sea lion","SST_39",11.57525
+1994,"California sea lion","SST_39",11.57525
+1995,"Harbor seal","SST_39",12.1486363636364
+1995,"California sea lion","SST_39",12.1486363636364
+1996,"Steller sea lion","SST_39",12.15075
+1996,"Harbor seal","SST_39",12.15075
+1996,"California sea lion","SST_39",12.15075
+1997,"Steller sea lion","SST_39",13.1489166666667
+1997,"Harbor seal","SST_39",13.1489166666667
+1997,"California sea lion","SST_39",13.1489166666667
+1998,"Harbor seal","SST_39",12.6874545454545
+1998,"Steller sea lion","SST_39",12.6874545454545
+1998,"California sea lion","SST_39",12.6874545454545
+1999,"California sea lion","SST_39",12.0346666666667
+1999,"Steller sea lion","SST_39",12.0346666666667
+1999,"Harbor seal","SST_39",12.0346666666667
+2000,"Harbor seal","SST_39",11.4466666666667
+2000,"California sea lion","SST_39",11.4466666666667
+2001,"Steller sea lion","SST_39",11.15825
+2001,"Harbor seal","SST_39",11.15825
+2001,"California sea lion","SST_39",11.15825
+2002,"Steller sea lion","SST_39",11.4340909090909
+2002,"Harbor seal","SST_39",11.4340909090909
+2002,"California sea lion","SST_39",11.4340909090909
+2003,"California sea lion","SST_39",11.7205833333333
+2003,"Harbor seal","SST_39",11.7205833333333
+2003,"Steller sea lion","SST_39",11.7205833333333
+2004,"California sea lion","SST_39",12.1420833333333
+2004,"Harbor seal","SST_39",12.1420833333333
+2004,"Steller sea lion","SST_39",12.1420833333333
+2005,"Steller sea lion","SST_39",12.2713333333333
+2005,"California sea lion","SST_39",12.2713333333333
+2005,"Harbor seal","SST_39",12.2713333333333
+2006,"Steller sea lion","SST_39",12.24875
+2006,"Harbor seal","SST_39",12.24875
+2006,"California sea lion","SST_39",12.24875
+2007,"California sea lion","SST_39",11.5585454545455
+2007,"Harbor seal","SST_39",11.5585454545455
+2007,"Steller sea lion","SST_39",11.5585454545455
+2008,"Harbor seal","SST_39",10.93375
+2008,"California sea lion","SST_39",10.93375
+2008,"Steller sea lion","SST_39",10.93375
+2009,"Steller sea lion","SST_39",11.2064166666667
+2009,"California sea lion","SST_39",11.2064166666667
+2009,"Harbor seal","SST_39",11.2064166666667
+2010,"Steller sea lion","SST_39",11.4386666666667
+2010,"Harbor seal","SST_39",11.4386666666667
+2010,"California sea lion","SST_39",11.4386666666667
+2011,"Steller sea lion","SST_39",11.890375
+2011,"Harbor seal","SST_39",11.890375
+2011,"California sea lion","SST_39",11.890375
+2012,"Steller sea lion","SST_39",11.5450833333333
+2012,"California sea lion","SST_39",11.5450833333333
+2012,"Harbor seal","SST_39",11.5450833333333
+2013,"Harbor seal","SST_39",11.3266666666667
+2013,"Steller sea lion","SST_39",11.3266666666667
+2013,"California sea lion","SST_39",11.3266666666667
+2014,"Harbor seal","SST_39",13.16075
+2014,"Steller sea lion","SST_39",13.16075
+2014,"California sea lion","SST_39",13.16075
+2015,"Steller sea lion","SST_39",12.748875
+2015,"Harbor seal","SST_39",12.748875
+2015,"California sea lion","SST_39",12.748875
+2016,"California sea lion","SST_39",12.3861666666667
+2016,"Steller sea lion","SST_39",12.3861666666667
+2016,"Harbor seal","SST_39",12.3861666666667
+1989,"California sea lion","SST_44",NA
+1989,"Harbor seal","SST_44",NA
+1989,"Steller sea lion","SST_44",NA
+1990,"Steller sea lion","SST_44",NA
+1990,"California sea lion","SST_44",NA
+1990,"Harbor seal","SST_44",NA
+1991,"Steller sea lion","SST_44",10.996
+1991,"California sea lion","SST_44",10.996
+1991,"Harbor seal","SST_44",10.996
+1992,"Steller sea lion","SST_44",12.1149166666667
+1992,"Harbor seal","SST_44",12.1149166666667
+1992,"California sea lion","SST_44",12.1149166666667
+1993,"Steller sea lion","SST_44",11.8565833333333
+1993,"Harbor seal","SST_44",11.8565833333333
+1993,"California sea lion","SST_44",11.8565833333333
+1994,"Harbor seal","SST_44",11.99525
+1994,"Steller sea lion","SST_44",11.99525
+1994,"California sea lion","SST_44",11.99525
+1995,"Harbor seal","SST_44",13.49425
+1995,"California sea lion","SST_44",13.49425
+1996,"Steller sea lion","SST_44",11.780875
+1996,"Harbor seal","SST_44",11.780875
+1996,"California sea lion","SST_44",11.780875
+1997,"Steller sea lion","SST_44",13.6812
+1997,"Harbor seal","SST_44",13.6812
+1997,"California sea lion","SST_44",13.6812
+1998,"Harbor seal","SST_44",13.0315555555556
+1998,"Steller sea lion","SST_44",13.0315555555556
+1998,"California sea lion","SST_44",13.0315555555556
+1999,"California sea lion","SST_44",10.0903333333333
+1999,"Steller sea lion","SST_44",10.0903333333333
+1999,"Harbor seal","SST_44",10.0903333333333
+2000,"Harbor seal","SST_44",11.2718333333333
+2000,"California sea lion","SST_44",11.2718333333333
+2001,"Steller sea lion","SST_44",11.3287272727273
+2001,"Harbor seal","SST_44",11.3287272727273
+2001,"California sea lion","SST_44",11.3287272727273
+2002,"Steller sea lion","SST_44",11.2370909090909
+2002,"Harbor seal","SST_44",11.2370909090909
+2002,"California sea lion","SST_44",11.2370909090909
+2003,"California sea lion","SST_44",11.9773333333333
+2003,"Harbor seal","SST_44",11.9773333333333
+2003,"Steller sea lion","SST_44",11.9773333333333
+2004,"California sea lion","SST_44",12.5106666666667
+2004,"Harbor seal","SST_44",12.5106666666667
+2004,"Steller sea lion","SST_44",12.5106666666667
+2005,"Steller sea lion","SST_44",12.7262222222222
+2005,"California sea lion","SST_44",12.7262222222222
+2005,"Harbor seal","SST_44",12.7262222222222
+2006,"Steller sea lion","SST_44",11.7273333333333
+2006,"Harbor seal","SST_44",11.7273333333333
+2006,"California sea lion","SST_44",11.7273333333333
+2007,"California sea lion","SST_44",12.0481818181818
+2007,"Harbor seal","SST_44",12.0481818181818
+2007,"Steller sea lion","SST_44",12.0481818181818
+2008,"Harbor seal","SST_44",11.6178
+2008,"California sea lion","SST_44",11.6178
+2008,"Steller sea lion","SST_44",11.6178
+2009,"Steller sea lion","SST_44",11.4874166666667
+2009,"California sea lion","SST_44",11.4874166666667
+2009,"Harbor seal","SST_44",11.4874166666667
+2010,"Steller sea lion","SST_44",12.0105833333333
+2010,"Harbor seal","SST_44",12.0105833333333
+2010,"California sea lion","SST_44",12.0105833333333
+2011,"Steller sea lion","SST_44",12.2397142857143
+2011,"Harbor seal","SST_44",12.2397142857143
+2011,"California sea lion","SST_44",12.2397142857143
+2012,"Steller sea lion","SST_44",11.54
+2012,"California sea lion","SST_44",11.54
+2012,"Harbor seal","SST_44",11.54
+2013,"Harbor seal","SST_44",11.7335833333333
+2013,"Steller sea lion","SST_44",11.7335833333333
+2013,"California sea lion","SST_44",11.7335833333333
+2014,"Harbor seal","SST_44",12.4470833333333
+2014,"Steller sea lion","SST_44",12.4470833333333
+2014,"California sea lion","SST_44",12.4470833333333
+2015,"Steller sea lion","SST_44",13.0754166666667
+2015,"Harbor seal","SST_44",13.0754166666667
+2015,"California sea lion","SST_44",13.0754166666667
+2016,"California sea lion","SST_44",13.0293333333333
+2016,"Steller sea lion","SST_44",13.0293333333333
+2016,"Harbor seal","SST_44",13.0293333333333
+1989,"California sea lion","Upwelling_39",51.4292166666667
+1989,"Harbor seal","Upwelling_39",51.4292166666667
+1989,"Steller sea lion","Upwelling_39",51.4292166666667
+1990,"Steller sea lion","Upwelling_39",51.16715
+1990,"California sea lion","Upwelling_39",51.16715
+1990,"Harbor seal","Upwelling_39",51.16715
+1991,"Steller sea lion","Upwelling_39",54.0167583333333
+1991,"California sea lion","Upwelling_39",54.0167583333333
+1991,"Harbor seal","Upwelling_39",54.0167583333333
+1992,"Steller sea lion","Upwelling_39",33.3160916666667
+1992,"Harbor seal","Upwelling_39",33.3160916666667
+1992,"California sea lion","Upwelling_39",33.3160916666667
+1993,"Steller sea lion","Upwelling_39",35.7635583333333
+1993,"Harbor seal","Upwelling_39",35.7635583333333
+1993,"California sea lion","Upwelling_39",35.7635583333333
+1994,"Harbor seal","Upwelling_39",56.7530666666667
+1994,"Steller sea lion","Upwelling_39",56.7530666666667
+1994,"California sea lion","Upwelling_39",56.7530666666667
+1995,"Harbor seal","Upwelling_39",22.6484583333333
+1995,"California sea lion","Upwelling_39",22.6484583333333
+1996,"Steller sea lion","Upwelling_39",57.3358333333333
+1996,"Harbor seal","Upwelling_39",57.3358333333333
+1996,"California sea lion","Upwelling_39",57.3358333333333
+1997,"Steller sea lion","Upwelling_39",87.4543333333333
+1997,"Harbor seal","Upwelling_39",87.4543333333333
+1997,"California sea lion","Upwelling_39",87.4543333333333
+1998,"Harbor seal","Upwelling_39",54.3282833333333
+1998,"Steller sea lion","Upwelling_39",54.3282833333333
+1998,"California sea lion","Upwelling_39",54.3282833333333
+1999,"California sea lion","Upwelling_39",119.979008333333
+1999,"Steller sea lion","Upwelling_39",119.979008333333
+1999,"Harbor seal","Upwelling_39",119.979008333333
+2000,"Harbor seal","Upwelling_39",92.6549333333333
+2000,"California sea lion","Upwelling_39",92.6549333333333
+2001,"Steller sea lion","Upwelling_39",122.135866666667
+2001,"Harbor seal","Upwelling_39",122.135866666667
+2001,"California sea lion","Upwelling_39",122.135866666667
+2002,"Steller sea lion","Upwelling_39",103.8053
+2002,"Harbor seal","Upwelling_39",103.8053
+2002,"California sea lion","Upwelling_39",103.8053
+2003,"California sea lion","Upwelling_39",87.0250666666667
+2003,"Harbor seal","Upwelling_39",87.0250666666667
+2003,"Steller sea lion","Upwelling_39",87.0250666666667
+2004,"California sea lion","Upwelling_39",60.149925
+2004,"Harbor seal","Upwelling_39",60.149925
+2004,"Steller sea lion","Upwelling_39",60.149925
+2005,"Steller sea lion","Upwelling_39",59.0830166666667
+2005,"California sea lion","Upwelling_39",59.0830166666667
+2005,"Harbor seal","Upwelling_39",59.0830166666667
+2006,"Steller sea lion","Upwelling_39",89.6762416666667
+2006,"Harbor seal","Upwelling_39",89.6762416666667
+2006,"California sea lion","Upwelling_39",89.6762416666667
+2007,"California sea lion","Upwelling_39",101.763666666667
+2007,"Harbor seal","Upwelling_39",101.763666666667
+2007,"Steller sea lion","Upwelling_39",101.763666666667
+2008,"Harbor seal","Upwelling_39",116.512108333333
+2008,"California sea lion","Upwelling_39",116.512108333333
+2008,"Steller sea lion","Upwelling_39",116.512108333333
+2009,"Steller sea lion","Upwelling_39",90.1843583333333
+2009,"California sea lion","Upwelling_39",90.1843583333333
+2009,"Harbor seal","Upwelling_39",90.1843583333333
+2010,"Steller sea lion","Upwelling_39",62.41455
+2010,"Harbor seal","Upwelling_39",62.41455
+2010,"California sea lion","Upwelling_39",62.41455
+2011,"Steller sea lion","Upwelling_39",100.035358333333
+2011,"Harbor seal","Upwelling_39",100.035358333333
+2011,"California sea lion","Upwelling_39",100.035358333333
+2012,"Steller sea lion","Upwelling_39",102.981908333333
+2012,"California sea lion","Upwelling_39",102.981908333333
+2012,"Harbor seal","Upwelling_39",102.981908333333
+2013,"Harbor seal","Upwelling_39",151.065383333333
+2013,"Steller sea lion","Upwelling_39",151.065383333333
+2013,"California sea lion","Upwelling_39",151.065383333333
+2014,"Harbor seal","Upwelling_39",97.0734083333333
+2014,"Steller sea lion","Upwelling_39",97.0734083333333
+2014,"California sea lion","Upwelling_39",97.0734083333333
+2015,"Steller sea lion","Upwelling_39",91.819675
+2015,"Harbor seal","Upwelling_39",91.819675
+2015,"California sea lion","Upwelling_39",91.819675
+2016,"California sea lion","Upwelling_39",83.759675
+2016,"Steller sea lion","Upwelling_39",83.759675
+2016,"Harbor seal","Upwelling_39",83.759675
+1989,"California sea lion","Upwelling_45",-1.81045
+1989,"Harbor seal","Upwelling_45",-1.81045
+1989,"Steller sea lion","Upwelling_45",-1.81045
+1990,"Steller sea lion","Upwelling_45",-13.33505
+1990,"California sea lion","Upwelling_45",-13.33505
+1990,"Harbor seal","Upwelling_45",-13.33505
+1991,"Steller sea lion","Upwelling_45",-21.1840333333333
+1991,"California sea lion","Upwelling_45",-21.1840333333333
+1991,"Harbor seal","Upwelling_45",-21.1840333333333
+1992,"Steller sea lion","Upwelling_45",-28.825925
+1992,"Harbor seal","Upwelling_45",-28.825925
+1992,"California sea lion","Upwelling_45",-28.825925
+1993,"Steller sea lion","Upwelling_45",-30.73925
+1993,"Harbor seal","Upwelling_45",-30.73925
+1993,"California sea lion","Upwelling_45",-30.73925
+1994,"Harbor seal","Upwelling_45",-29.2570583333333
+1994,"Steller sea lion","Upwelling_45",-29.2570583333333
+1994,"California sea lion","Upwelling_45",-29.2570583333333
+1995,"Harbor seal","Upwelling_45",-44.4648333333333
+1995,"California sea lion","Upwelling_45",-44.4648333333333
+1996,"Steller sea lion","Upwelling_45",-22.87705
+1996,"Harbor seal","Upwelling_45",-22.87705
+1996,"California sea lion","Upwelling_45",-22.87705
+1997,"Steller sea lion","Upwelling_45",-45.4834666666667
+1997,"Harbor seal","Upwelling_45",-45.4834666666667
+1997,"California sea lion","Upwelling_45",-45.4834666666667
+1998,"Harbor seal","Upwelling_45",-57.2931416666667
+1998,"Steller sea lion","Upwelling_45",-57.2931416666667
+1998,"California sea lion","Upwelling_45",-57.2931416666667
+1999,"California sea lion","Upwelling_45",-74.05335
+1999,"Steller sea lion","Upwelling_45",-74.05335
+1999,"Harbor seal","Upwelling_45",-74.05335
+2000,"Harbor seal","Upwelling_45",-34.8501
+2000,"California sea lion","Upwelling_45",-34.8501
+2001,"Steller sea lion","Upwelling_45",-34.9395916666667
+2001,"Harbor seal","Upwelling_45",-34.9395916666667
+2001,"California sea lion","Upwelling_45",-34.9395916666667
+2002,"Steller sea lion","Upwelling_45",-39.425025
+2002,"Harbor seal","Upwelling_45",-39.425025
+2002,"California sea lion","Upwelling_45",-39.425025
+2003,"California sea lion","Upwelling_45",-46.2091
+2003,"Harbor seal","Upwelling_45",-46.2091
+2003,"Steller sea lion","Upwelling_45",-46.2091
+2004,"California sea lion","Upwelling_45",-30.3241666666667
+2004,"Harbor seal","Upwelling_45",-30.3241666666667
+2004,"Steller sea lion","Upwelling_45",-30.3241666666667
+2005,"Steller sea lion","Upwelling_45",-22.123925
+2005,"California sea lion","Upwelling_45",-22.123925
+2005,"Harbor seal","Upwelling_45",-22.123925
+2006,"Steller sea lion","Upwelling_45",-33.9206416666667
+2006,"Harbor seal","Upwelling_45",-33.9206416666667
+2006,"California sea lion","Upwelling_45",-33.9206416666667
+2007,"California sea lion","Upwelling_45",-17.00995
+2007,"Harbor seal","Upwelling_45",-17.00995
+2007,"Steller sea lion","Upwelling_45",-17.00995
+2008,"Harbor seal","Upwelling_45",-8.4657
+2008,"California sea lion","Upwelling_45",-8.4657
+2008,"Steller sea lion","Upwelling_45",-8.4657
+2009,"Steller sea lion","Upwelling_45",-21.7834166666667
+2009,"California sea lion","Upwelling_45",-21.7834166666667
+2009,"Harbor seal","Upwelling_45",-21.7834166666667
+2010,"Steller sea lion","Upwelling_45",-56.86565
+2010,"Harbor seal","Upwelling_45",-56.86565
+2010,"California sea lion","Upwelling_45",-56.86565
+2011,"Steller sea lion","Upwelling_45",-31.005225
+2011,"Harbor seal","Upwelling_45",-31.005225
+2011,"California sea lion","Upwelling_45",-31.005225
+2012,"Steller sea lion","Upwelling_45",-46.621225
+2012,"California sea lion","Upwelling_45",-46.621225
+2012,"Harbor seal","Upwelling_45",-46.621225
+2013,"Harbor seal","Upwelling_45",0.634033333333333
+2013,"Steller sea lion","Upwelling_45",0.634033333333333
+2013,"California sea lion","Upwelling_45",0.634033333333333
+2014,"Harbor seal","Upwelling_45",-32.4760166666667
+2014,"Steller sea lion","Upwelling_45",-32.4760166666667
+2014,"California sea lion","Upwelling_45",-32.4760166666667
+2015,"Steller sea lion","Upwelling_45",-19.0296583333333
+2015,"Harbor seal","Upwelling_45",-19.0296583333333
+2015,"California sea lion","Upwelling_45",-19.0296583333333
+2016,"California sea lion","Upwelling_45",-55.372625
+2016,"Steller sea lion","Upwelling_45",-55.372625
+2016,"Harbor seal","Upwelling_45",-55.372625
+1989,"California sea lion","Wind_39",-2.30200818181818
+1989,"Harbor seal","Wind_39",-2.30200818181818
+1989,"Steller sea lion","Wind_39",-2.30200818181818
+1990,"Steller sea lion","Wind_39",-3.0596425
+1990,"California sea lion","Wind_39",-3.0596425
+1990,"Harbor seal","Wind_39",-3.0596425
+1991,"Steller sea lion","Wind_39",-2.390138
+1991,"California sea lion","Wind_39",-2.390138
+1991,"Harbor seal","Wind_39",-2.390138
+1992,"Steller sea lion","Wind_39",-1.55006125
+1992,"Harbor seal","Wind_39",-1.55006125
+1992,"California sea lion","Wind_39",-1.55006125
+1993,"Steller sea lion","Wind_39",-1.96045666666667
+1993,"Harbor seal","Wind_39",-1.96045666666667
+1993,"California sea lion","Wind_39",-1.96045666666667
+1994,"Harbor seal","Wind_39",-2.80351333333333
+1994,"Steller sea lion","Wind_39",-2.80351333333333
+1994,"California sea lion","Wind_39",-2.80351333333333
+1995,"Harbor seal","Wind_39",-0.733636666666667
+1995,"California sea lion","Wind_39",-0.733636666666667
+1996,"Steller sea lion","Wind_39",-2.0214225
+1996,"Harbor seal","Wind_39",-2.0214225
+1996,"California sea lion","Wind_39",-2.0214225
+1997,"Steller sea lion","Wind_39",-2.5802625
+1997,"Harbor seal","Wind_39",-2.5802625
+1997,"California sea lion","Wind_39",-2.5802625
+1998,"Harbor seal","Wind_39",-1.47188416666667
+1998,"Steller sea lion","Wind_39",-1.47188416666667
+1998,"California sea lion","Wind_39",-1.47188416666667
+1999,"California sea lion","Wind_39",-2.51627
+1999,"Steller sea lion","Wind_39",-2.51627
+1999,"Harbor seal","Wind_39",-2.51627
+2000,"Harbor seal","Wind_39",-1.80908333333333
+2000,"California sea lion","Wind_39",-1.80908333333333
+2001,"Steller sea lion","Wind_39",-2.24662583333333
+2001,"Harbor seal","Wind_39",-2.24662583333333
+2001,"California sea lion","Wind_39",-2.24662583333333
+2002,"Steller sea lion","Wind_39",-1.88735545454545
+2002,"Harbor seal","Wind_39",-1.88735545454545
+2002,"California sea lion","Wind_39",-1.88735545454545
+2003,"California sea lion","Wind_39",-1.57058083333333
+2003,"Harbor seal","Wind_39",-1.57058083333333
+2003,"Steller sea lion","Wind_39",-1.57058083333333
+2004,"California sea lion","Wind_39",-2.25205583333333
+2004,"Harbor seal","Wind_39",-2.25205583333333
+2004,"Steller sea lion","Wind_39",-2.25205583333333
+2005,"Steller sea lion","Wind_39",-1.6639125
+2005,"California sea lion","Wind_39",-1.6639125
+2005,"Harbor seal","Wind_39",-1.6639125
+2006,"Steller sea lion","Wind_39",-0.45088
+2006,"Harbor seal","Wind_39",-0.45088
+2006,"California sea lion","Wind_39",-0.45088
+2007,"California sea lion","Wind_39",-3.17293
+2007,"Harbor seal","Wind_39",-3.17293
+2007,"Steller sea lion","Wind_39",-3.17293
+2008,"Harbor seal","Wind_39",-3.3257075
+2008,"California sea lion","Wind_39",-3.3257075
+2008,"Steller sea lion","Wind_39",-3.3257075
+2009,"Steller sea lion","Wind_39",-3.15302333333333
+2009,"California sea lion","Wind_39",-3.15302333333333
+2009,"Harbor seal","Wind_39",-3.15302333333333
+2010,"Steller sea lion","Wind_39",-2.14105727272727
+2010,"Harbor seal","Wind_39",-2.14105727272727
+2010,"California sea lion","Wind_39",-2.14105727272727
+2011,"Steller sea lion","Wind_39",-2.605775
+2011,"Harbor seal","Wind_39",-2.605775
+2011,"California sea lion","Wind_39",-2.605775
+2012,"Steller sea lion","Wind_39",-2.62314166666667
+2012,"California sea lion","Wind_39",-2.62314166666667
+2012,"Harbor seal","Wind_39",-2.62314166666667
+2013,"Harbor seal","Wind_39",-3.83557583333333
+2013,"Steller sea lion","Wind_39",-3.83557583333333
+2013,"California sea lion","Wind_39",-3.83557583333333
+2014,"Harbor seal","Wind_39",-1.97883
+2014,"Steller sea lion","Wind_39",-1.97883
+2014,"California sea lion","Wind_39",-1.97883
+2015,"Steller sea lion","Wind_39",-2.8482025
+2015,"Harbor seal","Wind_39",-2.8482025
+2015,"California sea lion","Wind_39",-2.8482025
+2016,"California sea lion","Wind_39",-1.67022833333333
+2016,"Steller sea lion","Wind_39",-1.67022833333333
+2016,"Harbor seal","Wind_39",-1.67022833333333
+1989,"California sea lion","Wind_44",NA
+1989,"Harbor seal","Wind_44",NA
+1989,"Steller sea lion","Wind_44",NA
+1990,"Steller sea lion","Wind_44",NA
+1990,"California sea lion","Wind_44",NA
+1990,"Harbor seal","Wind_44",NA
+1991,"Steller sea lion","Wind_44",2.500107
+1991,"California sea lion","Wind_44",2.500107
+1991,"Harbor seal","Wind_44",2.500107
+1992,"Steller sea lion","Wind_44",-0.795996727272727
+1992,"Harbor seal","Wind_44",-0.795996727272727
+1992,"California sea lion","Wind_44",-0.795996727272727
+1993,"Steller sea lion","Wind_44",0.40495825
+1993,"Harbor seal","Wind_44",0.40495825
+1993,"California sea lion","Wind_44",0.40495825
+1994,"Harbor seal","Wind_44",-1.43980133333333
+1994,"Steller sea lion","Wind_44",-1.43980133333333
+1994,"California sea lion","Wind_44",-1.43980133333333
+1995,"Harbor seal","Wind_44",-0.395890875
+1995,"California sea lion","Wind_44",-0.395890875
+1996,"Steller sea lion","Wind_44",-0.4232755
+1996,"Harbor seal","Wind_44",-0.4232755
+1996,"California sea lion","Wind_44",-0.4232755
+1997,"Steller sea lion","Wind_44",1.8861516
+1997,"Harbor seal","Wind_44",1.8861516
+1997,"California sea lion","Wind_44",1.8861516
+1998,"Harbor seal","Wind_44",-0.170940666666667
+1998,"Steller sea lion","Wind_44",-0.170940666666667
+1998,"California sea lion","Wind_44",-0.170940666666667
+1999,"California sea lion","Wind_44",0.585029833333333
+1999,"Steller sea lion","Wind_44",0.585029833333333
+1999,"Harbor seal","Wind_44",0.585029833333333
+2000,"Harbor seal","Wind_44",-0.392331818181818
+2000,"California sea lion","Wind_44",-0.392331818181818
+2001,"Steller sea lion","Wind_44",-1.1233083
+2001,"Harbor seal","Wind_44",-1.1233083
+2001,"California sea lion","Wind_44",-1.1233083
+2002,"Steller sea lion","Wind_44",-0.719580818181818
+2002,"Harbor seal","Wind_44",-0.719580818181818
+2002,"California sea lion","Wind_44",-0.719580818181818
+2003,"California sea lion","Wind_44",0.341928083333333
+2003,"Harbor seal","Wind_44",0.341928083333333
+2003,"Steller sea lion","Wind_44",0.341928083333333
+2004,"California sea lion","Wind_44",-0.277037166666667
+2004,"Harbor seal","Wind_44",-0.277037166666667
+2004,"Steller sea lion","Wind_44",-0.277037166666667
+2005,"Steller sea lion","Wind_44",-0.526458222222222
+2005,"California sea lion","Wind_44",-0.526458222222222
+2005,"Harbor seal","Wind_44",-0.526458222222222
+2006,"Steller sea lion","Wind_44",1.398406
+2006,"Harbor seal","Wind_44",1.398406
+2006,"California sea lion","Wind_44",1.398406
+2007,"California sea lion","Wind_44",-0.0447354545454545
+2007,"Harbor seal","Wind_44",-0.0447354545454545
+2007,"Steller sea lion","Wind_44",-0.0447354545454545
+2008,"Harbor seal","Wind_44",-0.8010407
+2008,"California sea lion","Wind_44",-0.8010407
+2008,"Steller sea lion","Wind_44",-0.8010407
+2009,"Steller sea lion","Wind_44",-0.10389575
+2009,"California sea lion","Wind_44",-0.10389575
+2009,"Harbor seal","Wind_44",-0.10389575
+2010,"Steller sea lion","Wind_44",0.879556333333333
+2010,"Harbor seal","Wind_44",0.879556333333333
+2010,"California sea lion","Wind_44",0.879556333333333
+2011,"Steller sea lion","Wind_44",0.291517727272727
+2011,"Harbor seal","Wind_44",0.291517727272727
+2011,"California sea lion","Wind_44",0.291517727272727
+2012,"Steller sea lion","Wind_44",1.83901057142857
+2012,"California sea lion","Wind_44",1.83901057142857
+2012,"Harbor seal","Wind_44",1.83901057142857
+2013,"Harbor seal","Wind_44",-0.875774416666667
+2013,"Steller sea lion","Wind_44",-0.875774416666667
+2013,"California sea lion","Wind_44",-0.875774416666667
+2014,"Harbor seal","Wind_44",-0.1809957
+2014,"Steller sea lion","Wind_44",-0.1809957
+2014,"California sea lion","Wind_44",-0.1809957
+2015,"Steller sea lion","Wind_44",-1.23257833333333
+2015,"Harbor seal","Wind_44",-1.23257833333333
+2015,"California sea lion","Wind_44",-1.23257833333333
+2016,"California sea lion","Wind_44",1.09313381818182
+2016,"Steller sea lion","Wind_44",1.09313381818182
+2016,"Harbor seal","Wind_44",1.09313381818182
+1989,"California sea lion","SST_39_anom",-0.492903387047735
+1989,"Harbor seal","SST_39_anom",-0.492903387047735
+1989,"Steller sea lion","SST_39_anom",-0.492903387047735
+1990,"Steller sea lion","SST_39_anom",-0.0492483946488297
+1990,"California sea lion","SST_39_anom",-0.0492483946488297
+1990,"Harbor seal","SST_39_anom",-0.0492483946488297
+1991,"Steller sea lion","SST_39_anom",-0.342224996655519
+1991,"California sea lion","SST_39_anom",-0.342224996655519
+1991,"Harbor seal","SST_39_anom",-0.342224996655519
+1992,"Steller sea lion","SST_39_anom",1.0380130511427
+1992,"Harbor seal","SST_39_anom",1.0380130511427
+1992,"California sea lion","SST_39_anom",1.0380130511427
+1993,"Steller sea lion","SST_39_anom",0.273228992320079
+1993,"Harbor seal","SST_39_anom",0.273228992320079
+1993,"California sea lion","SST_39_anom",0.273228992320079
+1994,"Harbor seal","SST_39_anom",-0.320081727982163
+1994,"Steller sea lion","SST_39_anom",-0.320081727982163
+1994,"California sea lion","SST_39_anom",-0.320081727982163
+1995,"Harbor seal","SST_39_anom",0.251989893584676
+1995,"California sea lion","SST_39_anom",0.251989893584676
+1996,"Steller sea lion","SST_39_anom",0.255418272017837
+1996,"Harbor seal","SST_39_anom",0.255418272017837
+1996,"California sea lion","SST_39_anom",0.255418272017837
+1997,"Steller sea lion","SST_39_anom",1.2535849386845
+1997,"Harbor seal","SST_39_anom",1.2535849386845
+1997,"California sea lion","SST_39_anom",1.2535849386845
+1998,"Harbor seal","SST_39_anom",0.824008744299179
+1998,"Steller sea lion","SST_39_anom",0.824008744299179
+1998,"California sea lion","SST_39_anom",0.824008744299179
+1999,"California sea lion","SST_39_anom",-0.577269230769231
+1999,"Steller sea lion","SST_39_anom",-0.577269230769231
+1999,"Harbor seal","SST_39_anom",-0.577269230769231
+2000,"Harbor seal","SST_39_anom",-0.448665061315496
+2000,"California sea lion","SST_39_anom",-0.448665061315496
+2001,"Steller sea lion","SST_39_anom",-0.737081727982163
+2001,"Harbor seal","SST_39_anom",-0.737081727982163
+2001,"California sea lion","SST_39_anom",-0.737081727982163
+2002,"Steller sea lion","SST_39_anom",-0.483710975980542
+2002,"Harbor seal","SST_39_anom",-0.483710975980542
+2002,"California sea lion","SST_39_anom",-0.483710975980542
+2003,"California sea lion","SST_39_anom",-0.17474839464883
+2003,"Harbor seal","SST_39_anom",-0.17474839464883
+2003,"Steller sea lion","SST_39_anom",-0.17474839464883
+2004,"California sea lion","SST_39_anom",0.24675160535117
+2004,"Harbor seal","SST_39_anom",0.24675160535117
+2004,"Steller sea lion","SST_39_anom",0.24675160535117
+2005,"Steller sea lion","SST_39_anom",0.37600160535117
+2005,"California sea lion","SST_39_anom",0.37600160535117
+2005,"Harbor seal","SST_39_anom",0.37600160535117
+2006,"Steller sea lion","SST_39_anom",0.218033830128205
+2006,"Harbor seal","SST_39_anom",0.218033830128205
+2006,"California sea lion","SST_39_anom",0.218033830128205
+2007,"California sea lion","SST_39_anom",-0.338101015506234
+2007,"Harbor seal","SST_39_anom",-0.338101015506234
+2007,"Steller sea lion","SST_39_anom",-0.338101015506234
+2008,"Harbor seal","SST_39_anom",-0.961581727982163
+2008,"California sea lion","SST_39_anom",-0.961581727982163
+2008,"Steller sea lion","SST_39_anom",-0.961581727982163
+2009,"Steller sea lion","SST_39_anom",-0.688915061315497
+2009,"California sea lion","SST_39_anom",-0.688915061315497
+2009,"Harbor seal","SST_39_anom",-0.688915061315497
+2010,"Steller sea lion","SST_39_anom",-0.456665061315497
+2010,"Harbor seal","SST_39_anom",-0.456665061315497
+2010,"California sea lion","SST_39_anom",-0.456665061315497
+2011,"Steller sea lion","SST_39_anom",-0.412918615523969
+2011,"Harbor seal","SST_39_anom",-0.412918615523969
+2011,"California sea lion","SST_39_anom",-0.412918615523969
+2012,"Steller sea lion","SST_39_anom",-0.35024839464883
+2012,"California sea lion","SST_39_anom",-0.35024839464883
+2012,"Harbor seal","SST_39_anom",-0.35024839464883
+2013,"Harbor seal","SST_39_anom",-0.568665061315497
+2013,"Steller sea lion","SST_39_anom",-0.568665061315497
+2013,"California sea lion","SST_39_anom",-0.568665061315497
+2014,"Harbor seal","SST_39_anom",1.26541827201784
+2014,"Steller sea lion","SST_39_anom",1.26541827201784
+2014,"California sea lion","SST_39_anom",1.26541827201784
+2015,"Steller sea lion","SST_39_anom",0.994586366360089
+2015,"Harbor seal","SST_39_anom",0.994586366360089
+2015,"California sea lion","SST_39_anom",0.994586366360089
+2016,"California sea lion","SST_39_anom",1.15397914251208
+2016,"Steller sea lion","SST_39_anom",1.15397914251208
+2016,"Harbor seal","SST_39_anom",1.15397914251208
+1989,"California sea lion","SST_44_anom",NA
+1989,"Harbor seal","SST_44_anom",NA
+1989,"Steller sea lion","SST_44_anom",NA
+1990,"Steller sea lion","SST_44_anom",NA
+1990,"California sea lion","SST_44_anom",NA
+1990,"Harbor seal","SST_44_anom",NA
+1991,"Steller sea lion","SST_44_anom",-0.519979166666666
+1991,"California sea lion","SST_44_anom",-0.519979166666666
+1991,"Harbor seal","SST_44_anom",-0.519979166666666
+1992,"Steller sea lion","SST_44_anom",0.132396949038439
+1992,"Harbor seal","SST_44_anom",0.132396949038439
+1992,"California sea lion","SST_44_anom",0.132396949038439
+1993,"Steller sea lion","SST_44_anom",-0.125936384294894
+1993,"Harbor seal","SST_44_anom",-0.125936384294894
+1993,"California sea lion","SST_44_anom",-0.125936384294894
+1994,"Harbor seal","SST_44_anom",0.285567045454546
+1994,"Steller sea lion","SST_44_anom",0.285567045454546
+1994,"California sea lion","SST_44_anom",0.285567045454546
+1995,"Harbor seal","SST_44_anom",0.689172945487483
+1995,"California sea lion","SST_44_anom",0.689172945487483
+1996,"Steller sea lion","SST_44_anom",0.00122929625199331
+1996,"Harbor seal","SST_44_anom",0.00122929625199331
+1996,"California sea lion","SST_44_anom",0.00122929625199331
+1997,"Steller sea lion","SST_44_anom",1.6993191370224
+1997,"Harbor seal","SST_44_anom",1.6993191370224
+1997,"California sea lion","SST_44_anom",1.6993191370224
+1998,"Harbor seal","SST_44_anom",0.498561136729615
+1998,"Steller sea lion","SST_44_anom",0.498561136729615
+1998,"California sea lion","SST_44_anom",0.498561136729615
+1999,"California sea lion","SST_44_anom",-1.00257504131706
+1999,"Steller sea lion","SST_44_anom",-1.00257504131706
+1999,"Harbor seal","SST_44_anom",-1.00257504131706
+2000,"Harbor seal","SST_44_anom",-0.710686384294894
+2000,"California sea lion","SST_44_anom",-0.710686384294894
+2001,"Steller sea lion","SST_44_anom",-0.737566964685339
+2001,"Harbor seal","SST_44_anom",-0.737566964685339
+2001,"California sea lion","SST_44_anom",-0.737566964685339
+2002,"Steller sea lion","SST_44_anom",-0.893263934382309
+2002,"Harbor seal","SST_44_anom",-0.893263934382309
+2002,"California sea lion","SST_44_anom",-0.893263934382309
+2003,"California sea lion","SST_44_anom",-0.00518638429489426
+2003,"Harbor seal","SST_44_anom",-0.00518638429489426
+2003,"Steller sea lion","SST_44_anom",-0.00518638429489426
+2004,"California sea lion","SST_44_anom",0.528146949038439
+2004,"Harbor seal","SST_44_anom",0.528146949038439
+2004,"Steller sea lion","SST_44_anom",0.528146949038439
+2005,"Steller sea lion","SST_44_anom",0.150748173766652
+2005,"California sea lion","SST_44_anom",0.150748173766652
+2005,"Harbor seal","SST_44_anom",0.150748173766652
+2006,"Steller sea lion","SST_44_anom",-0.255186384294894
+2006,"Harbor seal","SST_44_anom",-0.255186384294894
+2006,"California sea lion","SST_44_anom",-0.255186384294894
+2007,"California sea lion","SST_44_anom",-0.0181124192307939
+2007,"Harbor seal","SST_44_anom",-0.0181124192307939
+2007,"Steller sea lion","SST_44_anom",-0.0181124192307939
+2008,"Harbor seal","SST_44_anom",-0.711716643610014
+2008,"California sea lion","SST_44_anom",-0.711716643610014
+2008,"Steller sea lion","SST_44_anom",-0.711716643610014
+2009,"Steller sea lion","SST_44_anom",-0.495103050961561
+2009,"California sea lion","SST_44_anom",-0.495103050961561
+2009,"Harbor seal","SST_44_anom",-0.495103050961561
+2010,"Steller sea lion","SST_44_anom",0.0280636157051058
+2010,"Harbor seal","SST_44_anom",0.0280636157051058
+2010,"California sea lion","SST_44_anom",0.0280636157051058
+2011,"Steller sea lion","SST_44_anom",-0.162109707321664
+2011,"Harbor seal","SST_44_anom",-0.162109707321664
+2011,"California sea lion","SST_44_anom",-0.162109707321664
+2012,"Steller sea lion","SST_44_anom",-0.442519717628228
+2012,"California sea lion","SST_44_anom",-0.442519717628228
+2012,"Harbor seal","SST_44_anom",-0.442519717628228
+2013,"Harbor seal","SST_44_anom",-0.248936384294894
+2013,"Steller sea lion","SST_44_anom",-0.248936384294894
+2013,"California sea lion","SST_44_anom",-0.248936384294894
+2014,"Harbor seal","SST_44_anom",0.464563615705106
+2014,"Steller sea lion","SST_44_anom",0.464563615705106
+2014,"California sea lion","SST_44_anom",0.464563615705106
+2015,"Steller sea lion","SST_44_anom",1.09289694903844
+2015,"Harbor seal","SST_44_anom",1.09289694903844
+2015,"California sea lion","SST_44_anom",1.09289694903844
+2016,"California sea lion","SST_44_anom",1.04681361570511
+2016,"Steller sea lion","SST_44_anom",1.04681361570511
+2016,"Harbor seal","SST_44_anom",1.04681361570511

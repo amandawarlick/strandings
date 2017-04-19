@@ -7,6 +7,14 @@ output: word_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Helpful readme on regression methods: http://www.statmethods.net/stats/regression.html
+
+##Methodological Questions
+
+- What are the things I should be cognizant of that are particular to my data? 
+- How to deal with colinearity of oceanographic conditions, and seasonality of all strandings?
+- How will the models deal with certain oceanographic variables not being available for the whole time series?
+
 ##To Dos
 
 - Y/N stranding network member rates

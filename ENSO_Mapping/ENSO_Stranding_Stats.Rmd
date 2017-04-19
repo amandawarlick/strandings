@@ -2,8 +2,7 @@
 title: 'Pinniped Stranding and Oceanographic Index Modeling Analysis and Research Questions'
 author: Amanda Warlick, March 2017
 output:
-  word_document:
-    reference_docx: mytemplate.docx
+  word_document
 
 ---
 
@@ -12,70 +11,134 @@ knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE)
 ```
  
 
-```{r, include = F, echo = F}
+```{r packages and data, include = F, echo = F}
 library(ggplot2)
 library(tidyr)
-library(ggmap)
+#library(ggmap)
 library(data.table)
-library(cowplot)
+#library(cowplot)
 library(knitr)
 library(reshape2)
 library(stringr)
 library(magrittr)
 library(scales)
 library(stats) 
-library(PMCMR)
-library(pgirmess) #kruskalmc()
-library(MASS) #glm.nb()
-library(multcomp) #glht()
+library(MASS) #glm.nb(), stepAIC()
 library(dplyr)
-# detach("package:multcomp")
-# detach("package:TH.data")
-# detach("package:MASS")
+library(leaps) # regsubsets() 
 
 #setwd("~/Documents/R/Strandings")
 
 # Data Load 
 ###############################################################################
 pinnipeds_ocean <- read.csv("pinnipeds_ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
-  # transform(Decade = ifelse(Year.of.Observation < 2000, '1990s', 
-  #                           ifelse(Year.of.Observation < 2010, '2000s', '2010s'))) %>%
   transform(Period = ifelse(Year.of.Observation < 2005, 'Pre_Prescott', 'Post_Prescott'))
 
-# Set Up Factors
-# pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
-#                                    levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+#Load dataframes from PinnipedsandENSO.Rmd
 
-pinnipeds_ocean_small <- pinnipeds_ocean %>%
-  
+#Monthly anomalies separate species
+monthly_anom <- read.csv("monthly_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+#Monthly anomalies combined species
+monthly_anom_comb <- read.csv("monthly_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+#Annual anomalies separate species
+annual_anom <- read.csv("annual_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+#Annual anomalies combined species
+annual_anom_comb <- read.csv("annual_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
 ```
-
-##Methodological Questions
-
-- Appropriate to apply breakpoint and then two different means for more even anomalies over time?
-- What are the things I should be cognizant of that are particular to my data? 
-- How to deal with colinearity of oceanographic conditions, and seasonality of all strandings?
-- Is applying a timeseries monthly average (all Januaries) to each month the appropriate way to derive monthly anomalies?
-- How will the models deal with certain oceanographic variables not being available for the whole time series?
 
 ##Research Questions
 
-1. Are strandings (and or HI cases) for combined or individual species correlated with certain oceanographic indices?
+1. Are strandings (and or human interaction (HI) cases) for combined or individual species correlated with certain oceanographic indices?
 
 1a. All cases
 ```{r}
 
+#All cases monthly
+
 # (a) Strandings for combined species 
 
+#Model selection using stepAIC() on negative binomial regression
+fit_step_all <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb))
+step <- stepAIC(fit_step_all, direction = "backward")
+step$anova
+# Final Model:
+# cnt_all ~ PDO + SST_39_anom + SST_44 + Upwelling_39 + CBA_South
+
+#Help - next step is to see if final model results in significant predictors?
+summary(glm.nb(cnt_all ~ PDO + SST_39_anom + SST_44 + Upwelling_39 + CBA_South, data = na.omit(monthly_anom_comb)))
+
+# #trying regsubsets() - chooses the nbest models for up to 8 predictors
+# <--- Interesting, but lots of visual comparison required; when only two predictors, looks like SST and Wind are consistently important
+# leaps <- regsubsets(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = monthly_anom_comb, nbest = 3)
+# summary(leaps) 
+
 # (b) Strandings for separate species
+
+#California sea lion
+fit_step_csl <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+step <- stepAIC(fit_step_csl, direction = "backward")
+step$anova
+# Final Model:
+# cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_North
+
+summary(glm.nb(cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_North, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'))))
+# Help - these results seem quite different with and without na.omit() for the data. What's happeneing there?
+
+#Harbor seal
+#Help - error message I don't understand on this glm() call
+fit_step_hs <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+step <- stepAIC(fit_step_hs, direction = "backward")
+step$anova
+
+#Steller sea lion
+fit_step_ssl <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+step <- stepAIC(fit_step_ssl, direction = "backward")
+step$anova
+# Final Model:
+# cnt_all ~ MEI + NPGO + SST_39_anom + Wind_39 + CBA_North
+summary(glm.nb(cnt_all ~ MEI + NPGO + SST_39_anom + Wind_39 + CBA_North, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'))))
+
+#<-- Help: Overall for these single-species models, it looks like the recommended best-fit models are different from each other, but by how much or whether it is meaningful is unclear to me
+#<-- Help: For all of the above, should I be concerned with issues of colinearity/covariance for some of the oceanographic variables?
 
 ```
 
 1b. HI cases
 ```{r}
+
 # (a) HI cases for combined species 
+#Help - intimidating error messages with fit_step_HI
+fit_step_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb))
+step <- stepAIC(fit_step_HI, direction = "backward")
+step$anova
+# Final Model:
+# cnt_HI ~ SST_39 + SST_44 + Wind_39 + Upwelling_39 + CBA_North + 
+#     CBA_South
 
 # (b) HI cases for separate species
+
+#<-- Help: Perhaps too few observations? Lots of error and warning messages. Zero-inflated?
+
+#California sea lion
+fit_step_csl_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+step <- stepAIC(fit_step_csl_HI, direction = "backward")
+step$anova
+# Final Model:
+# cnt_HI ~ SST_39_anom
+
+#Help - lots of warning messages I don't understand
+summary(glm.nb(cnt_HI ~ SST_39_anom, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'))))
+
+#Harbor seal
+#Help - same error message I don't understand as above
+# fit_step_hs_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+# step <- stepAIC(fit_step_hs_HI, direction = "backward")
+# step$anova
+
+#Steller sea lion
+fit_step_ssl_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+step <- stepAIC(fit_step_ssl_HI, direction = "backward")
+step$anova
 
 ```
 
@@ -86,13 +149,47 @@ pinnipeds_ocean_small <- pinnipeds_ocean %>%
 
 # (a) Stranding anoms for combined species 
 
+#Trying anomalies with just post-2004 data, could also add variable for post2004 to include
+#Help - switched over to glm() because error message said negative numbers (the anomalies) aren't allowed with poisson 
+fit_step_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb %>% filter(Year.of.Observation > 2004)))
+step <- stepAIC(fit_step_2004, direction = "backward")
+step$anova
+# Final Model:
+# strand_anom_all ~ MEI + PDO + NPGO + SST_39_anom + SST_44 + SST_44_anom + Upwelling_39 + CBA_South
+summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39_anom + SST_44 + SST_44_anom +
+    Upwelling_39 + CBA_South, data = monthly_anom_comb %>% filter(Year.of.Observation > 2004)))
+
 # (b) Stranding anoms for separate species
 
+#CSL
+fit_step_CSL_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'California sea lion')))
+step <- stepAIC(fit_step_CSL_2004, direction = "backward")
+step$anova
+# Final Model:
+# strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_South
+summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + 
+    CBA_South, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'California sea lion')))
+
+#HS
+fit_step_HS_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Harbor seal')))
+step <- stepAIC(fit_step_HS_2004, direction = "backward")
+step$anova
+# Final Model:
+# strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44
+summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Harbor seal')))
+
+#SSL
+fit_step_SSL_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Steller sea lion')))
+step <- stepAIC(fit_step_SSL_2004, direction = "backward")
+step$anova
+# Final Model:
+# strand_anom_all ~ MEI + NPGO + SST_39_anom + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + CBA_North
+summary(glm(strand_anom_all ~ MEI + NPGO + SST_39_anom + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + CBA_North, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Steller sea lion')))
 ```
 
 2b. HI cases
 ```{r}
-
+#Repeat process from above, waiting for advice on overall approach
 # (a) HI case anoms for combined species 
 
 # (b) HI case anoms for separate species
@@ -105,14 +202,13 @@ pinnipeds_ocean_small <- pinnipeds_ocean %>%
 ```{r}
 
 #All strandings combined species
+ 
+#Help: First look at lag times... looks like one and two month lags are coming up as significant, but lots of covariance and other issues going on I'm sure
+fit_step_all_lags <- glm.nb(cnt_all ~ SST_39 + SST_44 + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North + CBA_South + SST_39_anom + SST_44_anom , data = na.omit(monthly_anom_comb))
+step <- stepAIC(fit_step_all_lags, direction = "backward")
+step$anova
 
-#All stranding anomalies combined species
 
-#All HI cases combined species
-
-#all HI anomalies combined species
-
-#Separate species?
 ```
 
 4. Are there different models that are a better fit for different species (i.e., are species impacted differently by the same ocean conditions?)
@@ -122,12 +218,7 @@ pinnipeds_ocean_small <- pinnipeds_ocean %>%
 
 5. Are stranding hotspots different during EN vs LN conditions? Or some other metric?
 ```{r}
-
-# (a) All strandings
-
-# (b) HI cases combined
-
-# (c) HI case types
+#Use SatScan to explore 
 ```
 
 
