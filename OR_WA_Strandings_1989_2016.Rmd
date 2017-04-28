@@ -749,7 +749,7 @@ HI_species_prev_figure <-
 #Are there seasonal patterns in all stranding cases? Only alive and fresh dead because timing matters - hard to tell when decomposed individuals stranded
 monthly_all <- pinnipeds_data %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Year.of.Observation, Month.of.Observation, Sex, Age.Class) %>%
+  group_by(Year.of.Observation, Month.of.Observation, Sex, Age.Class, Water.Body) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
 monthly_stats <- monthly_all %>%
@@ -770,6 +770,17 @@ posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, monthly_stats, dist = "
 #Poisson - shows all months are different from the mean? but doesn't show which are dif from eachother?
 monthly_all_model <- glm(cnt ~ Month.of.Observation, family = poisson(link = log), data = monthly_stats)
 summary(monthly_all_model)
+
+#All monthly cases by region
+monthly_reg_figure <- 
+  monthly_all %>% group_by(Month.of.Observation, Water.Body) %>%
+  summarize(sum = sum(cnt)) %>%
+ggplot(aes(x = factor(Month.of.Observation), y = sum, fill = Water.Body)) +
+  geom_bar(stat = 'identity') +
+  ylab("Total Strandings") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  plot_theme(legend.position = 'top') + 
+  scale_fill_brewer(palette = 'Set1')
 
 #All monthly cases by sex
 monthly_sex_figure <- 
@@ -847,7 +858,7 @@ monthly_years_figure <-
 monthly_HI <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y') %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
-  group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class) %>%
+  group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class, Water.Body) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
 monthly_HI_yr_mo <- pinnipeds_data %>%
@@ -861,6 +872,17 @@ monthly_HI_model <- glm(cnt ~ Month.of.Observation, family = poisson(link = log)
 summary(monthly_HI_model)
 
 #summary(aov(cnt ~ Month.of.Observation, data = monthly_HI_yr_mo))
+
+#plot of HI types over season per region
+regplotdata <- monthly_HI %>% 
+  filter(Interaction.Type == 'Gunshot') %>%
+  group_by(Month.of.Observation, Water.Body) %>% 
+  summarize(cnt = sum(cnt))
+reg_figure <- ggplot(regplotdata, aes(x = factor(Month.of.Observation), y = cnt, group = Water.Body, col = Water.Body)) +
+  geom_line() + 
+  ylab("Human Interaction Cases") + xlab("") + 
+  plot_theme(legend.position = 'top') + 
+  scale_fill_brewer(palette = 'Set1') 
 
 monthly_HI_YNCBD <- pinnipeds_data %>% 
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%

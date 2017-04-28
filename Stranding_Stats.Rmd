@@ -282,13 +282,13 @@ HIcount_type_species <- HIcount_type_species %>%
 
 #(e) Which types of cases might be increasing or decreasing for which species?
 #Not sig or insuff data for CSL, SSL, NFS, NES, GFS
-summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal')))
+summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
 #not sig for SSL, NFS, NES, GFS
-summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal')))
+summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
 #not sig for harbors, SSL, NFS, NES, GFS
-summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal')))
+summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
 ```
 
@@ -372,10 +372,12 @@ posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_species_
 monthly_HI_type <- pinnipeds_data %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Water.Body == 'Inland_WA') %>%
+  filter(Pinniped.Common.Name == 'Harbor seal') %>%
   group_by(Month.of.Observation, Interaction.Type, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_HI_type %>% filter(Interaction.Type == 'Fisheries'), dist = "Chisquare") 
+posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_HI_type %>% filter(Interaction.Type == 'Other'), dist = "Chisquare") 
 ```
 
 - Seasonality across age and sex classes?
@@ -473,6 +475,7 @@ HIprev_type_mo <- HIprev_type_mo %>%
 marchgun <- HIprev_type_mo %>% filter(Month.of.Observation != 'MAR') %>%
   summarize(mean(Gunshot))
 
+posthoc.kruskal.nemenyi.test(Other ~ Month.of.Observation, HIprev_type_mo, dist = "Chisquare") 
 
 ```
 
@@ -715,6 +718,18 @@ kruskalmc(age_HI$cnt ~ age_HI$Age.Class)
 
 #contrast for difference from mean rather than reference point
 age_contrasts_HI <- summary(glm(cnt ~ Age.Class, contrasts = list(Age.Class = 'contr.sum'), data = age_HI))
+
+#paper question - proportion of pups that are harbors?
+
+hs_pups <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name == 'Harbor seal' & Age.Class == 'Pup') %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+all_pups <- pinnipeds_data %>%
+  filter(Age.Class == 'Pup') %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
+hs_pups/all_pups
 
 
 ```
