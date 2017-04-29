@@ -802,79 +802,79 @@ kable(ORcounties_table, align = 'c', format.args = list(big.mark = ","))
 
 **References**  
 
-Aguirre A.A. & Tabor G.M. (2004). Marine vertebrates as sentinels of marine ecosystem health. EcoHealth. 1: 236–238.
+Aguirre A.A., & Tabor G.M. (2004). Marine vertebrates as sentinels of marine ecosystem health. EcoHealth. 1: 236–238. DOI: 10.1007/s10393-004-0091-9
 
-Antonelis, G.A., J.D. Baker, T.C. Johanos, R.C. Braun, & A.L. Harting. (2006). Hawaiian monk seal (*Monachus schauinslandi*): status and conservation issues. Atoll Research Bulletin 543: 75–101.
+Antonelis, G.A., Baker, J.D., Johanos, T.C., Braun, R.C., & Harting, A.L. (2006). Hawaiian monk seal (*Monachus schauinslandi*): status and conservation issues. Atoll Research Bulletin 543: 75–101.
 
-Barbieri, M., Raverty, S., Hanson, M.B., Venn-Watson, S., Ford, J.K., & Gaydos, J.K. (2013). Spatial and temporal analysis of killer whale (*Orcinus orca*) strandings in the North Pacific Ocean and the benefits of a coordinated stranding response protocol. Marine Mammal Science 29.4: E448-E462.
+Barbieri, M., Raverty, S., Hanson, M.B., Venn-Watson, S., Ford, J.K., & Gaydos, J.K. (2013). Spatial and temporal analysis of killer whale (*Orcinus orca*) strandings in the North Pacific Ocean and the benefits of a coordinated stranding response protocol. Marine Mammal Science 29.4: E448-E462. DOI: 10.1111/mms.12044
 
-Berini, C. R., Kracker, L. M. & McFee, W.E. (2015). Modeling pygmy sperm whale (*Kogia breviceps*, De Blainville 1838) strandings along the southeast coast of the United States from 1992 to 2006 in relation to environmental factors. NOAA Technical Memorandum NOS NCCOS 203. 44 pp.
+Berini, C. R., Kracker, L. M., & McFee, W.E. (2015). Modeling pygmy sperm whale (*Kogia breviceps*, De Blainville 1838) strandings along the southeast coast of the United States from 1992 to 2006 in relation to environmental factors. NOAA Technical Memorandum NOS NCCOS 203. 44 pp.
 
-Bogomolni, A., K.R. Pugliares, S.M. Sharp, K. Patchett, C.T. Harry, J.M. LaRocque, K.M. Touhey, & M. Moore. (2010). Mortality trends of stranded marine mammals on Cape Cod and southeastern Massachusetts, USA, 2000 to 2006. Diseases of Aquatic Organisms 88: 143-155.
+Bogomolni, A., Pugliares, K.R., Sharp, S.M., Patchett, K., Harry, C.T., LaRocque, J.M., Touhey, K.M., & Moore, M. (2010). Mortality trends of stranded marine mammals on Cape Cod and southeastern Massachusetts, USA, 2000 to 2006. Diseases of Aquatic Organisms 88: 143-155. DOI: 10.3354/dao02146
 
-Bossart, G.D. (2006). Marine mammals as sentinels species for oceans and human health. Oceanography 19(2): 134-37.
+Bossart, G.D. (2006). Marine mammals as sentinels species for oceans and human health. Oceanography 19(2): 134-37. DOI: 10.5670/oceanog.2006.77.
 
-Bossart, G.D. (2011). Marine mammals as sentinel species for oceans and human health. Veterinary Pathology 48(3): 676-90.
+Bossart, G.D. (2011). Marine mammals as sentinel species for oceans and human health. Veterinary Pathology 48(3): 676-90. DOI: 10.1177/0300985810388525
 
-Brabyn, M. W. & McLean, I. G. (1992). Oceanography and coastal topography of herd stranding sites for whales in New Zealand. Journal of Mammalogy 73: 469–76.
+Brabyn, M. W., & McLean, I. G. (1992). Oceanography and coastal topography of herd stranding sites for whales in New Zealand. Journal of Mammalogy 73: 469–76.
 
-Carretta, J.V., Oleson, E.M., Baker, J., Weller, D.W., Lang, A.R., & others. (2016). U.S. Pacific marine mammal stock assessments: 2015. NOAA-TM-NMFS-SWFSC-561. Washington, DC. National Oceanic and Atmospheric Administration.
+Carretta, J.V., Oleson, E.M., Baker, J., Weller, D.W., Lang, A.R., Baker, J.,… Brownell, R.L. (2016). U.S. Pacific marine mammal stock assessments: 2015. NOAA-TM-NMFS-SWFSC-561. Washington, DC. National Oceanic and Atmospheric Administration.
 
-Cleveland, W.S. & Devlin, S.J. (1988). Locally weighted regression: an approach to regression analysis by local fitting. Journal of American Statistical Society 83, 596–610.
+Cleveland, W.S., & Devlin, S.J. (1988). Locally weighted regression: an approach to regression analysis by local fitting. Journal of American Statistical Society 83, 596–610. DOI: 10.2307/2289282
 
-Colegrove, K.M., Greig, D.J., & F.M.D. Gulland. (2005). Causes of live strandings of northern elephant seals and Pacific harbor seals along the central California coast, 1992-2001. Aquatic Mammals 31(1): 1-10.
+Colegrove, K.M., Greig, D.J., & Gulland, F.M.D.  (2005). Causes of live strandings of northern elephant seals and Pacific harbor seals along the central California coast, 1992-2001. Aquatic Mammals 31(1): 1-10. DOI: 10.1578/AM.31.1.2005.1
 
-DeLong, R.L., Gearin, P.J., Bengston, J.L., Dawson, P. & Feldkamp, S.D. (1990). Studies of the effects of entanglement on individual northern fur seals. In: R.S. Shomura and M.L. Godfrey (eds.), Proceedings of the Second International Conference on Marine Debris, 2–7 April, 1989, Honolulu, Hawaii. NOAA Technical Memorandum NMFS SWFSC 154. pp. 492–493.
+DeLong, R.L., Gearin, P.J., Bengston, J.L., Dawson, P., & Feldkamp, S.D. (1990). Studies of the effects of entanglement on individual northern fur seals. In: R.S. Shomura and M.L. Godfrey (eds.), Proceedings of the Second International Conference on Marine Debris, 2–7 April, 1989, Honolulu, Hawaii. NOAA Technical Memorandum NMFS SWFSC 154. pp. 492–493.
 
-DeMaster, D. (2014).  Results of Steller sea lion surveys in Alaska, June-July 2013.  Memorandum to J. Balsiger, J. Kurland, B. Gerke, and L. Rotterman, NMFS Alaska Regional Office, Juneau AK. Alaska Fisheries Science Center, NMFS, 7600 Sand Point Way NE, Seattle, WA 98115. 
+DeMaster, D. (2014). Results of Steller sea lion surveys in Alaska, June-July 2013. Memorandum to J. Balsiger, J. Kurland, B. Gerke, and L. Rotterman, NMFS Alaska Regional Office, Juneau AK. Alaska Fisheries Science Center, NMFS, 7600 Sand Point Way NE, Seattle, WA 98115.
 
-Esperon-Rodriguez, M. & Gallo-Reynoso, J.P. (2012). The re-colonization of the Archipelago of San Benito, Baja California, by the Guadalupe fur seal. Revista Mexicana de Biodiversidad 83:170-176.
+Esperon-Rodriguez, M., & Gallo-Reynoso, J.P. (2012). The re-colonization of the Archipelago of San Benito, Baja California, by the Guadalupe fur seal. Revista Mexicana de Biodiversidad 83:170-176.
 
-Evans, K., Thresher, R., Warneke, R., Bradshaw, C.J.A., Pook, M., Thiele, D., & Hindell, M.A. (2005). Periodic variability in cetacean strandings: links to large-scale climate events. Biology Letters 1(2): 147-150.
+Evans, K., Thresher, R., Warneke, R., Bradshaw, C.J.A., Pook, M., Thiele, D., & Hindell, M.A. (2005). Periodic variability in cetacean strandings: links to large-scale climate events. Biology Letters 1(2): 147-150. DOI: 10.1098/rsbl.2005.0313
 
 Figueroa-Carranza, A.L. (1994). Early lactation and attendance behavior of the Guadalupe fur seal females (*Arctocephalus townsendi*). M. Sc. Thesis. University of California, Santa Cruz.
 
 Fowler, C.W. (1987). Marine debris and northern fur seals: a case study. Marine Pollution Bulletin 18: 326–335.
 
-Frungillo, J. & Read, A. (2014). An analysis of gray and harbor seal strandings in Cape Cod, MA from 1999 to 2012. Master’s thesis project, Nicholas School of the Environment of Duke University, NC.
+Frungillo, J., & Read, A. (2014). An analysis of gray and harbor seal strandings in Cape Cod, MA from 1999 to 2012. Master’s thesis project, Nicholas School of the Environment of Duke University, NC.
 
-Gatrell A.C., Bailey, T.C., Diggle, P. & Rowlingson, B.S. (1996). Spatial Point Pattern Analysis and its Application in Geographical Epidemiology, Transactions of the Institute of British Geography 2: 256- 274.
+Gatrell A.C., Bailey, T.C., Diggle, P., & Rowlingson, B.S. (1996). Spatial Point Pattern Analysis and its Application in Geographical Epidemiology, Transactions of the Institute of British Geography 2: 256- 274.
 
-Gelatt, T., R. Ream, & Johnson, D. (2015). Callorhinus ursinus. The IUCN Red List of Threatened Species 2015:e.T3590A45224953. Available at: http://www.iucnredlist.org/details/3590/0
+Gelatt, T., Ream, R., & Johnson, D. (2015). *Callorhinus ursinus*. The IUCN Red List of Threatened Species 2015:e.T3590A45224953. http://www.iucnredlist.org/details/3590/0
 
-Goldstein, T., Johnson, S.P., Phillips, A.V., Hanni, K.D., Fauquier, D.A. & Gulland, F.M.D. (1999). Human-related injuries observed in live stranded pinnipeds along the central California coast 1986–1998. Aquatic Mammals 25: 43–51.
+Goldstein, T., Johnson, S.P., Phillips, A.V., Hanni, K.D., Fauquier, D.A., & Gulland, F.M.D. (1999). Human-related injuries observed in live stranded pinnipeds along the central California coast 1986–1998. Aquatic Mammals 25: 43–51.
 
-Greig, D. J., Gulland, F. M. D., & Kreuder, C. (2005). A decade of live California sea lion (*Zalophus californianus*) strandings along the central California coast: Causes and trends, 1991-2000. Aquatic Mammals 31(1): 11-22. 
+Greig, D. J., Gulland, F. M. D., & Kreuder, C. (2005). A decade of live California sea lion (*Zalophus californianus*) strandings along the central California coast: Causes and trends, 1991-2000. Aquatic Mammals 31(1): 11-22. DOI: 10.1578/AM.31.1.2005.11
 
-Gulland, F.M.D., & Hall, A.J. (2007). Is marine mammal health deteriorating? Trends in the global reporting of marine mammal disease. EcoHealth 4(2): 135-150.
+Gulland, F.M.D., & Hall, A.J. (2007). Is marine mammal health deteriorating? Trends in the global reporting of marine mammal disease. EcoHealth 4(2): 135-150. DOI: 10.1007/s10393-007-0097-1
 
-Hanni, K.D., Long, D.J., Jones, R.E., Pyle, P., & L.E. Morgan. (1997). Sightings and strandings of Guadalupe fur seals in central and northern California, 1988-1995. Journal of Mammalogy 78(2): 684-690.
+Hanni, K.D., Long, D.J., Jones, R.E., Pyle, P., & Morgan, L.E. (1997). Sightings and strandings of Guadalupe fur seals in central and northern California, 1988-1995. Journal of Mammalogy 78(2): 684-690.
 
-Hanni, K.D., & P. Pyle. (2000). Entanglement of pinnipeds in synthetic materials at south-east Farallon Island, California, 1976–1998. Marine Pollution Bulletin 40: 1076–1081.
+Hanni, K.D., & Pyle, P. (2000). Entanglement of pinnipeds in synthetic materials at south-east Farallon Island, California, 1976–1998. Marine Pollution Bulletin 40: 1076–1081. DOI: 10.1016/S0025-326X(00)00050-3
 
 Harris, D.E. & S. Gupta. (2006). GIS-based Analysis of Ice-breeding Seal Strandings in the Gulf of Maine. Northeastern Naturalist 13(3): 403-420.
 
-Huber, H.R., B.R. Dickerson, S.J. Jeffries, & D.M. Lambourn. (2012). Genetic analysis of Washington State harbor seals (*Phoca vitulina richardii*) using microsatellites. Canadian Journal of Zoology 90(12): 1361-1369.
+Huber, H.R., Dickerson, B.R., Jeffries, S.J.& Lambourn, D.M. (2012). Genetic analysis of Washington State harbor seals (*Phoca vitulina richardii*) using microsatellites. Canadian Journal of Zoology 90(12): 1361-1369. DOI: 10.1139/cjz-2012-0047
 
-Huggins, J.L., Leahy, C.L., Calambokidis, J., Lambourn, D., Jeffries, S.J. & others. (2013). Causes and patterns of harbor seal (*Phoca vitulina*) pup mortality at Smith Island, Washington, 2004-2010. Northwestern Naturalist 94(3): 198-208.
+Huggins, J.L., Leahy, C.L., Calambokidis, J., Lambourn, D., Jeffries, S.J., Norman, S.A., & Raverty, S. (2013). Causes and patterns of harbor seal (*Phoca vitulina*) pup mortality at Smith Island, Washington, 2004-2010. Northwestern Naturalist 94(3): 198-208. DOI: 10.1898/12-14.1
 
-Huggins, J. L., Raverty, S. A., Norman, S. A., Calambokidis, J., Gaydos, J. K., Duffield, D. A., & ... Barre, L. (2015a). Increased harbor porpoise mortality in the Pacific Northwest, USA: understanding when higher levels may be normal. Diseases of Aquatic Organisms, 115(2), 93-102.
+Huggins, J. L., Raverty, S. A., Norman, S. A., Calambokidis, J., Gaydos, J. K., Duffield, D. A.,  ... Barre, L. (2015a). Increased harbor porpoise mortality in the Pacific Northwest, USA: understanding when higher levels may be normal. Diseases of Aquatic Organisms, 115(2), 93-102. DOI: 10.3354/dao02887
 
-Huggins, J.L, Oliver, J., Lambourn, D.M., Calambokidis, J., Diehl, B. & S. Jeffries. (2015b). Dedicated beach surveys along the central Washington coast reveal a high proportion of unreported marine mammal strandings. Marine Mammal Science 31(2): 782-789.
+Huggins, J.L, Oliver, J., Lambourn, D.M., Calambokidis, J., Diehl, B. & Jeffries, S. (2015b). Dedicated beach surveys along the central Washington coast reveal a high proportion of unreported marine mammal strandings. Marine Mammal Science 31(2): 782-789. DOI: 10.1111/mms.12184
 
-Jeffries, S.J., P.J. Gearin, H.R. Huber, D.L. Saul, & D.A. Pruett. (2000). Atlas of Seal and Sea Lion haul-out Sites in Washington. Washington Department of Fish and Wildlife, Wildlife Science Division, 600 Capitol Way North, Olympia WA. pp. 150.
+Jeffries, S.J., P.J. Gearin, H.R. Huber, D.L. Saul, & Pruett, D.A.  (2000). Atlas of Seal and Sea Lion haul-out Sites in Washington. Washington Department of Fish and Wildlife, Wildlife Science Division, 600 Capitol Way North, Olympia WA. pp. 150.
 
-Jeffries, S. J., Huber, H. R., Calambokidis, J. & Laake, J. (2003). Trends  and  status  of  harbor  seals  in  Washington State: 1978–1999. Journal of Wildlife Management 67:207–218.
+Jeffries, S. J., Huber, H. R., Calambokidis, J. & Laake, J. (2003). Trends and status of harbor seals in Washington State: 1978–1999. Journal of Wildlife Management 67:207–218.
 
-Johnston, D.W., Frungillo, J., Smith, A., Moore, K., Sharp, B., Schuh, J. & Read, A. (2015). Trends in stranding and bycatch rates of gray and harbor seals along the Northeastern coast of the U.S.: evidence of divergence in the abundance of two sympatric phocid species? PLoS ONE 10(7): e0131660. 
+Johnston, D.W., Frungillo, J., Smith, A., Moore, K., Sharp, B., Schuh, J. & Read, A. (2015). Trends in stranding and bycatch rates of gray and harbor seals along the Northeastern coast of the U.S.: evidence of divergence in the abundance of two sympatric phocid species? PLoS One 10(7): e0131660.
 
-Kaplan Dau, B., Gilardi, K.V.K., Gulland, F.M., Higgins, A., Holcomb, J.B., St. Leger, J., & Ziccardi, M.H. (2009). Fishing gear-related injury in California marine wildlife. Journal of Wildlife Diseases 45(2): 355-362.
+Kaplan Dau, B., Gilardi, K.V.K., Gulland, F.M., Higgins, A., Holcomb, J.B., St. Leger, J., & Ziccardi, M.H. (2009). Fishing gear-related injury in California marine wildlife. Journal of Wildlife Diseases 45(2): 355-362. DOI: 10.7589/0090-3558-45.2.355
 
-Keledjian, A.J., & Mesnick, S. (2013). The Impacts of El Niño Conditions on California. Sea Lion Fisheries Interactions: Predicting Spatial and Temporal Hotspots Along the California Coast. Aquatic Mammals 39(3), 221-232.
+Keledjian, A.J., & Mesnick, S. (2013). The Impacts of El Niño Conditions on California. Sea Lion Fisheries Interactions: Predicting Spatial and Temporal Hotspots along the California Coast. Aquatic Mammals 39(3), 221-232. DOI: 10.1578/am.39.3.2013.221
 
 Kiyota, M. & Baba, N. (2001). Entanglement in marine debris among adult female northern fur seals at St. Paul Island, Alaska in 1991–1999. Bulletin of the National Research Institute of Far Seas Fisheries 38: 13-20.
 
-Kreuder, C., Miller, M.A., Jessup, D.A., Lowenstine, L.J., Harris, M.D., Ames, J.A., Carpenter, T.E., Conrad, P.A., & Mazet, J.A. (2003). Patterns of mortality in southern sea otters (*Enhydra lutras nereis*) from 1998–2001. Journal of Wildlife Diseases 39:495–509.
+Kreuder, C., Miller, M.A., Jessup, D.A., Lowenstine, L.J., Harris, M.D., Ames, J.A., Carpenter, T.E., Conrad, P.A., & Mazet, J.A. (2003). Patterns of mortality in southern sea otters (*Enhydra lutras nereis*) from 1998–2001. Journal of Wildlife Diseases 39:495–509. DOI: 10.7589/0090-3558-39.3.495
 
 Kulldorff, M., & Nagarwalla, N. (1995). Spatial disease clusters: Detection and inference. Statistical Methods 14:799–810.
 
@@ -882,52 +882,53 @@ Kulldorff, M. (2001). Prospective time periodic geographical disease surveillanc
 
 Kulldorff, M., Heffernan, R., Hartman, J., Assuncao, R., & Mostashari, F. (2005). A space-time permutation scan statistic for disease outbreak detection. PLoS Med 2(3): e59.
 
-Lambourn, D.M., Garner, M., Ewalt, D., Raverty, S., Sidor, I., Jeffries, S. Rhyan, J., & Gaydos, J.K. (2013). *Brucella pinnipedialis* infections in Pacific harbor seals from Washington State, USA. Journal of Wildlife Disease 49(4): 802-815.
+Lambourn, D.M., Garner, M., Ewalt, D., Raverty, S., Sidor, I., Jeffries, S. Rhyan, J., & Gaydos, J.K. (2013). *Brucella pinnipedialis* infections in Pacific harbor seals from Washington State, USA. Journal of Wildlife Disease 49(4): 802-815. DOI: 10.7589/2012-05-137.
 
-Lambourn, D., D’Agnese, E., Jeffries, S., Wilkinson, K., Huggins, J., Rice, J., Duffield, D., Smith, W., Grigg, M., Raverty, S. (2015). Return of the Guadalupe fur seal to the Pacific Northwest: Stranding and sightings. 21st Biennial Conference on the Biology of Marine Mammals. Dec. 13-18. San Francisco, CA.
+Lambourn, D., D’Agnese, E., Jeffries, S., Wilkinson, K., Huggins, J., Rice, J., Duffield, D., Smith, W., Grigg, M., & Raverty, S. (2015). Return of the Guadalupe fur seal to the Pacific Northwest: Stranding and sightings. 21st Biennial Conference on the Biology of Marine Mammals. Dec. 13-18. San Francisco, CA.
 
-Leeney, R.H., Amies, R., Broderick, A.C., Witt, M.J., Loveridge, J., Doyle, J., & Godley, B.J. (2008). Spatio-temporal analysis of cetacean strandings and bycatch in a UK fisheries hotspot. Biodiversity and Conservation 17: 2323.
+Leeney, R.H., Amies, R., Broderick, A.C., Witt, M.J., Loveridge, J., Doyle, J., & Godley, B.J. (2008). Spatio-temporal analysis of cetacean strandings and bycatch in a UK fisheries hotspot. Biodiversity and Conservation 17: 2323. DOI: 10.1007/s10531-008-9377-5
 
-Le Boeuf, B.J., Crocker, D.E., Costa, D.P., Blackwell, S.B., Webb, P.M., & D.S. Houser. (2000). Foraging ecology of northern elephant seals. Ecological monographs 70(3): 353-382.
+Le Boeuf, B.J., Crocker, D.E., Costa, D.P., Blackwell, S.B., Webb, P.M., & Houser, D.S. (2000). Foraging ecology of northern elephant seals. Ecological monographs 70(3): 353-382.
 
-Lea, M.A., Johnson, D., Ream, R., Sterling, J., Melin, S., & Gelatt, T. (2009). Extreme weather events influence dispersal of naïve northern fur seals. Biology Letters 5: 252–257.
+Lea, M.A., Johnson, D., Ream, R., Sterling, J., Melin, S., & Gelatt, T. (2009). Extreme weather events influence dispersal of naïve northern fur seals. Biology Letters 5: 252–257. DOI: 10.1098/rsbl.2008.0643
 
 Lee, K. (2016). Stranding mortality patterns in California sea lions and Steller sea lions in Oregon and southern Washington, 2006 to 2014. Dissertations and Theses. Paper 2995. Portland State University.
 
-London, J.M., Ver Hoef, J.M., Jeffries, S.J., Lance, M.M., & Boveng, P.L. (2012). Haul-out behavior of harbor seals (*Phoca vitulina*) in Hood Canal, Washington. PLoS ONE 7(6): e38180. 
+London, J.M., Ver Hoef, J.M., Jeffries, S.J., Lance, M.M., & Boveng, P.L. (2012). Haul-out behavior of harbor seals (Phoca vitulina) in Hood Canal, Washington. PLoS One 7(6): e38180.
 
-Lowry, M.S. & Forney, K.A. (2005). Abundance and distribution of California sea lions (*Zalophus californianus*) in central and northern California during 1998 and summer 1999.
-Fishery Bulletin 103:331-343.
+Lowry, M.S. & Forney, K.A. (2005). Abundance and distribution of California sea lions (*Zalophus californianus*) in central and northern California during 1998 and summer 1999. Fishery Bulletin 103:331-343.
 
-Lowry, M.S., R. Condit, B.Hatfield, S.G. Allen, R. Berger, P.A. Morris, B.J. Le Boeuf, & Reiter, J. (2014). Abundance, Distribution, and Population Growth of the Northern Elephant Seal (*Mirounga angustirostris*) in the United States from 1991 to 2010. Aquatic Mammals 40(1): 20-31.
+Lowry, M.S., R. Condit, B.Hatfield, S.G. Allen, R. Berger, P.A. Morris, B.J. Le Boeuf, & Reiter, J. (2014). Abundance, Distribution, and Population Growth of the Northern Elephant Seal (*Mirounga angustirostris*) in the United States from 1991 to 2010. Aquatic Mammals 40(1): 20-31. DOI: 10.1578/AM.40.1.2014.20
 
 Maldini, D., Mazzuca, L., & Atkinson, S. (2005). Odontocete stranding patterns in the main Hawaiian Islands (1937–2002): how do they compare with live animal surveys? Pacific Science 59, 55–67.
 
-Maniscalco, J.M., Wynne, K., Pitcher, K.W., Hanson, M.B., Melin, S.R., & Atkinson, S. (2004). The occurrence of California sea lions (*Zalophus californianus*) in Alaska. Aquatic Mammals 30(3): 427-433.
+Maniscalco, J.M., Wynne, K., Pitcher, K.W., Hanson, M.B., Melin, S.R., & Atkinson, S. (2004). The occurrence of California sea lions (*Zalophus californianus*) in Alaska. Aquatic Mammals 30(3): 427-433. DOI: 10.1578/AM.30.3.2004.427
 
-Melin, S.R., DeLong, R.L., & Thomason, J.R. (2000). Attendance patterns of California sea lion (*Zalophus californianus*) females and pups during the non-breeding season at San Miguel Island. Marine Mammal Science 16(1): 169-185. 
+Melin, S.R., DeLong, R.L., & Thomason, J.R. (2000). Attendance patterns of California sea lion (*Zalophus californianus*) females and pups during the non-breeding season at San Miguel Island. Marine Mammal Science 16(1): 169-185. DOI: 10.1111/j.1748-7692.2000.tb00911.x
 
-Melin, S. R., DeLong, R. L., & Siniff, D. (2008). The effects of El Niño on the foraging behavior of lactating California sea lions (*Zalophus californianus*) during the non-breeding season. Canadian Journal of Zoology 86: 192-206. 
+Melin, S. R., DeLong, R. L., & Siniff, D. (2008). The effects of El Niño on the foraging behavior of lactating California sea lions (*Zalophus californianus*) during the non-breeding season. Canadian Journal of Zoology 86: 192-206. DOI: 10.1139/Z07-132
 
 Melin, S.R., Orr, A.J., Harris, J.D., Laake, J.L., & DeLong, R.L. (2010). Unprecedented mortality of California sea lion pups associated with anomalous oceanographic conditions along the central California coast in 2009. California Cooperative Oceanic Fisheries Investigations Report 51: 182-194.
 
-Moore S.E. (2008). Marine mammals as ecosystem sentinels. Journal of Mammalogy 89(3): 534–540.
+Moore S.E. (2008). Marine mammals as ecosystem sentinels. Journal of Mammalogy 89(3): 534–540. DOI: 10.1644/07-MAMM-S-312R1.1
 
-Moore, S.E., Lyday, S., Roletto, J., Litle, K., Parrish, J.K., Nevins, H., ... Kell, S. (2009). Entanglements of marine mammals and seabirds in central California and the north-west coast of the United States 2001-2005. Marine Pollution Bulletin. 58: 1045-1051.National Marine Fisheries Service. 2008. Recovery Plan for the Steller Sea Lion (*Eumetopias jubatus*). Revision. National Marine Fisheries Service, Silver Spring, MD. 325 pp.
+Moore, S.E., Lyday, S., Roletto, J., Litle, K., Parrish, J.K., Nevins, H., ... Kell, S. (2009). Entanglements of marine mammals and seabirds in central California and the north-west coast of the United States 2001-2005. Marine Pollution Bulletin. 58: 1045-1051.
 
-National Marine Fisheries Service. (2013). Status Review of The Eastern Distinct Population Segment of Steller Sea Lion (Eumetopias jubatus). 144pp. Protected Resources Division, Alaska Region, National Marine Fisheries Service, 709 West 9th St, Juneau, Alaska 99802. 
+National Marine Fisheries Service. 2008. Recovery Plan for the Steller Sea Lion (*Eumetopias jubatus*). Revision. National Marine Fisheries Service, Silver Spring, MD. 325 pp.
 
-National Oceanic and Atmospheric Administration. (2016). Annual summary of ocean ecosystem indicators for 2016 and pre-season outlook for 2017. NOAA Northwest Fisheries Science Center, https://www.nwfsc.noaa.gov/research/divisions/fe/estuarine/oeip/b-latest-updates.cfm accessed 2/1/2017. 
+National Marine Fisheries Service. (2013). Status Review of The Eastern Distinct Population Segment of Steller Sea Lion (*Eumetopias jubatus*). 144pp. Protected Resources Division, Alaska Region, National Marine Fisheries Service, 709 West 9th St, Juneau, Alaska 99802.
 
-Norman, S.A., Bowlby, C.E., Brancato, M.S., Calambokidis, J., Duffield, D., Gearin, P.J., Gornall, T.A.... & Scordino, J. (2004). Cetacean strandings in Oregon and Washington between 1930 and 2002. Journal of Cetacean Research and Management 6:87–99.
+National Oceanic and Atmospheric Administration. (2016). Annual summary of ocean ecosystem indicators for 2016 and pre-season outlook for 2017. NOAA Northwest Fisheries Science Center, https://www.nwfsc.noaa.gov/research/divisions/fe/estuarine/oeip/b-latest-updates.cfm accessed 2/1/2017.
 
-Norman, S.A., Huggins, J., Carpenter, T.E., Case, J.T., Lambourn, D.M., Rice, J., Calambokidis, J.... & Klope, M. (2011). The application of GIS and spatio-temporal analyses to investigations of unusual marine mammal strandings and mortality events. Marine mammal science 28(3): E251-E266.
+Norman, S.A., Bowlby, C.E., Brancato, M.S., Calambokidis, J., Duffield, D., Gearin, P.J.,... Scordino, J. (2004). Cetacean strandings in Oregon and Washington between 1930 and 2002. Journal of Cetacean Research and Management 6:87–99.
 
-Orr, A.J., Melin, S.R., Harris, J.D., & R.L. DeLong. (2012). Status of the northern fur seal population at San Miguel Island, California during 2010 and 2011. Pp. 41-58, In: Testa, J. W. (ed.), Fur seal investigations, 2010-2011. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-241. 77 pp.
+Norman, S.A., Huggins, J., Carpenter, T.E., Case, J.T., Lambourn, D.M., Rice, J.,… Klope, M. (2011). The application of GIS and spatio-temporal analyses to investigations of unusual marine mammal strandings and mortality events. Marine Mammal Science 28(3): E251-E266. DOI: 10.1111/j.1748-7692.2011.00507.x
 
-Osinga, N., Shahi Ferdous, M.M., Morick, D., Garcia Hartmann, M., Ulloa, J.A., Vedder, L.... & Kuiken, T. (2012). Patterns of Stranding and Mortality in Common Seals (*Phoca vitulina*) and Grey Seals (*Halichoerus grypus*) in The Netherlands between 1979 and 2008. Journal of Comparative Pathology 147(4): 1-16.
+Orr, A.J., Melin, S.R., Harris, J.D., & DeLong, R.L. (2012). Status of the northern fur seal population at San Miguel Island, California during 2010 and 2011. Pp. 41-58, In: Testa, J. W. (ed.), Fur seal investigations, 2010-2011. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-241. 77 pp.
 
-Peltier H., Baagøe H.J., Camphuysen K.C.J., Czeck R., Dabin W., Daniel P., Deaville, R… & Ridoux, V. (2013). The Stranding Anomaly as Population Indicator: The Case of Harbour Porpoise (*Phocoena phocoena*) in North-Western Europe. PLoS ONE 8(4): e62180. 
+Osinga, N., Shahi Ferdous, M.M., Morick, D., Garcia Hartmann, M., Ulloa, J.A., Vedder, L.,… Kuiken, T. (2012). Patterns of Stranding and Mortality in Common Seals (*Phoca vitulina*) and Grey Seals (*Halichoerus grypus*) in The Netherlands between 1979 and 2008. Journal of Comparative Pathology 147(4): 1-16.
+
+Peltier H., Baagøe H.J., Camphuysen K.C.J., Czeck R., Dabin W., Daniel P.,…  Ridoux, V. (2013). The Stranding Anomaly as Population Indicator: The Case of Harbour Porpoise (*Phocoena phocoena*) in North-Western Europe. PLoS One 8(4): e62180.
 
 Pikesley, S.K., Witt, M.J., Hardy, T., Loveridge, J., Loveridge, J., Williams, R., & Godley, B.J. (2011). Cetacean sightings and strandings: evidence for spatial and temporal trends? Journal of the Marine Biological Association of the United Kingdom: 1-12.
 
@@ -937,17 +938,18 @@ Pyenson, N.D. (2010). Carcasses on the coastline: measuring the ecological fidel
 
 Ross, P.S. (2000). Marine mammals as sentinels in ecological risk assessment. Human and Ecological Risk Assessment 6(1): 29–46.
 
-Soulen, B.K., Cammen, K., Schultz, T.F., Johnston, D.W. (2013). Factors Affecting Harp Seal (*Pagophilus groenlandicus*) Strandings in the Northwest Atlantic. Plos One 8(7): e68779.
+Soulen, B.K., Cammen, K., Schultz, T.F., & Johnston, D.W. (2013). Factors Affecting Harp Seal (*Pagophilus groenlandicus*) Strandings in the Northwest Atlantic. PloS One 8(7): e68779.
 
-Stewart, B.S., & Yochem, P.K. (1987). Entanglement of pinnipeds in synthetic debris and fishing net and line fragments at San Nicolas and San Miguel islands, California, 1978-1986. Marine Pollution Bulletin 18: 336-339. 
+Stewart, B.S., & Yochem, P.K. (1987). Entanglement of pinnipeds in synthetic debris and fishing net and line fragments at San Nicolas and San Miguel islands, California, 1978-1986. Marine Pollution Bulletin 18: 336-339.
 
-Stroud, R.K., & Roffe, T.J. (1997). Causes of death in marine mammals stranded along the Oregon coast. Journal of Wildlife Diseases 15(1): 91-97. 
+Stroud, R.K., & Roffe, T.J. (1997). Causes of death in marine mammals stranded along the Oregon coast. Journal of Wildlife Diseases 15(1): 91-97.
 
-Thomas, A.C., Lance, M.M, Jeffries, S.J., Miner, B.G., & Acevedo-Gutiérrez, A. (2011). Harbor  seal  foraging  response  to  a  seasonal  resource  pulse,  spawning  Pacific  herring.  Marine Ecology Progress Series 441:225–239.
+Thomas, A.C., Lance, M.M, Jeffries, S.J., Miner, B.G., & Acevedo-Gutiérrez, A. (2011). Harbor seal foraging response to a seasonal resource pulse, spawning Pacific herring. Marine Ecology Progress Series 441:225–239. DOI: 10.3354/meps09370
 
-Wilkinson, D. & G. Worthy. (1999). In: Conservation and Management of Marine Mammals (Twiss, J. R. and R.R. Reeves, eds.). Smithsonian Institute Press, Washington, pp. 396-411.
+Wilkinson, D. & Worthy, G. (1999). In: Conservation and Management of Marine Mammals (Twiss, J. R. and R.R. Reeves, eds.). Smithsonian Institute Press, Washington, pp. 396-411.
 
-Woodhouse, C.D. (1991). Marine mammal beachings as indicators of population events. Marine mammal strandings in the United States: proceedings of the second marine mammal stranding workshop. US Dep Commerc., NOAA Technical Report. NMFS 98:111-115. 157pp.
+Woodhouse, C.D. (1991). Marine mammal beachings as indicators of population events. Marine mammal strandings in the United States: proceedings of the second marine mammal stranding workshop. US Dep Commerce., NOAA Technical Report. NMFS 98:111-115. 157pp.
+
 
 ```{r old figures}
 #Option with overlapping HI types
