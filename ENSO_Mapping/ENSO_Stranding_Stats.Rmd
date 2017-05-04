@@ -26,6 +26,8 @@ library(stats)
 library(MASS) #glm.nb(), stepAIC()
 library(dplyr)
 library(leaps) # regsubsets() 
+library(corrplot)
+library(Hmisc) # rcorr()
 
 #setwd("~/Documents/R/Strandings")
 
@@ -36,21 +38,86 @@ pinnipeds_ocean <- read.csv("pinnipeds_ocean.csv", header = TRUE, na.strings = "
 
 #Load dataframes from PinnipedsandENSO.Rmd
 
+#Ocean only variables for correlation exploration
+ocean_corr <- read.csv("ocean_full.csv", header = T, na.strings = "NA", stringsAsFactors = F) %>%
+  dplyr::select(-matches("Date")) %>%
+  dplyr::select(-matches("ENSO_cat")) %>%
+  dplyr::select(-c(Month.of.Observation, Year.of.Observation))
+
 #Monthly anomalies separate species
-monthly_anom <- read.csv("monthly_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+monthly_anom <- read.csv("monthly_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2004, 'Pre_Prescott', 'Post_Prescott'))
 #Monthly anomalies combined species
-monthly_anom_comb <- read.csv("monthly_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+monthly_anom_comb <- read.csv("monthly_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2004, 'Pre_Prescott', 'Post_Prescott'))
 #Annual anomalies separate species
-annual_anom <- read.csv("annual_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+annual_anom <- read.csv("annual_anom.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2004, 'Pre_Prescott', 'Post_Prescott'))
 #Annual anomalies combined species
-annual_anom_comb <- read.csv("annual_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE)
+annual_anom_comb <- read.csv("annual_anom_comb.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2004, 'Pre_Prescott', 'Post_Prescott'))
+
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+```
+
+```{r ocean cor}
+
+ocean_corr_small <- ocean_corr %>%
+  dplyr::select(-matches("lag"))
+
+ocean_corr_0vs1 <- ocean_corr %>%
+  dplyr::select(-matches("lag2")) %>%
+  dplyr::select(-matches("lag3")) 
+
+ocean_corr_0vs2 <- ocean_corr %>%
+  dplyr::select(-matches("lag1")) %>%
+  dplyr::select(-matches("lag3")) 
+
+ocean_corr_0vs3 <- ocean_corr %>%
+  dplyr::select(-matches("lag1")) %>%
+  dplyr::select(-matches("lag2")) 
+
+# cor <- cor(ocean_corr_small, use = "pairwise.complete.obs")
+# cor <- cor(ocean_corr_med, use = "pairwise.complete.obs")
+
+cor_test_small <- rcorr(as.matrix(ocean_corr_small))
+flattenCorrMatrix(cor_test_small$r, cor_test_small$P)
+
+cor_test_0vs1 <- rcorr(as.matrix(ocean_corr_0vs1))
+cor_test_0vs2 <- rcorr(as.matrix(ocean_corr_0vs2))
+cor_test_0vs3 <- rcorr(as.matrix(ocean_corr_0vs3))
+
+#In general, 
+## --- Upwelling 39 and 45 are correlated, likewise Wind 39 and 44, SST 39 and 44 less so
+## --- SST and SST_anom of same buoy are correlated, less so for opposite buoy pairs
+## --- Upwelling and Wind are inversely correlated
+## --- PDO and MEI correlated
+## --- CBA North and South inversely correlated, and correlated to MEI etc. and SST_anoms, but less so with SST, Upwell, and Wind
+corrplot(cor_test_small$r, type = "lower", order = "original", p.mat = cor_test_small$P, 
+         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .2)
+corrplot(cor_test_0vs1$r, type = "lower", order = "original", p.mat = cor_test_0vs1$P, 
+         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
+#SST and SST_anom_lag2s are correlated
+corrplot(cor_test_0vs2$r, type = "lower", order = "original", p.mat = cor_test_0vs2$P, 
+         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
+corrplot(cor_test_0vs3$r, type = "lower", order = "original", p.mat = cor_test_0vs3$P, 
+         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
+
 ```
 
 ##Research Questions
 
 1. Are strandings (and or human interaction (HI) cases) for combined or individual species correlated with certain oceanographic indices?
 
-1a. All cases
+1a. All cases, plus lag variables
 ```{r}
 
 #All cases monthly
@@ -58,48 +125,89 @@ annual_anom_comb <- read.csv("annual_anom_comb.csv", header = TRUE, na.strings =
 # (a) Strandings for combined species 
 
 #Model selection using stepAIC() on negative binomial regression
-fit_step_all <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb))
+#na.omit() removes all rows with any missing data, glm.nb(keeps rows but removes the single NA value)
+#keep this - list of all vars
+fit_step_all <- glm.nb(cnt_all ~ 
+          MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
+          MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
+          MEI_lag2 + PDO_lag2 + NPGO_lag2 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + CBA_North_lag2 + CBA_South_lag2 + SST_39_anom_lag2 + SST_44_anom_lag2 +
+          MEI_lag3 + PDO_lag3 + NPGO_lag3 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3, 
+      data = na.omit(monthly_anom_comb))
 step <- stepAIC(fit_step_all, direction = "backward")
 step$anova
 # Final Model:
-# cnt_all ~ PDO + SST_39_anom + SST_44 + Upwelling_39 + CBA_South
 
-#Help - next step is to see if final model results in significant predictors?
-summary(glm.nb(cnt_all ~ PDO + SST_39_anom + SST_44 + Upwelling_39 + CBA_South, data = na.omit(monthly_anom_comb)))
+#regsubsets() - chooses the nbest models for up to 8 predictors
+mod_select <- regsubsets(cnt_all ~ 
+      SST_39_anom + SST_44 + CBA_South_lag1 + SST_39_lag1 + Wind_39_lag1 + Upwelling_39_lag1 + PDO_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, data = monthly_anom_comb, nbest = 5)
+summary(mod_select)
 
-# #trying regsubsets() - chooses the nbest models for up to 8 predictors
-# <--- Interesting, but lots of visual comparison required; when only two predictors, looks like SST and Wind are consistently important
-# leaps <- regsubsets(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = monthly_anom_comb, nbest = 3)
-# summary(leaps) 
+#best model without lag data was: SST_44, SST_39_anom, Upwelling_39, Wind_39
+nb <- summary(glm.nb(cnt_all ~ SST_39_anom + SST_44 + Upwelling_39 + CBA_South + Wind_39, data = monthly_anom_comb))
+qp <- summary(glm(cnt_all ~ SST_39_anom + SST_44 + Upwelling_39 + CBA_South + Wind_39, data = monthly_anom_comb, family = 'quasipoisson'))
+
+#best model with lag data; #PDO and MEI seem interchangeable in the model
+nb <- summary(glm.nb(cnt_all ~ SST_39_anom + SST_44 + CBA_South_lag1 + Wind_39_lag1 + 
+                       Upwelling_39_lag1 + MEI_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, 
+                     data = monthly_anom_comb))
+
+qp <- summary(glm(cnt_all ~ SST_39_anom + SST_44 + CBA_South_lag1 + Wind_39_lag1 + Upwelling_39_lag1 + 
+                    MEI_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, 
+                  data = monthly_anom_comb, family = 'quasipoisson'))
+
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.33, which means model is an okay fit?
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue is small - not a good fit
+
 
 # (b) Strandings for separate species
 
 #California sea lion
-fit_step_csl <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
-step <- stepAIC(fit_step_csl, direction = "backward")
-step$anova
-# Final Model:
-# cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_North
 
-summary(glm.nb(cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_North, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'))))
-# Help - these results seem quite different with and without na.omit() for the data. What's happeneing there?
+#regsubsets, continue with SST44, MEI, SST39anom, Upwelling_39 OR Wind_44, CBA_South
+mod_select <- regsubsets(cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_44 + CBA_South +
+          SST_44_lag1 + SST_39_anom_lag1 +
+          SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + SST_39_anom_lag2 + 
+          Wind_44_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+
+#without lag variables, best fit was SST_44, SST_39_anom, and Wind_44 OR Upwelling_39 significant
+nb <- summary(glm.nb(cnt_all ~ SST_39 + SST_39_anom + SST_39_anom_lag3 + SST_44 + SST_44_lag1 +
+                 Wind_39_lag2 + Wind_44 + Wind_44_lag3 + CBA_South + Upwelling_39_lag2 + Period, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+
+qp <- summary(glm(cnt_all ~ SST_39 + SST_39_anom + SST_39_anom_lag3 + SST_44 + SST_44_lag1 +
+                 Wind_39_lag2 + Wind_44 + Wind_44_lag3 + CBA_South + Upwelling_39_lag2 + Period, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.48, which means model is an okay fit?
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # not a good fit - overdispersion
 
 #Harbor seal
-#Help - error message I don't understand on this glm() call
-fit_step_hs <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
-step <- stepAIC(fit_step_hs, direction = "backward")
-step$anova
+
+#regsubsets, continue with Wind_39, Upwelling_39, SST_39, SST_39_anom, PDO, SST_44
+mod_select <- regsubsets(cnt_all ~ SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + CBA_South +
+         SST_44_lag1 + SST_44_lag2 + Upwelling_45_lag2 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
+summary(mod_select)
+
+nb <- summary(glm.nb(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #neg binomial produces lower AIC
+qp <- summary(glm(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
+
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.79, which means model is an okay fit?
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates not a good fit
 
 #Steller sea lion
-fit_step_ssl <- glm.nb(cnt_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
-step <- stepAIC(fit_step_ssl, direction = "backward")
-step$anova
-# Final Model:
-# cnt_all ~ MEI + NPGO + SST_39_anom + Wind_39 + CBA_North
-summary(glm.nb(cnt_all ~ MEI + NPGO + SST_39_anom + Wind_39 + CBA_North, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'))))
+
+#regsubsets, continue with Wind_39, CBA_North, SST_39, SST_39_anom, MEI, SST_44
+mod_select <- regsubsets(cnt_all ~ MEI + SST_44 + Wind_39 + Upwelling_39 + CBA_North +
+          MEI_lag1 + SST_44_lag2 + Wind_39_lag2 + CBA_North_lag2 +
+          MEI_lag3 + Wind_44_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+
+summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+
+summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson') 
 
 #<-- Help: Overall for these single-species models, it looks like the recommended best-fit models are different from each other, but by how much or whether it is meaningful is unclear to me
-#<-- Help: For all of the above, should I be concerned with issues of colinearity/covariance for some of the oceanographic variables?
+#<-- Help: For all of the above, what to do about colinearity/covariance of oceanographic variables?
 
 ```
 
@@ -107,87 +215,93 @@ summary(glm.nb(cnt_all ~ MEI + NPGO + SST_39_anom + Wind_39 + CBA_North, data = 
 ```{r}
 
 # (a) HI cases for combined species 
-#Help - intimidating error messages with fit_step_HI
-fit_step_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb))
-step <- stepAIC(fit_step_HI, direction = "backward")
-step$anova
-# Final Model:
-# cnt_HI ~ SST_39 + SST_44 + Wind_39 + Upwelling_39 + CBA_North + 
-#     CBA_South
+
+mod_select <- regsubsets(cnt_HI ~ MEI + SST_39 + Wind_44 + CBA_South + SST_39_lag1 + Wind_39_lag3 + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
+summary(mod_select)
+
+qp <- summary(glm(cnt_HI ~ MEI + SST_39 + Wind_44 + CBA_South + SST_39_lag1 + Wind_39_lag3 + Period, 
+          data = monthly_anom_comb, family = 'quasipoisson'))
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) #high pvalue
 
 # (b) HI cases for separate species
 
-#<-- Help: Perhaps too few observations? Lots of error and warning messages. Zero-inflated?
-
 #California sea lion
-fit_step_csl_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
-step <- stepAIC(fit_step_csl_HI, direction = "backward")
-step$anova
-# Final Model:
-# cnt_HI ~ SST_39_anom
 
-#Help - lots of warning messages I don't understand
-summary(glm.nb(cnt_HI ~ SST_39_anom, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'))))
+#regsubsets, continue with SST44, MEI, SST39anom, Upwelling_39 OR Wind_44, CBA_South
+mod_select <- regsubsets(cnt_HI ~ PDO + SST_39 + SST_39_anom + Wind_44 + CBA_North + CBA_South +
+          MEI_lag1 + PDO_lag1 + NPGO_lag1 + Wind_39_lag1 + Upwelling_45_lag2 + CBA_South_lag2 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+
+nb <- summary(glm.nb(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
+          Upwelling_45_lag2 + CBA_South_lag2,
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+
+qp <- summary(glm(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
+          Upwelling_45_lag2 + CBA_South_lag2, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.99, which means model is an okay fit?
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue = 0.99, which means model is an okay fit?
 
 #Harbor seal
-#Help - same error message I don't understand as above
-# fit_step_hs_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
-# step <- stepAIC(fit_step_hs_HI, direction = "backward")
-# step$anova
+
+#regsubsets, continue with Wind_39, Upwelling_39, SST_39, SST_39_anom, PDO, SST_44
+# mod_select <- regsubsets(cnt_all ~ 
+#           MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
+#           MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
+#           MEI_lag2 + PDO_lag2 + NPGO_lag2 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + CBA_North_lag2 + CBA_South_lag2 + SST_39_anom_lag2 + SST_44_anom_lag2 +
+#           MEI_lag3 + PDO_lag3 + NPGO_lag3 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
+# summary(mod_select)
+
+nb <- summary(glm.nb(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #neg binomial produces lower AIC
+qp <- summary(glm(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
+
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.79, which means model is an okay fit?
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates not a good fit
 
 #Steller sea lion
-fit_step_ssl_HI <- glm.nb(cnt_HI ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
-step <- stepAIC(fit_step_ssl_HI, direction = "backward")
-step$anova
+
+#regsubsets, continue with Wind_39, CBA_North, SST_39, SST_39_anom, MEI, SST_44
+# mod_select <- regsubsets(cnt_all ~ 
+#           MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
+#           MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
+#           MEI_lag2 + PDO_lag2 + NPGO_lag2 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + CBA_North_lag2 + CBA_South_lag2 + SST_39_anom_lag2 + SST_44_anom_lag2 +
+#           MEI_lag3 + PDO_lag3 + NPGO_lag3 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
+# summary(mod_select)
+
+summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+
+summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson')
+
 
 ```
 
 2. Are stranding anomalies correlated with certain oceanographic indices?
 
-2a. All cases
+2a. All cases anomalies
 ```{r}
 
 # (a) Stranding anoms for combined species 
 
-#Trying anomalies with just post-2004 data, could also add variable for post2004 to include
-#Help - switched over to glm() because error message said negative numbers (the anomalies) aren't allowed with poisson 
-fit_step_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom_comb %>% filter(Year.of.Observation > 2004)))
-step <- stepAIC(fit_step_2004, direction = "backward")
-step$anova
-# Final Model:
-# strand_anom_all ~ MEI + PDO + NPGO + SST_39_anom + SST_44 + SST_44_anom + Upwelling_39 + CBA_South
-summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39_anom + SST_44 + SST_44_anom +
-    Upwelling_39 + CBA_South, data = monthly_anom_comb %>% filter(Year.of.Observation > 2004)))
+mod_select <- regsubsets(strand_anom_all ~ NPGO + SST_44_anom + Wind_44 + CBA_South +
+          NPGO_lag1 + SST_44_lag1 + SST_39_anom_lag1 + SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + SST_39_anom_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
+summary(mod_select)
+
+summary(glm.nb(strand_anom_all + 10 ~ Wind_44 + CBA_South + SST_39_anom_lag1 +
+          SST_44_lag1 + SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb))
 
 # (b) Stranding anoms for separate species
 
 #CSL
-fit_step_CSL_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'California sea lion')))
-step <- stepAIC(fit_step_CSL_2004, direction = "backward")
-step$anova
-# Final Model:
-# strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + CBA_South
-summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + 
-    CBA_South, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'California sea lion')))
+ 
 
 #HS
-fit_step_HS_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Harbor seal')))
-step <- stepAIC(fit_step_HS_2004, direction = "backward")
-step$anova
-# Final Model:
-# strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44
-summary(glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Harbor seal')))
+
 
 #SSL
-fit_step_SSL_2004 <- glm(strand_anom_all ~ MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South, data = na.omit(monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Steller sea lion')))
-step <- stepAIC(fit_step_SSL_2004, direction = "backward")
-step$anova
-# Final Model:
-# strand_anom_all ~ MEI + NPGO + SST_39_anom + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + CBA_North
-summary(glm(strand_anom_all ~ MEI + NPGO + SST_39_anom + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + CBA_North, data = monthly_anom %>% filter(Year.of.Observation > 2004 & Pinniped.Common.Name == 'Steller sea lion')))
+
 ```
 
-2b. HI cases
+2b. HI cases anomalies
 ```{r}
 #Repeat process from above, waiting for advice on overall approach
 # (a) HI case anoms for combined species 
@@ -196,22 +310,8 @@ summary(glm(strand_anom_all ~ MEI + NPGO + SST_39_anom + SST_44_anom + Wind_39 +
 
 ```
 
-3. Is there a detectable and appropriate lag time where oceanographic indices correlate more strongly with strandings or stranding anomalies?
 
-3a. 
-```{r}
-
-#All strandings combined species
- 
-#Help: First look at lag times... looks like one and two month lags are coming up as significant, but lots of covariance and other issues going on I'm sure
-fit_step_all_lags <- glm.nb(cnt_all ~ SST_39 + SST_44 + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North + CBA_South + SST_39_anom + SST_44_anom , data = na.omit(monthly_anom_comb))
-step <- stepAIC(fit_step_all_lags, direction = "backward")
-step$anova
-
-
-```
-
-4. Are there different models that are a better fit for different species (i.e., are species impacted differently by the same ocean conditions?)
+3. Are there different models that are a better fit for different species (i.e., are species impacted differently by the same ocean conditions?)
 ```{r}
 
 ```

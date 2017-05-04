@@ -156,6 +156,11 @@ Zeileis - strucchange
 
 #More ENSO-related
 
+Menza et al
+Distribution mapping of seabirds and marmams along the WA coast
+- Complements efforts, since this is at-sea, no winter distrib sampling
+- Could incorporate as model variable; stellers and harbors
+
 Norman 2008**
 Norman, S.A. (2008). Spatial epidemiology and GIS in marine mammal conservation medicine and disease research. Ecohealth 5:257–267.
 - spatial ecology/epidemiology

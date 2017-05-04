@@ -50,7 +50,7 @@ fish <- fish %>% filter(Year.of.Observation > 1988) %>%
                                                                                            ifelse(Mo == 9, 'SEP',
                                                                                                   ifelse(Mo == 10, 'OCT',
                                                                                                          ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
+  dplyr::select(-Mo)
 
 
 ###Ocean 
@@ -96,7 +96,7 @@ ocean <- ocean %>% filter(Year.of.Observation > 1988) %>%
                                                                                            ifelse(Mo == 9, 'SEP',
                                                                                                   ifelse(Mo == 10, 'OCT',
                                                                                                          ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
+  dplyr::select(-Mo)
 
 #write.csv(ocean, file = "./ocean.csv", row.names = F)
 
@@ -117,7 +117,7 @@ ocean_lag1 <- ocean_lag1 %>% filter(Year.of.Observation > 1988) %>%
                                                                                            ifelse(Mo == 9, 'SEP',
                                                                                                   ifelse(Mo == 10, 'OCT',
                                                                                                          ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
+  dplyr::select(-Mo)
 
 ocean_lag2 <- read.csv("ocean_lag2.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) 
 ocean_lag2$Date <- as.Date(ocean_lag2$Date, format = "%m/%d/%y")
@@ -135,7 +135,7 @@ ocean_lag2 <- ocean_lag2 %>% filter(Year.of.Observation > 1988) %>%
                                                                                            ifelse(Mo == 9, 'SEP',
                                                                                                   ifelse(Mo == 10, 'OCT',
                                                                                                          ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
+  dplyr::select(-Mo)
 
 ocean_lag3 <- read.csv("ocean_lag3.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) 
 ocean_lag3$Date <- as.Date(ocean_lag3$Date, format = "%m/%d/%y")
@@ -153,16 +153,43 @@ ocean_lag3 <- ocean_lag3 %>% filter(Year.of.Observation > 1988) %>%
                                                                                            ifelse(Mo == 9, 'SEP',
                                                                                                   ifelse(Mo == 10, 'OCT',
                                                                                                          ifelse(Mo == 11, 'NOV', 'DEC')))))))))))) %>% 
-  select(-Mo)
+  dplyr::select(-Mo)
 
 ocean_full <- ocean %>%
   merge(ocean_lag1, by = c('Year.of.Observation', 'Month.of.Observation'), all = T, suffixes = c("", "_lag1")) %>%
   merge(ocean_lag2, by = c('Year.of.Observation', 'Month.of.Observation'), all = T, suffixes = c("", "_lag2")) %>%
   merge(ocean_lag3, by = c('Year.of.Observation', 'Month.of.Observation'), all = T, suffixes = c("", "_lag3"))
 
+#Derive mean SST values
+meanSST <- ocean %>%
+  dplyr::select(matches("SST"), Month.of.Observation, -matches("_lag")) %>%
+  group_by(Month.of.Observation) %>%
+  dplyr::summarize(SST_39_mean = mean(SST_39, na.rm = T),
+            SST_44_mean = mean(SST_44, na.rm = T))
+#Add means into df and subtract from values for anomalies
+ocean_full <- ocean_full %>%
+  merge(meanSST, by = 'Month.of.Observation') %>%
+  transform(SST_39_anom = SST_39 - SST_39_mean) %>%
+  transform(SST_44_anom = SST_44 - SST_44_mean) %>%
+  dplyr::select(-c(SST_39_mean, SST_44_mean))
+
+# anom_lags <- ocean %>% dplyr::select(Date, Month.of.Observation, SST_39_anom, SST_44_anom) %>%
+#   arrange(Date)
+# write.csv(anom_lags, "anom_lags.csv", row.names = F)
+
+#Manually added CBA in here, since it is the only "fish" variable that is monthly - may use the other "fish" later
+temp_anom_CBA_lags <- read.csv("temp_anom_CBA_lags.csv", header = T, na.strings = "NA", stringsAsFactors = F) %>%
+  transform(Date = as.Date(Date, format = "%m/%d/%Y"))
+
+ocean_full <- ocean_full %>%
+  merge(temp_anom_CBA_lags, by = 'Date') %>%
+  transform(Month.of.Observation = Month.of.Observation.y,
+            Year.of.Observation = Year.of.Observation.y) %>%
+  dplyr::select(-c(Month.of.Observation.x, Year.of.Observation.x, Month.of.Observation.y, Year.of.Observation.y)) 
+ 
 setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
-write.csv(ocean_full, file = "./ocean.csv", row.names = F)
+write.csv(ocean_full, file = "./ocean_full.csv", row.names = F)
 write.csv(fish, file = "./fish.csv", row.names = F)
 
 
