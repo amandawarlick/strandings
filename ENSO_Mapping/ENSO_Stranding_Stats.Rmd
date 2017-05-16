@@ -29,7 +29,7 @@ library(leaps) # regsubsets()
 library(corrplot)
 library(Hmisc) # rcorr()
 
-#setwd("~/Documents/R/Strandings")
+#setwd("~/Documents/R/Strandings/ENSO")
 
 # Data Load 
 ###############################################################################
@@ -110,6 +110,53 @@ corrplot(cor_test_0vs2$r, type = "lower", order = "original", p.mat = cor_test_0
          insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
 corrplot(cor_test_0vs3$r, type = "lower", order = "original", p.mat = cor_test_0vs3$P, 
          insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
+
+```
+
+```{r chow test}
+
+r.reg <- lm(cnt_all ~ Year.of.Observation, data = annual_anom_comb)
+ur.reg1 <- lm(cnt_all ~ Year.of.Observation, data = annual_anom_comb %>% filter(Period == 'Pre_Prescott'))
+ur.reg2 <- lm(cnt_all ~ Year.of.Observation, data = annual_anom_comb %>% filter(Period != 'Pre_Prescott'))
+                                            
+## review the regression results
+summary(r.reg)
+summary(ur.reg1)
+summary(ur.reg2)
+ 
+## Calculate sum of squared residuals for each regression
+SSR <- NULL
+SSR$r <- r.reg$residuals^2
+SSR$ur1 <- ur.reg1$residuals^2
+SSR$ur2 <- ur.reg2$residuals^2
+ 
+## K is the number of regressors in our model
+K <- r.reg$rank
+ 
+## Computing the Chow test statistic (F-test)
+numerator <- (sum(SSR$r) - (sum(SSR$ur1) + sum(SSR$ur2)))/K
+denominator <- (sum(SSR$ur1) + sum(SSR$ur2)) / (nrow(annual_anom_comb) - 2*K)
+chow = numerator/denominator
+chow
+ 
+## Calculate P-value
+1-pf(chow, K, (nrow(annual_anom_comb) - 2*K))
+
+## Plot the results
+plot(annual_anom_comb$Year.of.Observation, annual_anom_comb$cnt_all, main="Eruptions of Old Faithful")
+# restricted model
+abline(r.reg, col = "red",lwd = 2, lty = "dashed")
+# unrestricted model 1
+segments(0, ur.reg2$coefficients[1], 2003,
+ur.reg2$coefficients[1]+2003*ur.reg2$coefficients[2], col= 'blue')
+# unrestricted model 2
+segments(2003, ur.reg1$coefficients[1]+2003*ur.reg1$coefficients[2],
+2016, ur.reg1$coefficients[1]+2016*ur.reg1$coefficients[2], col= 'blue')
+
+#Strucchange option - comes up with same pvalue as manual calculation, 2003 breakpoint
+sctest(cnt_all ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
+sctest(strand_anom ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
+
 
 ```
 

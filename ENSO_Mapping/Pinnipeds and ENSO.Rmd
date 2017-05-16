@@ -175,15 +175,20 @@ annual_anom_plot <- ggplot(annual_anom_melt %>% filter(variable != 'cnt_all'), a
 ```{r, annual comb sp}
 #Annual anomalies with combined species
 
-#***Stranding and ocean anomalies - combined species, annual
-annual_anom_comb <- annual_anom_melt %>%
+annual_anom_comb_plot_data <- annual_anom_melt %>%
   group_by(Year.of.Observation, variable) %>%
   dplyr::summarize(value = mean(value))
 
-annual_anom_comb_plot <- ggplot(annual_anom_comb %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
+annual_anom_comb_plot <- ggplot(annual_anom_comb_plot_data %>% filter(variable != 'cnt'), aes(Year.of.Observation, value, col = variable)) +
   geom_line() +
   xlab("") + ylab("Annual Anomalies") +
   plot_theme(legend.position = 'top')
+
+#***Stranding and ocean anomalies - combined species, annual
+annual_anom_comb <- annual_anom_melt %>%
+  group_by(Year.of.Observation, variable) %>%
+  dplyr::summarize(value = mean(value)) %>%
+  dcast(Year.of.Observation ~ variable, value.var = 'value')
 
 ```
 

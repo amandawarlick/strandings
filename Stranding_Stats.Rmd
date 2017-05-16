@@ -29,9 +29,10 @@ library(pgirmess) #kruskalmc()
 library(MASS) #glm.nb()
 library(multcomp) #glht()
 library(dplyr)
+detach("package:Hmisc")
 # detach("package:multcomp")
 # detach("package:TH.data")
-# detach("package:MASS")
+detach("package:MASS")
 
 #setwd("~/Documents/R/Strandings")
 
