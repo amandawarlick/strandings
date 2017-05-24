@@ -354,13 +354,13 @@ age_sex_table <- write.csv(age_sex_table, file = "./Figures/age_sex_table.csv", 
 
 data_by_year <- pinnipeds_data %>% 
   group_by(Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
 
 #Statistically significant change in all stranding cases in OR and WA combined over time (p < 0.05, 25 strandings per year increase).
 timeseries_all_model <- glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = data_by_year)
 timeseries_all_model <- lm(cnt ~ Year.of.Observation, data = data_by_year)
 summary(timeseries_all_model)
-autoplot(timeseries_all_model)
+plot(timeseries_all_model)
 
 all_yr_figure <- 
   ggplot(data_by_year, aes(x = Year.of.Observation, y = cnt)) + 
@@ -2513,5 +2513,48 @@ write.csv(dfw, file = "./dfw.csv", row.names = F)
 all_day <- pinnipeds_data %>%
   group_by(Year.of.Observation, Month.of.Observation, Day.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number))
+```
+
+```{r new stuff}
+
+# check out
+mammals2 <- mammals %>%
+   group_by(vore) %>%
+  mutate(n = n() / nrow(mammals))
+# #
+# # # Density plot, weighted
+ggplot(mammals2, aes(x = sleep_total, fill = vore)) +
+geom_density(aes(weight = n), col = NA, alpha = 0.35)
+
+#stat_density_2d(aes(col = ..level..), h = c(5, 0.5))
+
+# saveGIF({
+# 
+#   # Loop through all time points
+#   for (i in unique(japan$time)) {
+# 
+#     # Subset japan: data
+# data <- japan$time == i
+# 
+#     # Finish the ggplot command
+#     p <- ggplot(data, aes(x = AGE, y = POP, fill = SEX, width = 1)) +
+#       coord_flip() +
+#       geom_bar(data = data[data$SEX == "Female",], stat = "identity") +
+#       geom_bar(data = data[data$SEX == "Male",], stat = "identity") +
+#       ggtitle(i)
+# 
+#     print(p)
+# 
+#   }
+# 
+# }, movie.name = "pyramid.gif", interval = 0.1)
+
+# p <- ggplot(Vocab, aes(x = education, y = vocabulary,
+#                        color = year, group = year, frame = year, cumulative = TRUE)) +
+#   stat_smooth(method = "lm", se = FALSE, size = 3)
+# 
+# # Call gg_animate on p
+# gg_animate(p, interval = 1.0, filename = "vocab.gif")
+
 ```
 

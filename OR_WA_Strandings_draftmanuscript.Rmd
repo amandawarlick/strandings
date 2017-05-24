@@ -13,14 +13,19 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = 
 ```{r load packages, results = 'hide', message = FALSE}
 
 library(devtools)
-#devtools::install_github("dkahle/ggmap")
-#devtools::install_github("hadley/ggplot2", force = TRUE)
+##devtools::install_github("hadley/ggplot2", force = TRUE)
+# install_github("hadley/ggplot2@v2.2.0")
+# devtools::install_github("dkahle/ggmap")
+
 #devtools::install_github("adletaw/captioner")
 library(tidyr)
 library(ggmap)
+library(maps)
+library(mapdata)
+#library(rgdal) #??
 #library(data.table)
 library(dplyr)
-library(cowplot)
+#library(cowplot)
 library(ggplot2)
 library(stats)
 library(captioner)
@@ -33,6 +38,7 @@ library(stats) #kruskal.test
 library(PMCMR) # posthoc.kruskal.nemenyi.test https://cran.r-project.org/web/packages/PMCMR/vignettes/PMCMR.pdf
 library(strucchange) # chow test https://cran.r-project.org/web/packages/strucchange/strucchange.pdf  
 library(pgirmess) #kruskalmc
+#library(GGally)
 
 case <- function(x)
   paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
@@ -135,34 +141,34 @@ pinnipeds_data$County <- factor(pinnipeds_data$County, levels = c('Whatcom', 'Sa
 #Data objects for inline stats
 species <- pinnipeds_data %>%
   group_by(Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(cnt = n_distinct(National.Database.Number))
 
 species_year_mean <- pinnipeds_data %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   group_by(Pinniped.Common.Name) %>%
-  summarize(mean = round(mean(cnt)))
+  dplyr::summarize(mean = round(mean(cnt)))
 
 species_HI <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(prop = round(cnt/sum(cnt), 2)*100)
 
 age_all <- pinnipeds_data %>%
   group_by(Age.Class) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
   age_all$prop <- round(age_all$cnt/sum(age_all$cnt), 2)*100
 
 data_by_year <- pinnipeds_data %>% 
   group_by(Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(cnt = n_distinct(National.Database.Number))
 
 data_by_year_state_prop <- pinnipeds_data %>%
   filter(!is.na(Water.Body) & Water.Body != 'NA') %>% #fix NAs
   group_by(Water.Body, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Year.of.Observation ~ Water.Body, value.var = 'cnt') %>%
   transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
             prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
@@ -172,7 +178,7 @@ HI_state_prop <- pinnipeds_data %>%
   filter(!is.na(Water.Body) & Water.Body != 'NA') %>% #fix NAs
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Water.Body, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Interaction.Type ~ Water.Body, value.var = 'cnt') %>%
   transform(prop.or = round(OR_Coast/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
             prop.wa_in = round(Inland_WA/(OR_Coast + WA_Coast + Inland_WA), 2)*100,
@@ -180,7 +186,7 @@ HI_state_prop <- pinnipeds_data %>%
 
 year_prop_HI <- pinnipeds_data %>%
   group_by(Findings.of.Human.Interaction, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Year.of.Observation ~ Findings.of.Human.Interaction, value.var = 'cnt') 
 year_prop_HI[is.na(year_prop_HI)] <- 0
 year_prop_HI <- year_prop_HI %>% transform(Prop.HI = round(Y/(Y + N + CBD), 2)*100)
@@ -195,7 +201,7 @@ year_prop_HI <- year_prop_HI %>% transform(Prop.HI = round(Y/(Y + N + CBD), 2)*1
 species_all_final <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Year.of.Observation, Short_name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(Short_name, cnt)) +
   geom_boxplot() +
   scale_y_continuous(labels = comma) +
@@ -207,7 +213,7 @@ species_HI_type_final <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Year.of.Observation, Pinniped.Common.Name, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(Pinniped.Common.Name, cnt, fill = Interaction.Type)) +
   geom_boxplot() +
   xlab("") + ylab("Human Interactions") +
@@ -224,11 +230,11 @@ figs("species_boxplots", caption = "Boxplots of (a) annual stranding cases for e
 all_yr_data <- pinnipeds_data %>% 
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
 
 all_yr_final <- ggplot(data = all_yr_data, aes(x = Year.of.Observation, y = cnt)) + 
   geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
-  geom_smooth(data = all_yr_data %>% group_by(Year.of.Observation) %>% summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), method = "loess", se = FALSE, col = 'black', size = 0.8, linetype = 3) +
+  geom_smooth(data = all_yr_data %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), method = "loess", se = FALSE, col = 'black', size = 0.8, linetype = 3) +
   xlab("") + ylab("Annual Strandings") +
   scale_y_continuous(labels = comma) +
   scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
@@ -242,7 +248,7 @@ all_yr_final <- ggplot(data = all_yr_data, aes(x = Year.of.Observation, y = cnt)
 statelineplotdata <- pinnipeds_data %>%
   filter(!is.na(Water.Body) & Water.Body != 'NA') %>% 
   group_by(Water.Body, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(Water.Body = gsub("_", " ", Water.Body)) 
 
 statelineplot <- 
@@ -266,11 +272,11 @@ figs("all_timeseries", caption = "(a) Increasing total reported strandings acros
 HI_data_sp <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
 
 HI_species_final <- ggplot(data = HI_data_sp, aes(x = Year.of.Observation, y = cnt)) +
   geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) + 
-  geom_smooth(data = HI_data_sp %>% group_by(Year.of.Observation) %>% summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), 
+  geom_smooth(data = HI_data_sp %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), 
               method = 'loess', se = F, col = "black", linetype = 3) +
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) + 
@@ -283,11 +289,11 @@ HI_species_final <- ggplot(data = HI_data_sp, aes(x = Year.of.Observation, y = c
 HI_type_data <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Year.of.Observation, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
 
 HI_type_final <- ggplot(data = HI_type_data, aes(x = Year.of.Observation, y = cnt)) +
   geom_line(aes(group = Interaction.Type, col = Interaction.Type), size = 1) + 
-  geom_smooth(data = HI_type_data %>% group_by(Year.of.Observation) %>% summarize(cnt = sum(cnt)), method = 'loess', se = F, col = "black", linetype = 3) +
+  geom_smooth(data = HI_type_data %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), method = 'loess', se = F, col = "black", linetype = 3) +
   ylab("Human Interaction Cases") + xlab("") + 
   scale_y_continuous(labels = comma) +
   pubfigure_theme(legend.position = c(.35,.9)) + 
@@ -301,13 +307,13 @@ figs("HI_timeseries", caption = "(a) Annual HI cases combined (black loess regre
 #strandings per year for denominators
 numberperyear <- pinnipeds_data %>%
   group_by(Year.of.Observation) %>%
-  summarize(yr.cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(yr.cnt = n_distinct(National.Database.Number))
 
 #HI over time - by species
 allprev_sp <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Findings.of.Human.Interaction, Year.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Year.of.Observation + Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt') 
 allprev_sp[is.na(allprev_sp)] <- 0
 allprev_sp <- allprev_sp %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
@@ -330,7 +336,7 @@ HI_prev_sp_figure <- ggplot(allprev_sp, aes(Year.of.Observation, HI.Prev)) +
 allprev_type <- pinnipeds_data %>%
   filter(Interaction.Type != 'NA') %>%
   group_by(Interaction.Type, Year.of.Observation) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Year.of.Observation ~ Interaction.Type, value.var = 'cnt') 
 allprev_type[is.na(allprev_type)] <- 0
 allprev_type <- allprev_type %>%
@@ -361,13 +367,13 @@ figs("HI_prev_final", caption = "Prevalence of human interaction cases (a) signi
 monthly_HI <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y') %>%
   group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) 
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
 
 #Species
 monthly_HI_sp_final_line <- monthly_HI %>% 
   filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Month.of.Observation, Pinniped.Common.Name) %>%
-  summarize(sum = sum(cnt), se = sd(cnt, na.rm = T)) %>%
+  dplyr::summarize(sum = sum(cnt), se = sd(cnt, na.rm = T)) %>%
   ggplot(aes(x = factor(Month.of.Observation), y = sum, group = Pinniped.Common.Name, col = Pinniped.Common.Name)) +
   geom_line(size = 1) +
   ylab("Human Interactions") + xlab("") + 
@@ -379,7 +385,7 @@ monthly_HI_sp_final_line <- monthly_HI %>%
 #Age
 monthly_HI_age_final_line <- monthly_HI %>% 
   group_by(Month.of.Observation, Age.Class) %>%
-  summarize(sum = sum(cnt), se = sd(cnt, na.rm = T)) %>%
+  dplyr::summarize(sum = sum(cnt), se = sd(cnt, na.rm = T)) %>%
   ggplot(aes(x = factor(Month.of.Observation), y = sum, group = Age.Class, col = Age.Class)) +
   geom_line(size = 1) +
   #geom_errorbar(limits) +
@@ -393,7 +399,7 @@ monthly_HI_age_final_line <- monthly_HI %>%
 monthly_HI_type_final_line <- monthly_HI %>% 
   filter(Interaction.Type != 'NA') %>%
   group_by(Month.of.Observation, Interaction.Type) %>%
-  summarize(sum = sum(cnt)) %>%
+  dplyr::summarize(sum = sum(cnt)) %>%
   ggplot(aes(x = factor(Month.of.Observation), y = sum, group = Interaction.Type, col = Interaction.Type)) +
   geom_line(size = 1) +
   ylab("Human Interactions") + xlab("") + 
@@ -412,7 +418,7 @@ figs("monthly_age_HI_figure_line", caption = "Sum of human interaction cases acr
 all_county_final <- pinnipeds_data %>% 
   filter(County != 'NA' & County != 'Unknown' & Pinniped.Common.Name != 'Unidentified') %>% 
   group_by(County, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = County, y = cnt, fill = Pinniped.Common.Name)) + 
   geom_bar(stat = 'identity', width = 0.6)  + 
   geom_vline(xintercept = 16.5, linetype = "dashed") +
@@ -431,7 +437,7 @@ HI_county_final <- pinnipeds_data %>%
         Findings.of.Human.Interaction == 'Y' & 
         Interaction.Type != 'NA') %>% 
   group_by(County, Interaction.Type) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
   ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
   geom_bar(stat = 'identity', width = 0.6)  + 
   geom_vline(xintercept = 16.5, linetype = "dashed") +
@@ -454,7 +460,7 @@ figs("countyfigure", caption = "(a) Total strandings by species in Washington (l
 ```
 
 
-```{r maps, results = 'hide'}
+```{r map play, results = 'hide'}
 
 #########MAPS#######
 allbox <- c(-129, 41, -117, 50)
@@ -469,10 +475,94 @@ pinnipeds_data_mapping <- pinnipeds_data %>%
             lat_corr = as.numeric(lat_corr)) #%>%
   #filter(Longitude != 'NA')
 
-pinnipeds_data_mapping_sp <- pinnipeds_data_mapping %>% filter(Pinniped.Common.Name != 'Unidentified')
+weight_sp <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+   group_by(Pinniped.Common.Name) %>%
+  dplyr::summarize(weight = n()/nrow(pinnipeds_data)) 
+
+pinnipeds_data_mapping_sp <- pinnipeds_data_mapping %>% filter(Pinniped.Common.Name != 'Unidentified') %>%
+  merge(weight_sp, by = 'Pinniped.Common.Name')
 
 pinnipeds_data_mapping_HI <- pinnipeds_data_mapping %>% 
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
+
+#state outline
+canada <- map_data("world", region = "Canada") %>%
+  filter(lat > 41.6 & lat < 52) %>%
+  filter(long > -131 & long < -112) 
+
+pnw_state_outline <- map_data("state", region = c("oregon", "washington")) %>%
+  bind_rows(canada) 
+
+HI_type_facet_map <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey", color = "black") + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 5, col = 'red') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Interaction.Type) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+species_HI_facet_map <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey80", color = "grey40") + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), 
+             aes(x = long_corr, y = lat_corr), col = 'grey20', size = 0.2, alpha = 0.5)  +
+  geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 3, col = 'black') +  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Pinniped.Common.Name) +
+  theme_classic() +
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 9),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+#county lines
+# counties <- tolower(unique(pinnipeds_data_mapping_sp$County)) 
+# 
+# pnw_outline <- map_data("county", region = c("oregon", "washington")) %>%
+#   filter(subregion %in% counties) %>%
+#   mutate(subregion = ifelse(region == 'washington' & subregion == 'lincoln', 'NA',
+#                             ifelse(region == 'washington' & subregion == 'douglas', 'NA',
+#                                    ifelse(region == 'oregon' & subregion == 'jefferson', 'NA',
+#                                           ifelse(region == 'washington' & subregion == 'columbia', 'NA', subregion))))) %>%
+#   filter(subregion != 'NA')
+
+# pnw_map <- ggplot(pnw_outline) +
+# geom_polygon(aes(x = long, y = lat, group = group), fill = "grey", color = "black") + 
+#   coord_fixed(1.3) + 
+#   geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 5, col = 'grey30') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   #facet_wrap(~ Interaction.Type) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) + 
+#   #theme_nothing() +
+#   theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+#     axis.line = element_blank(),
+#     #axis.ticks = element_blank(),
+#     #axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+#play with qmplot
+# test <- qmplot(long_corr, lat_corr, data = pinnipeds_data_mapping_HI,
+#                geom = "density2d")
+
+
+```
+
+```{r paper maps, results = 'hide'}
 
 #HI type facet map
 HI_type_facet <- ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
@@ -488,7 +578,7 @@ HI_type_facet <- ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain
     #axis.text = element_blank(),
     strip.text = element_text(size = 10),
     strip.background = element_blank(),
-    panel.border = element_rect(colour = "black", fill = NA, size = 5))
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
   
 figs("HI_type_facet", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout inland Washington waters and at the mouth of the Columbia River, and a gunshot wound cluster centered at the mouth of the Columbia River.")
 
@@ -497,8 +587,8 @@ HIstrands_species <-
  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
   geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), 
              aes(x = long_corr, y = lat_corr), col = 'grey35', size = 0.2, alpha = 0.5)  +
-  geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
-  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 2, col = 'grey20') +  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr, weight = weight), bins = 3, col = 'red') +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, weight = weight), bins = 2, col = 'grey20') +  scale_alpha(range = c(0, 0.1), guide = FALSE) +
   xlab("") + ylab("") +
   facet_wrap(~ Pinniped.Common.Name) +
   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.9, 48.95)) +
@@ -508,7 +598,7 @@ HIstrands_species <-
     #axis.text = element_blank(),
     strip.text = element_text(size = 10),
     strip.background = element_blank(),
-    panel.border = element_rect(colour = "black", fill = NA, size = 5))
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
 
 figs("HIstrands_species", caption = "Strandings (grey points) and kernel density hotspot contour lines showing overlapping hotspots for all strandings (black) and human interaction cases (red) for all species, with hotspots occurring throughout inland Washington for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")
 
@@ -533,7 +623,7 @@ Amanda J. Warlick,^1^ Deborah A. Duffield,^2^ Dyanna M. Lambourn^3^, James M. Ri
 
 **Abstract**  
 
-Marine mammal strandings can be used as a proxy to assess pinniped health and the impacts of anthropogenic activities in the local marine environment. Stranding data from Washington and Oregon between 1989-2016 were used to examine regional and temporal patterns in strandings and human interaction cases across age and sex for six species. Over the study period, `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` pinnipeds were reported stranded along the coasts of Washington and Oregon, `r round(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of which were documented as human interaction cases. Gunshot wounds and fisheries entanglements constituted the majority of human interaction cases (`r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% and `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%, respectively), though the prevalence of these cases varied across species. Total strandings and the number and prevalence of reported human interaction cases increased over time in certain regions. The spatial distribution of strandings is highly dependent on species, with a higher proportion of California sea lions (*Zalophus californianus*), Steller sea lions (*Eumetopias jubatus*), and northern elephant seals (*Mirounga angustirostris*) stranding in Oregon whereas the majority of strandings in Washington were harbor seals (*Phoca vitulina*). Though patterns varied across species, seasons, and regions, pups (`r age_all[age_all$Age.Class == "Pup", "prop"]`% of total strandings) and adults (`r age_all[age_all$Age.Class == "Adult", "prop"]`%) stranded in higher numbers than yearlings and subadults. Approximately `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Male",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all cases were identified as male and `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Female",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% female, though the percentage of cases with evidence of human interaction was similar for both sexes. Stranding hotspots were different across species and types of human interactions, likely due to the differential distribution of species and human activities along the coast. Despite the challenges and uncertainties inherent in using stranding data as an indicator of pinniped health and anthropogenic impacts, modeling spatio-temporal patterns will be useful for stranding response practitioners and natural resource managers in evaluating the scope and magnitude of threats to pinniped populations. 
+Marine mammal strandings can be used as a proxy to assess pinniped health and the impacts of anthropogenic activities in the local marine environment. Stranding data from Washington and Oregon between 1989-2016 were used to examine regional and temporal patterns in strandings and human interaction cases across age and sex for six species. Over the study period, `r prettyNum(pinnipeds_data %>% dplyr::summarize(n_distinct(National.Database.Number)), big.mark = ",")` pinnipeds were reported stranded along the coasts of Washington and Oregon, `r round(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of which were documented as human interaction cases. Gunshot wounds and fisheries entanglements constituted the majority of human interaction cases (`r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% and `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%, respectively), though the prevalence of these cases varied across species. Total strandings and the number and prevalence of reported human interaction cases increased over time in certain regions. The spatial distribution of strandings is highly dependent on species, with a higher proportion of California sea lions (*Zalophus californianus*), Steller sea lions (*Eumetopias jubatus*), and northern elephant seals (*Mirounga angustirostris*) stranding in Oregon whereas the majority of strandings in Washington were harbor seals (*Phoca vitulina*). Though patterns varied across species, seasons, and regions, pups (`r age_all[age_all$Age.Class == "Pup", "prop"]`% of total strandings) and adults (`r age_all[age_all$Age.Class == "Adult", "prop"]`%) stranded in higher numbers than yearlings and subadults. Approximately `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Male",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all cases were identified as male and `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Female",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% female, though the percentage of cases with evidence of human interaction was similar for both sexes. Stranding hotspots were different across species and types of human interactions, likely due to the differential distribution of species and human activities along the coast. Despite the challenges and uncertainties inherent in using stranding data as an indicator of pinniped health and anthropogenic impacts, modeling spatio-temporal patterns will be useful for stranding response practitioners and natural resource managers in evaluating the scope and magnitude of threats to pinniped populations. 
 
 **Key Words:** pinnipeds, stranding, human interactions, spatio-temporal hotspots, Pacific Northwest, anthropogenic impacts. 
 
@@ -569,7 +659,7 @@ Guadalupe fur seals (*Arctocephalus townsendi*) were nearly extirpated in the la
 *Data Sources and Characterization*  
 Data for this analysis were drawn from the NOAA National Marine Fisheries Service national stranding database (accessed February 2017) that contains standardized "Level A" information submitted by stranding responders, including a field ID number, observation date, stranding location, latitude and longitude coordinates, age, sex, species, stranding condition (live or dead), and other observational comments including visible evidence of injury, illness, or human interaction. A pinniped is defined as being stranded when it is either dead or still alive on the beach but in need of medical attention or unable to return to the water on its own (Marine Mammal Protection Act of 1972). Animals are also reported by the public when they might be simply resting or molting, and responders frequently monitor these situations (particularly if the animal is located in a populated area) and use their best judgement about whether to document it in the database. Therefore, reported strandings for some species in some areas (particularly for elephant seals and harbor seal pups in inland Washington waters) may over-represent the true number of stranded animals that are sick or injured. We have not excluded these in this analysis because such cases are inconsistently documented across networks and are therefore difficult to systematically extract from such a large sample size. Furthermore, they do represent the true number of cases that require time and resources from response networks. 
 
-The total number of pinnipeds reported stranded in Oregon and Washington from 1989 to 2016 (*n* = `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` records) were characterized according to sex, age class, and species, and then aggregated by month, year, and stranding location (county). Inland Washington waters were distinguished from coastal Washington counties because the stranding response, public accessibility, and species' habitat use in these two sub-regions are very different. For this analysis, we assume stranding location can be used as a relative approximation for where strandings and human interactions actually took place, though carcasses can drift for some time before making landfall, and entangled animals can migrate with entangling debris from a different region.  
+The total number of pinnipeds reported stranded in Oregon and Washington from 1989 to 2016 (*n* = `r prettyNum(pinnipeds_data %>% dplyr::summarize(n_distinct(National.Database.Number)), big.mark = ",")` records) were characterized according to sex, age class, and species, and then aggregated by month, year, and stranding location (county). Inland Washington waters were distinguished from coastal Washington counties because the stranding response, public accessibility, and species' habitat use in these two sub-regions are very different. For this analysis, we assume stranding location can be used as a relative approximation for where strandings and human interactions actually took place, though carcasses can drift for some time before making landfall, and entangled animals can migrate with entangling debris from a different region.  
 
 In addition to examining total stranding cases, the number of human interaction (HI) cases were also examined. Human interaction cases are recorded on the Level A stranding intake form, with "Yes," "No," or "could not be determined (CBD)" designations for whether there is evidence of fisheries entanglements, gunshot wounds, boat collisions, or "other" human interactions. Descriptions of "other" human interactions can include indeterminate blunt trauma, dog bites, debris entanglement, oil staining, and humans harassing or illegally relocating animals. The “CBD” designation includes a variety of possible situations, ranging from an unexamined animal to an animal with suspected but unconfirmed HI. Thus, the number of confirmed HI cases is a conservative estimate. Records for dead or decomposed animals can be missing specification in certain fields, resulting in "Unknown" or "Unidentified" age, sex, or even species designations, and were therefore only included in analyses of total strandings. 
 
@@ -589,7 +679,7 @@ Stranding response network members have grown in their capacity and coverage ove
 
 **Results** 
 
-From 1989-2016, local stranding response networks identified and recorded `r prettyNum(pinnipeds_data %>% summarize(n_distinct(National.Database.Number)), big.mark = ",")` stranded pinnipeds along the coasts and inland waters of Oregon and Washington. Approximately `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "ALIVE",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "ALIVE",]), big.mark = ",")`) were alive and `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "FRESH DEAD",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "FRESH DEAD",]), big.mark = ",")`) were freshly dead at the time of recovery, with the remaining being in various states of decomposition. Evidence of human interaction was noted in `r round(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",]), big.mark = ",")`) of all stranding cases over the study period, including fisheries entanglements (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",]), big.mark = ",")`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% of all human interaction cases), gunshot wounds (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), boat collision injuries (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), and "other" (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%). 
+From 1989-2016, local stranding response networks identified and recorded `r prettyNum(pinnipeds_data %>% dplyr::summarize(n_distinct(National.Database.Number)), big.mark = ",")` stranded pinnipeds along the coasts and inland waters of Oregon and Washington. Approximately `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "ALIVE",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "ALIVE",]), big.mark = ",")`) were alive and `r round(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "FRESH DEAD",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Observation.Status == "FRESH DEAD",]), big.mark = ",")`) were freshly dead at the time of recovery, with the remaining being in various states of decomposition. Evidence of human interaction was noted in `r round(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",]), big.mark = ",")`) of all stranding cases over the study period, including fisheries entanglements (*n* = `r prettyNum(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",]), big.mark = ",")`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Fisheries",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`% of all human interaction cases), gunshot wounds (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Gunshot",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), boat collision injuries (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Boat",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%), and "other" (*n* = `r nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])`, `r round(nrow(pinnipeds_data[pinnipeds_data$Interaction.Type == "Other",])/(nrow(pinnipeds_data[pinnipeds_data$Findings.of.Human.Interaction == "Y",])), 2) * 100`%). 
 
 *Age Class and Sex*  
 All stranding cases - Annual strandings differed significantly by both sex (*χ*^2^ = 119.3, *p* < 0.001) and age class (*χ*^2^ = 232.6, *p* < 0.001), but remained relatively consistent throughout the study period. From 1989-2016, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Male",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% of all stranding cases were male, `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Female",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% female, and `r round(nrow(pinnipeds_data[pinnipeds_data$Sex == "Unid",])/n_distinct(pinnipeds_data$National.Database.Number), 2) * 100`% unidentified (`r tbls("age_sex_composition_table", display = "cite")`). Across all strandings, the majority were pups (`r age_all[age_all$Age.Class == "Pup", "prop"]`%) and adults (`r age_all[age_all$Age.Class == "Adult", "prop"]`%), with significantly fewer yearlings (`r age_all[age_all$Age.Class == "Yearling", "prop"]`%) and subadults (`r age_all[age_all$Age.Class == "Subadult", "prop"]`%), and the remainder unidentified (`r tbls("age_sex_composition_table", display = "cite")`). Pairwise comparisons showed that annual strandings of pups and adults were significantly higher than yearlings and subadults. 
@@ -606,7 +696,7 @@ The proportion of HI cases (*i.e.*, the number of cases with evidence of human i
 *Temporal Patterns*  
 All stranding cases - Since 1989, the number of reported stranding cases increased significantly over time (z = 5.4, *p* < 0.001), with 2003 being identified as a breakpoint in the timeseries using Chow's test (F = 5.6, *p* < 0.01). An annual average of `r data_by_year %>% filter(Year.of.Observation < 2004) %>% dplyr::summarize(round(mean(cnt), 0))` individuals stranded per year throughout the 1990s up to 2003 and `r data_by_year %>% filter(Year.of.Observation > 2003) %>% dplyr::summarize(round(mean(cnt), 0))` per year since then. However, annual strandings are changing differently over the study period for each species; significantly increasing for harbor seals (z = 6.2, *p* < 0.001), California sea lions (z = 7.7, *p* < 0.001), Steller sea lions (z = 8.3, *p* < 0.001), Guadalupe fur seals (z = 2.0, *p* < 0.05), and northern fur seals (z = 2.2, *p* < 0.05) (`r figs("all_timeseries", display = 'cite')`a), and no significant change detected for northern elephant seals. 
 
-Human interaction cases - The overall number of HI cases increased significantly from 1989-2016 (z = 7.8, *p* < 0.001). An annual average of `r year_prop_HI %>% filter(Year.of.Observation < 2000) %>% summarize(round(mean(Y), 0))` cases were documented throughout the 1990s and `r year_prop_HI %>% filter(Year.of.Observation > 1999) %>% summarize(round(mean(Y), 0))` per year since 2000. Specifically, there was an increasing number of gunshot wounds (z = 4.6, *p* < 0.001), fisheries entanglements (z = 8.3, *p* < 0.001), and boat injuries (z = 3.3, *p* < 0.01) over the study period (`r figs("HI_timeseries", display = "cite")`b). The prevalence of HI cases has also increased overall (z = 15.5, *p* < 0.001) and specifically for gunshot wounds (z = 6.4, *p* < 0.001), fisheries entanglements (z = 5.3, *p* < 0.001), and boat injuries (z = 4.2, *p* < 0.001) (`r figs("HI_prev_final", display = "cite")`b). The prevalence of combined HI case types exceeded 20% in 2012, 2013, and 2015.
+Human interaction cases - The overall number of HI cases increased significantly from 1989-2016 (z = 7.8, *p* < 0.001). An annual average of `r year_prop_HI %>% filter(Year.of.Observation < 2000) %>% dplyr::summarize(round(mean(Y), 0))` cases were documented throughout the 1990s and `r year_prop_HI %>% filter(Year.of.Observation > 1999) %>% dplyr::summarize(round(mean(Y), 0))` per year since 2000. Specifically, there was an increasing number of gunshot wounds (z = 4.6, *p* < 0.001), fisheries entanglements (z = 8.3, *p* < 0.001), and boat injuries (z = 3.3, *p* < 0.01) over the study period (`r figs("HI_timeseries", display = "cite")`b). The prevalence of HI cases has also increased overall (z = 15.5, *p* < 0.001) and specifically for gunshot wounds (z = 6.4, *p* < 0.001), fisheries entanglements (z = 5.3, *p* < 0.001), and boat injuries (z = 4.2, *p* < 0.001) (`r figs("HI_prev_final", display = "cite")`b). The prevalence of combined HI case types exceeded 20% in 2012, 2013, and 2015.
 
 Examining whether human interaction cases are changing over time is most meaningful at the species level. Similar to overall strandings, the number of documented HI cases increased for harbor seals (z = 8.7, *p* < 0.001), California sea lions (z = 6.3, *p* < 0.001), Steller sea lions (z = 5.3, *p* < 0.001), and Guadalupe fur seals (z = 2.1, *p* < 0.05) (`r figs("HI_timeseries", display = 'cite')`a). The prevalence of HI cases increased for harbor seals (z = 11.4, *p* < 0.001), California sea lions (z = 3.8, *p* < 0.001), and northern elephant seals (z = 3.5, *p* < 0.001), and decreased for Guadalupe fur seals largely due to the increase in overall strandings of the species (`r figs("HI_prev_final", display = "cite")`a). In terms of specific HI types, the prevalence of gunshot wound cases increased significantly for California sea lions (z = 2.8, *p* < 0.05), fisheries entanglement cases decreased for California sea lions (z = -2.1, *p* < 0.05) and increased for harbor seals (z = 5.4, *p* < 0.001), and boat-related injuries increased for harbor seals (z = 3.4, *p* < 0.001). 
  
@@ -963,23 +1053,23 @@ Zenkovich, B. (1998). The northern elephant seal in Oregon: A pupping range exte
 # figs("HI_overlap", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")
 
 #All strandings - species facet
-# allstrands_species <-
-#  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
-#   geom_point(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), color = 'grey40', size = 0.2, alpha = 0.8)  +
-#   geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 3, col = 'grey20') +
-#   # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
-#   # scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
-#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
-#   xlab("") + ylab("") +
-#   facet_wrap(~ Pinniped.Common.Name) +
-#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) +
-#    theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
-#     axis.line = element_blank(),
-#     axis.ticks = element_blank(),
-#     axis.text = element_blank(),
-#     strip.text = element_text(size = 10),
-#     strip.background = element_blank(),
-#     panel.border = element_rect(colour = "black", fill = NA, size = 5))
+allstrands_species <-
+ ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+  geom_point(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), color = 'grey40', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 3, col = 'grey20', h = c(5, 0.5)) +
+  # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+  # scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Pinniped.Common.Name) +
+  scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) +
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 5))
 # 
 # figs("allstrands_species", caption = "All stranding cases (grey points) and kernel density hotspot contour lines showing stranding hotspots for each species, with hotspots occurring in the Salish Sea for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")
 

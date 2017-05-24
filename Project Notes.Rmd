@@ -16,18 +16,16 @@ Helpful readme on regression methods: http://www.statmethods.net/stats/regressio
 - How will the models deal with certain oceanographic variables not being available for the whole time series?
 
 ##To Dos
-- Deal with prev figures - explain gfs decline
+- Learn about rgdal package
 - Jenn wants arrow on maps for North
 - Y/N stranding network member rates
 - read multivariate/backwards
-- ENSO cat lag
 - stats table update?
 - explore satScan
 - Spearman and Kendall rank test; Vuong test
 - Maps: kernel density: overall vs. LN/EN; satscan: overall as background, LN/EN
 - Get inland buoy data?
 - Derive lags: 6, mixed, fixed
-- Split 2004 break
 - Menza et al 2016 for local harbor seal abundance?
 - Consider CAR package? https://cran.r-project.org/web/packages/car/index.html 
 

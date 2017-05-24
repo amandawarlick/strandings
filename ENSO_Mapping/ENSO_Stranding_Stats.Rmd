@@ -143,21 +143,24 @@ chow
 1-pf(chow, K, (nrow(annual_anom_comb) - 2*K))
 
 ## Plot the results
-plot(annual_anom_comb$Year.of.Observation, annual_anom_comb$cnt_all, main="Eruptions of Old Faithful")
-# restricted model
-abline(r.reg, col = "red",lwd = 2, lty = "dashed")
-# unrestricted model 1
-segments(0, ur.reg2$coefficients[1], 2003,
-ur.reg2$coefficients[1]+2003*ur.reg2$coefficients[2], col= 'blue')
-# unrestricted model 2
-segments(2003, ur.reg1$coefficients[1]+2003*ur.reg1$coefficients[2],
-2016, ur.reg1$coefficients[1]+2016*ur.reg1$coefficients[2], col= 'blue')
+ggplot(annual_anom_comb, aes(Year.of.Observation, cnt_all)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = F, col = 'grey50', linetype = 'dashed', size = 0.7) +
+  geom_smooth(aes(group = Period), method = 'lm', se = F, linetype = 'dashed', col = 'red', size = 0.7) + 
+  xlab("") + ylab("Total Strandings")
+
+ggplot(annual_anom_comb, aes(Year.of.Observation, cnt_HI)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = F, col = 'grey50', linetype = 'dashed', size = 0.7) +
+  geom_smooth(aes(group = Period), method = 'lm', se = F, linetype = 'dashed', col = 'red', size = 0.7) + 
+  xlab("") + ylab("HI Cases")
 
 #Strucchange option - comes up with same pvalue as manual calculation, 2003 breakpoint
 sctest(cnt_all ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
 sctest(strand_anom ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
 
-
+sctest(cnt_HI ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
+sctest(strand_anom_HI ~ Year.of.Observation, type = "Chow", point = 15, data = annual_anom_comb)
 ```
 
 ##Research Questions
@@ -182,7 +185,6 @@ fit_step_all <- glm.nb(cnt_all ~
       data = na.omit(monthly_anom_comb))
 step <- stepAIC(fit_step_all, direction = "backward")
 step$anova
-# Final Model:
 
 #regsubsets() - chooses the nbest models for up to 8 predictors
 mod_select <- regsubsets(cnt_all ~ 
@@ -198,12 +200,12 @@ nb <- summary(glm.nb(cnt_all ~ SST_39_anom + SST_44 + CBA_South_lag1 + Wind_39_l
                        Upwelling_39_lag1 + MEI_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, 
                      data = monthly_anom_comb))
 
-qp <- summary(glm(cnt_all ~ SST_39_anom + SST_44 + CBA_South_lag1 + Wind_39_lag1 + Upwelling_39_lag1 + 
-                    MEI_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, 
-                  data = monthly_anom_comb, family = 'quasipoisson'))
+# qp <- summary(glm(cnt_all ~ SST_39_anom + SST_44 + CBA_South_lag1 + Wind_39_lag1 + Upwelling_39_lag1 + 
+#                     MEI_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, 
+#                   data = monthly_anom_comb, family = 'quasipoisson'))
 
 pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.33, which means model is an okay fit?
-pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue is small - not a good fit
+# pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue is small - not a good fit
 
 
 # (b) Strandings for separate species
@@ -222,11 +224,11 @@ nb <- summary(glm.nb(cnt_all ~ SST_39 + SST_39_anom + SST_39_anom_lag3 + SST_44 
                  Wind_39_lag2 + Wind_44 + Wind_44_lag3 + CBA_South + Upwelling_39_lag2 + Period, 
           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
-qp <- summary(glm(cnt_all ~ SST_39 + SST_39_anom + SST_39_anom_lag3 + SST_44 + SST_44_lag1 +
-                 Wind_39_lag2 + Wind_44 + Wind_44_lag3 + CBA_South + Upwelling_39_lag2 + Period, 
-          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
+# qp <- summary(glm(cnt_all ~ SST_39 + SST_39_anom + SST_39_anom_lag3 + SST_44 + SST_44_lag1 +
+#                  Wind_39_lag2 + Wind_44 + Wind_44_lag3 + CBA_South + Upwelling_39_lag2 + Period, 
+#           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
 pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.48, which means model is an okay fit?
-pchisq(deviance(qp), df.residual(qp), lower.tail = F) # not a good fit - overdispersion
+# pchisq(deviance(qp), df.residual(qp), lower.tail = F) # not a good fit - overdispersion
 
 #Harbor seal
 
@@ -236,10 +238,10 @@ mod_select <- regsubsets(cnt_all ~ SST_39 + SST_39_anom + SST_44 + SST_44_anom +
 summary(mod_select)
 
 nb <- summary(glm.nb(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #neg binomial produces lower AIC
-qp <- summary(glm(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
+# qp <- summary(glm(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
 
 pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.79, which means model is an okay fit?
-pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates not a good fit
+# pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates not a good fit
 
 #Steller sea lion
 
@@ -249,9 +251,13 @@ mod_select <- regsubsets(cnt_all ~ MEI + SST_44 + Wind_39 + Upwelling_39 + CBA_N
           MEI_lag3 + Wind_44_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
 summary(mod_select)
 
-summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+#Warning message
+nb <- summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
 
-summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson') 
+qp <- summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson') 
+
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.99
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue = .2
 
 #<-- Help: Overall for these single-species models, it looks like the recommended best-fit models are different from each other, but by how much or whether it is meaningful is unclear to me
 #<-- Help: For all of the above, what to do about colinearity/covariance of oceanographic variables?
@@ -279,6 +285,7 @@ mod_select <- regsubsets(cnt_HI ~ PDO + SST_39 + SST_39_anom + Wind_44 + CBA_Nor
           MEI_lag1 + PDO_lag1 + NPGO_lag1 + Wind_39_lag1 + Upwelling_45_lag2 + CBA_South_lag2 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3, really.big = T)
 summary(mod_select)
 
+#Warning messages; help
 nb <- summary(glm.nb(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
           Upwelling_45_lag2 + CBA_South_lag2,
           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
@@ -286,7 +293,7 @@ nb <- summary(glm.nb(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
 qp <- summary(glm(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
           Upwelling_45_lag2 + CBA_South_lag2, 
           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
-pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.99, which means model is an okay fit?
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.99
 pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue = 0.99, which means model is an okay fit?
 
 #Harbor seal
@@ -318,7 +325,8 @@ pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates
 summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
 
 summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson')
-
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) 
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) 
 
 ```
 
@@ -333,8 +341,12 @@ mod_select <- regsubsets(strand_anom_all ~ NPGO + SST_44_anom + Wind_44 + CBA_So
           NPGO_lag1 + SST_44_lag1 + SST_39_anom_lag1 + SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + SST_39_anom_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
 summary(mod_select)
 
-summary(glm.nb(strand_anom_all + 10 ~ Wind_44 + CBA_South + SST_39_anom_lag1 +
-          SST_44_lag1 + SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb))
+nb <- summary(glm.nb(strand_anom_all + 10 ~ Wind_44 + CBA_South + SST_39_anom_lag1 +
+          SST_44_lag1 + Wind_39_lag2 + Upwelling_39_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb))
+nb1 <- summary(glm.nb(strand_anom_all + 10 ~ SST_44 + CBA_South +
+          Wind_39_lag2 + Upwelling_39_lag2 + Period, data = monthly_anom_comb))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) 
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) 
 
 # (b) Stranding anoms for separate species
 

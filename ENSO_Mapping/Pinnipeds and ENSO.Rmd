@@ -137,6 +137,24 @@ annual_mean <- pinnipeds_ocean %>%
   group_by(Pinniped.Common.Name) %>%
   dplyr::summarize(mean_strand = mean(cnt))
 
+#Annual HI cases
+annual_HI <- pinnipeds_ocean %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt_HI = n_distinct(National.Database.Number))
+
+#Annual mean HI cases
+annual_HI_mean <- pinnipeds_ocean %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Water.Body != 'Inland_WA') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name) %>%
+  dplyr::summarize(mean_HI = mean(cnt))
+
 #Annual stranding anomalies dataframe; separate species
 annual_anom_strands <- pinnipeds_ocean %>%
   #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
@@ -145,7 +163,10 @@ annual_anom_strands <- pinnipeds_ocean %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
   dplyr::summarize(cnt_all = n_distinct(National.Database.Number)) %>%
   merge(annual_mean, by = 'Pinniped.Common.Name') %>%
-  transform(strand_anom = cnt_all - mean_strand)
+  transform(strand_anom = cnt_all - mean_strand) %>%
+  merge(annual_HI, by = c('Pinniped.Common.Name', 'Year.of.Observation')) %>%
+  merge(annual_HI_mean, by = 'Pinniped.Common.Name') %>%
+  transform(strand_anom_HI = cnt_HI - mean_HI)
 
 #Annual anomalies dataframe from above, melted 
 annual_anom_melt <- annual_anom_strands %>%
@@ -159,6 +180,12 @@ annual_anom <- annual_anom_melt %>%
   
 #Stranding anomalies only
 anom_strand_plot <- ggplot(annual_anom_strands, aes(Year.of.Observation, strand_anom, fill = Pinniped.Common.Name)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  xlab("") + ylab("Stranding Anomalies") +
+  plot_theme(legend.position = 'top')
+
+#HI anomalies only
+anom_strand_HI_plot <- ggplot(annual_anom_strands, aes(Year.of.Observation, strand_anom_HI, fill = Pinniped.Common.Name)) +
   geom_bar(stat = 'identity', position = 'dodge') +
   xlab("") + ylab("Stranding Anomalies") +
   plot_theme(legend.position = 'top')
@@ -472,7 +499,7 @@ ENSO_all <- pinnipeds_ocean %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Water.Body != 'Inland_WA') %>%
   group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(cnt = n_distinct(National.Database.Number))
 
 ENSO_all_figure <- 
   ggplot(ENSO_all, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
@@ -496,7 +523,7 @@ ENSO_HI <- pinnipeds_ocean %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   filter(Water.Body != 'Inland_WA') %>%
   group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(cnt = n_distinct(National.Database.Number))
 
 ENSO_HI_figure <- 
   ggplot(ENSO_HI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
@@ -517,7 +544,7 @@ ENSO_FI <- pinnipeds_ocean %>%
   filter(Interaction.Type == 'Gunshot' | Interaction.Type == 'Fisheries') %>%
   filter(Water.Body != 'Inland_WA') %>%
   group_by(ENSO_cat, Month.of.Observation, Pinniped.Common.Name) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  dplyr::summarize(cnt = n_distinct(National.Database.Number))
 
 ENSO_FI_gun_figure <- 
   ggplot(data = ENSO_FI, aes(x = Pinniped.Common.Name, y = cnt, fill = ENSO_cat)) +
