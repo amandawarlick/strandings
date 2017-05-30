@@ -291,6 +291,9 @@ summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, d
 #not sig for harbors, SSL, NFS, NES, GFS
 summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
+#sig for CSL, HS, 
+summary(glm(cbind(Other, NoOther) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
+
 ```
 
 ## Seasonality  
@@ -458,6 +461,7 @@ numberperyearpermonth <- pinnipeds_data %>%
   summarize(mo.cnt = n_distinct(National.Database.Number))
 
 HIprev_type_mo <- pinnipeds_data %>%
+  filter(Water.Body == 'WA_Coast') %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Interaction.Type, Month.of.Observation, Interaction.Type, Year.of.Observation) %>%
@@ -472,8 +476,20 @@ HIprev_type_mo <- HIprev_type_mo %>%
             Other = (Other/mo.cnt)) %>%
   dplyr::select(Month.of.Observation, Year.of.Observation, Boat, Gunshot, Fisheries, Other)
 
+HIprev_type_mo_sub <- pinnipeds_data %>%
+  #filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Month.of.Observation, Water.Body, Year.of.Observation) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  filter(Water.Body == 'OR_Coast' & Interaction.Type == 'Gunshot') %>% group_by(Month.of.Observation) %>% dplyr::summarize(cnt = sum(cnt))
+#   dcast(Month.of.Observation + Year.of.Observation + Water.Body ~ Interaction.Type, value.var = 'cnt')
+HIprev_type_mo_sub[is.na(HIprev_type_mo_sub)] <- 0
+
+ggplot(HIprev_type_mo_sub, aes(y = cnt, x = factor(Month.of.Observation))) +
+         geom_point()
+
 #Very prevalent gunshot wounds in March - fisheries season opening?
-marchgun <- HIprev_type_mo %>% filter(Month.of.Observation != 'MAR') %>%
+marchgun <- HIprev_type_mo %>% filter(Month.of.Observation == 'MAR') %>%
   summarize(mean(Gunshot))
 
 posthoc.kruskal.nemenyi.test(Other ~ Month.of.Observation, HIprev_type_mo, dist = "Chisquare") 
