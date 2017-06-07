@@ -69,7 +69,11 @@ tbls <- captioner(prefix="Table")
 # figs("name",display="num")
 # ## [1] "1"
 
-color1 <- c("#e45f56", "#a3d39c", "#4aaaa5", "#363e7e", "#f6b61c", "#3b98ee", "#999aa7")
+color6 <- c("#e45f56", "#363e7e", "#4aaaa5", "#a3d39c", "#f6b61c", "#3b98ee", "#999aa7")
+color3 <- c("#e45f56", "#363e7e", "#a3d39c")
+color4_HI <- c("#3b98ee", "#a3d39c", "#e45f56", "#f6b61c")
+color4_age <- c("#ff8000", "#363e7e", "#3b98ee", "#a3d39c")
+color2 <- c("#e45f56", "#363e7e")
 
 # Read Me Notes
 # ***Indicates important dataframe
@@ -562,5 +566,86 @@ print(ENSO_FI_gun_figure)
 summary(aov(cnt ~ ENSO_cat, data = ENSO_FI %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
 
+```
+
+```{r maps}
+
+# allbox <- c(-129, 41, -117, 50)
+# ORbox <- c(-125, 41.91, -121.5, 46.28)
+# WAbox <- c(-125.2, 46, -121.7, 49.1)
+# pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
+
+pinnipeds_data_mapping <- pinnipeds_data %>% 
+  transform(Longitude = as.numeric(Longitude),
+            Latitude = as.numeric(Latitude),
+            long_corr = as.numeric(long_corr),
+            lat_corr = as.numeric(lat_corr)) 
+
+#state outline
+canada <- map_data("world", region = "Canada") %>%
+  filter(lat > 41.6 & lat < 52) %>%
+  filter(long > -131 & long < -112) 
+
+pnw_state_outline <- map_data("state", region = c("oregon", "washington")) %>%
+  bind_rows(canada) 
+
+#map template
+map <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping, aes(x = long_corr, y = lat_corr), bins = 4, col = 'red') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Interaction.Type) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+```
+
+```{r}
+
+
+all_yr_data <- pinnipeds_data %>% 
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
+
+testanimate <- ggplot(data = all_yr_data, aes(x = Year.of.Observation, y = cnt, frame = Year.of.Observation, cumulative = T)) + 
+  geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
+  xlab("") + ylab("Annual Strandings") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  pubfigure_simple_theme(
+    axis.title = element_text(size = 10),
+    axis.text.x = element_blank(),
+    legend.position = c(.35,.85)) +
+  scale_color_manual(values = color6, guide = guide_legend(nrow = 2))
+
+
+HI_type_animate <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
+  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr, frame = Month.of.Observation, cumulative = F), bins = 4, col = 'red') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  #facet_wrap(~ Interaction.Type) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+gganimate(testanimate, interval = 1.0, filename = "~/Documents/R/Strandings/ENSO_Mapping/HImonthmap.gif")
+
+#ani.options(convert = shQuote('c:/program files/imagemagick/magick.exe'))
 ```
 

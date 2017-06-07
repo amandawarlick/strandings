@@ -1,11 +1,10 @@
-"County","All Strandings (%)","HI Proportion (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
-"Clackamas",0,1,0,100,0,0
-"Clatsop",16,49,14,72,5,10
-"Columbia",0,1,75,25,0,0
-"Coos",13,8,36,29,0,36
-"Curry",8,2,25,50,0,25
-"Douglas",2,1,25,50,0,25
-"Lane",7,4,59,27,0,14
-"Lincoln",44,27,46,19,7,28
-"Multnomah",0,1,17,83,0,0
-"Tillamook",9,6,44,41,0,15
+"County","All Strandings (n)","All Strandings (%)","HI Cases (n)","HI Prevalence (%)","Fisheries (%)","Gunshot (%)","Boat (%)","Other (%)"
+"Clatsop",878,16.2,258,49,14,72,5,10
+"Columbia",5,0.1,4,0.8,75,25,0,0
+"Coos",725,13.4,42,8,36,29,0,36
+"Curry",415,7.6,12,2.3,25,50,0,25
+"Douglas",111,2,4,0.8,25,50,0,25
+"Lane",385,7.1,22,4.2,59,27,0,14
+"Lincoln",2380,43.9,145,27.5,46,19,7,28
+"Multnomah",15,0.3,6,1.1,17,83,0,0
+"Tillamook",513,9.5,34,6.5,44,41,0,15
