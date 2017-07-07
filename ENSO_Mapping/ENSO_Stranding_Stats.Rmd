@@ -71,9 +71,16 @@ flattenCorrMatrix <- function(cormat, pmat) {
 ```{r ocean cor}
 
 ocean_corr_small <- ocean_corr %>%
-  dplyr::select(-matches("lag"))
+  dplyr::select(-matches("lag")) %>%
+  dplyr::select(-matches("44")) %>%
+  dplyr::select(-matches("45")) %>%
+  rename(Upwelling = Upwelling_39, SST = SST_39, SST_anom = SST_39_anom, Wind = Wind_39) %>%
+  dplyr::select(MEI, PDO, NPGO, SST, SST_anom, Upwelling, Wind, CBA_North, CBA_South)
 
 ocean_corr_0vs1 <- ocean_corr %>%
+  dplyr::select(-matches("44")) %>%
+  dplyr::select(-matches("45")) %>%
+  rename(Upwelling = Upwelling_39, SST = SST_39, SST_anom = SST_39_anom, Wind = Wind_39) %>%
   dplyr::select(-matches("lag2")) %>%
   dplyr::select(-matches("lag3")) 
 
@@ -85,11 +92,16 @@ ocean_corr_0vs3 <- ocean_corr %>%
   dplyr::select(-matches("lag1")) %>%
   dplyr::select(-matches("lag2")) 
 
+ocean_corr_small_buoys <- ocean_corr %>%
+  dplyr::select(-matches("lag")) 
+
 # cor <- cor(ocean_corr_small, use = "pairwise.complete.obs")
 # cor <- cor(ocean_corr_med, use = "pairwise.complete.obs")
 
 cor_test_small <- rcorr(as.matrix(ocean_corr_small))
 flattenCorrMatrix(cor_test_small$r, cor_test_small$P)
+
+cor_test_small_buoys <- rcorr(as.matrix(ocean_corr_small_buoys))
 
 cor_test_0vs1 <- rcorr(as.matrix(ocean_corr_0vs1))
 cor_test_0vs2 <- rcorr(as.matrix(ocean_corr_0vs2))
@@ -101,15 +113,18 @@ cor_test_0vs3 <- rcorr(as.matrix(ocean_corr_0vs3))
 ## --- Upwelling and Wind are inversely correlated
 ## --- PDO and MEI correlated
 ## --- CBA North and South inversely correlated, and correlated to MEI etc. and SST_anoms, but less so with SST, Upwell, and Wind
-corrplot(cor_test_small$r, type = "lower", order = "original", p.mat = cor_test_small$P, 
-         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .2)
-corrplot(cor_test_0vs1$r, type = "lower", order = "original", p.mat = cor_test_0vs1$P, 
+small <- corrplot(cor_test_small$r, type = "lower", order = "original", p.mat = cor_test_small$P, 
+         insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .9, number.cex = .2)
+lag0vs1 <- corrplot(cor_test_0vs1$r, type = "lower", order = "original", p.mat = cor_test_0vs1$P, 
          insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
 #SST and SST_anom_lag2s are correlated
-corrplot(cor_test_0vs2$r, type = "lower", order = "original", p.mat = cor_test_0vs2$P, 
+lag1vs2 <- corrplot(cor_test_0vs2$r, type = "lower", order = "original", p.mat = cor_test_0vs2$P, 
          insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
-corrplot(cor_test_0vs3$r, type = "lower", order = "original", p.mat = cor_test_0vs3$P, 
+lag2vs3 <- corrplot(cor_test_0vs3$r, type = "lower", order = "original", p.mat = cor_test_0vs3$P, 
          insig = "blank", sig.level = 0.01, tl.col = "black", tl.cex = .7, number.cex = .7)
+
+corrplot(cor_test_small_buoys$r, type = "lower", order = "original", p.mat = cor_test_small_buoys$P, 
+         insig = "blank", sig.level = 0.001, tl.col = "black", tl.cex = .9, number.cex = .2)
 
 ```
 
@@ -177,6 +192,8 @@ sctest(strand_anom_HI ~ Year.of.Observation, type = "Chow", point = 15, data = a
 #Model selection using stepAIC() on negative binomial regression
 #na.omit() removes all rows with any missing data, glm.nb(keeps rows but removes the single NA value)
 #keep this - list of all vars
+#keep this - all vars w/o 44 and lags: PDO + MEI + NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South +
+          #CBA_North + Period
 fit_step_all <- glm.nb(cnt_all ~ 
           MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
           MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
@@ -188,11 +205,13 @@ step$anova
 
 #regsubsets() - chooses the nbest models for up to 8 predictors
 mod_select <- regsubsets(cnt_all ~ 
-      SST_39_anom + SST_44 + CBA_South_lag1 + SST_39_lag1 + Wind_39_lag1 + Upwelling_39_lag1 + PDO_lag1 + Wind_39_lag2 + Upwelling_39_lag2 +  SST_39_lag3 + Period, data = monthly_anom_comb, nbest = 5)
+      MEI + NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South +
+          CBA_North + Period, data = monthly_anom_comb, nbest = 5)
 summary(mod_select)
 
 #best model without lag data was: SST_44, SST_39_anom, Upwelling_39, Wind_39
-nb <- summary(glm.nb(cnt_all ~ SST_39_anom + SST_44 + Upwelling_39 + CBA_South + Wind_39, data = monthly_anom_comb))
+nb <- summary(glm.nb(cnt_all ~ MEI + NPGO + SST_39 + Wind_39 + CBA_South +
+          Period, data = monthly_anom_comb))
 qp <- summary(glm(cnt_all ~ SST_39_anom + SST_44 + Upwelling_39 + CBA_South + Wind_39, data = monthly_anom_comb, family = 'quasipoisson'))
 
 #best model with lag data; #PDO and MEI seem interchangeable in the model
@@ -213,6 +232,17 @@ pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.33, which mea
 #California sea lion
 
 #regsubsets, continue with SST44, MEI, SST39anom, Upwelling_39 OR Wind_44, CBA_South
+
+mod_select <- regsubsets(cnt_all ~ PDO + MEI + NPGO + SST_39 + SST_39_anom + Wind_39 + CBA_South + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3)
+summary(mod_select)
+
+#wo lag
+nb <- summary(glm.nb(cnt_all ~ NPGO + SST_39 + SST_39_anom + Period, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) #.85
+
+
+#w lag
 mod_select <- regsubsets(cnt_all ~ PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_44 + CBA_South +
           SST_44_lag1 + SST_39_anom_lag1 +
           SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + SST_39_anom_lag2 + 
@@ -232,6 +262,16 @@ pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.48, which mea
 
 #Harbor seal
 
+#wo lag
+mod_select <- regsubsets(cnt_all ~ PDO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 +
+          CBA_North + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
+summary(mod_select)
+
+nb <- summary(glm.nb(cnt_all ~ SST_39 + SST_39_anom + Upwelling_39 +
+          CBA_North + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'))) 
+pchisq(deviance(nb), df.residual(nb), lower.tail = F)
+
+#w lag
 #regsubsets, continue with Wind_39, Upwelling_39, SST_39, SST_39_anom, PDO, SST_44
 mod_select <- regsubsets(cnt_all ~ SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + CBA_South +
          SST_44_lag1 + SST_44_lag2 + Upwelling_45_lag2 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
@@ -245,6 +285,16 @@ pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.79, which mea
 
 #Steller sea lion
 
+#wo lags
+mod_select <- regsubsets(cnt_all ~ PDO + MEI + NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South +
+          Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+#warning messages
+nb <- summary(glm.nb(cnt_all ~ SST_39 + SST_39_anom + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) #pchisq = 0.99
+# qp <- summary(glm(cnt_all ~ SST_39 + SST_39_anom +
+#           Period, family = 'quasipoisson', data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+  
+#w lag
 #regsubsets, continue with Wind_39, CBA_North, SST_39, SST_39_anom, MEI, SST_44
 mod_select <- regsubsets(cnt_all ~ MEI + SST_44 + Wind_39 + Upwelling_39 + CBA_North +
           MEI_lag1 + SST_44_lag2 + Wind_39_lag2 + CBA_North_lag2 +
@@ -267,12 +317,25 @@ pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue = .2
 1b. HI cases
 ```{r}
 
+#no lags or 44: #keep this - all vars w/o 44 and lags: PDO + MEI + NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South + CBA_North + Period
+
 # (a) HI cases for combined species 
 
+#wo lag
+mod_select <- regsubsets(cnt_HI ~ NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South + CBA_North + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
+summary(mod_select)
+
+nb <- summary(glm.nb(cnt_HI ~ SST_39 + SST_39_anom + Wind_39 + CBA_South + Period, 
+          data = monthly_anom_comb))
+qp <- summary(glm(cnt_HI ~ NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South + CBA_North + Period, 
+          data = monthly_anom_comb, family = 'quasipoisson'))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F)
+
+#w lag
 mod_select <- regsubsets(cnt_HI ~ MEI + SST_39 + Wind_44 + CBA_South + SST_39_lag1 + Wind_39_lag3 + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
 summary(mod_select)
 
-qp <- summary(glm(cnt_HI ~ MEI + SST_39 + Wind_44 + CBA_South + SST_39_lag1 + Wind_39_lag3 + Period, 
+qp <- summary(glm(cnt_HI ~ MEI + SST_39 + CBA_South + SST_39_lag3 + Period, 
           data = monthly_anom_comb, family = 'quasipoisson'))
 pchisq(deviance(qp), df.residual(qp), lower.tail = F) #high pvalue
 
@@ -280,51 +343,80 @@ pchisq(deviance(qp), df.residual(qp), lower.tail = F) #high pvalue
 
 #California sea lion
 
-#regsubsets, continue with SST44, MEI, SST39anom, Upwelling_39 OR Wind_44, CBA_South
+#wo lags
+mod_select <- regsubsets(cnt_HI ~ MEI + SST_39 + Upwelling_39 + Wind_39 + CBA_South + CBA_North + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+
+nb <- summary(glm.nb(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South + Upwelling_45_lag2,
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
+
+qp <- summary(glm(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South + Upwelling_45_lag2, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) 
+
+#w lags
+#regsubsets
 mod_select <- regsubsets(cnt_HI ~ PDO + SST_39 + SST_39_anom + Wind_44 + CBA_North + CBA_South +
           MEI_lag1 + PDO_lag1 + NPGO_lag1 + Wind_39_lag1 + Upwelling_45_lag2 + CBA_South_lag2 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), nbest = 3, really.big = T)
 summary(mod_select)
 
-#Warning messages; help
 nb <- summary(glm.nb(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
-          Upwelling_45_lag2 + CBA_South_lag2,
+          Upwelling_45_lag2,
           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
-qp <- summary(glm(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South +
-          Upwelling_45_lag2 + CBA_South_lag2, 
+qp <- summary(glm(cnt_HI ~ PDO + SST_39 + Wind_44 + CBA_South + Upwelling_45_lag2 + CBA_South_lag2, 
           data = monthly_anom %>% filter(Pinniped.Common.Name == 'California sea lion'), family = 'quasipoisson'))
 pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.99
 pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue = 0.99, which means model is an okay fit?
 
 #Harbor seal
 
-#regsubsets, continue with Wind_39, Upwelling_39, SST_39, SST_39_anom, PDO, SST_44
-# mod_select <- regsubsets(cnt_all ~ 
-#           MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
-#           MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
-#           MEI_lag2 + PDO_lag2 + NPGO_lag2 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + CBA_North_lag2 + CBA_South_lag2 + SST_39_anom_lag2 + SST_44_anom_lag2 +
-#           MEI_lag3 + PDO_lag3 + NPGO_lag3 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
+#wo lags - nothing significant
+# mod_select <- regsubsets(cnt_HI ~ PDO + MEI + NPGO + SST_39 + Upwelling_39 + Wind_39 + CBA_North + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
 # summary(mod_select)
+# 
+# nb <- summary(glm.nb(cnt_HI ~ NPGO + SST_39 + Upwelling_39 + CBA_North, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+# qp <- summary(glm(cnt_HI ~ NPGO + SST_39 + Upwelling_39 + CBA_North, 
+#           data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
 
-nb <- summary(glm.nb(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #neg binomial produces lower AIC
-qp <- summary(glm(cnt_all ~ SST_44 + CBA_South_lag3 + Wind_39 + SST_44_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
+#w lags
+#regsubsets
+mod_select <- regsubsets(cnt_HI ~
+         PDO + SST_44 + Wind_39 + Upwelling_39 + CBA_North + CBA_South +
+          PDO_lag1 + Upwelling_45_lag1 +  
+          SST_44_lag2 + CBA_South_lag2 +
+          SST_39_lag3 + Wind_44_lag3 + Upwelling_45_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal'), nbest = 3, really.big = T)
+summary(mod_select)
 
-pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 0.79, which means model is an okay fit?
-pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.05, indicates not a good fit
+# nb <- summary(glm.nb(cnt_HI ~ PDO + SST_44 + Wind_39 + Upwelling_39 + CBA_North +
+#           SST_44_lag2 + SST_39_anom_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+
+qp <- summary(glm(cnt_HI ~ SST_44 + CBA_North +
+          SST_44_lag2 + Upwelling_45_lag3 + SST_39_anom_lag3, 
+          data = monthly_anom %>% filter(Pinniped.Common.Name == 'Harbor seal')), family = 'quasipoisson')
+
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) # pvalue = 1 - something is clearly wrong here
+pchisq(deviance(qp), df.residual(qp), lower.tail = F) # pvalue < 0.99
 
 #Steller sea lion
 
-#regsubsets, continue with Wind_39, CBA_North, SST_39, SST_39_anom, MEI, SST_44
-# mod_select <- regsubsets(cnt_all ~ 
-#           MEI + PDO + NPGO + SST_39 + SST_39_anom + SST_44 + SST_44_anom + Wind_39 + Wind_44 + Upwelling_39 + Upwelling_45 + CBA_North + CBA_South +
-#           MEI_lag1 + PDO_lag1 + NPGO_lag1 + SST_39_lag1 + SST_44_lag1 + Wind_39_lag1 + Wind_44_lag1 + Upwelling_39_lag1 + Upwelling_45_lag1 + CBA_North_lag1 + CBA_South_lag1 + SST_39_anom_lag1 + SST_44_anom_lag1 +
-#           MEI_lag2 + PDO_lag2 + NPGO_lag2 + SST_39_lag2 + SST_44_lag2 + Wind_39_lag2 + Wind_44_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + CBA_North_lag2 + CBA_South_lag2 + SST_39_anom_lag2 + SST_44_anom_lag2 +
-#           MEI_lag3 + PDO_lag3 + NPGO_lag3 + SST_39_lag3 + SST_44_lag3 + Wind_39_lag3 + Wind_44_lag3 + Upwelling_39_lag3 + Upwelling_45_lag3 + CBA_North_lag3 + CBA_South_lag3 + SST_39_anom_lag3 + SST_44_anom_lag3 + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
-# summary(mod_select)
+#wo lags
+mod_select <- regsubsets(cnt_HI ~ MEI + NPGO + SST_39 + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South + Period, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
 
-summary(glm.nb(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+qp <- summary(glm(cnt_HI ~ NPGO + SST_39_anom + Upwelling_39 + Wind_39 + CBA_South, 
+                  family = 'quasipoisson', data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
 
-summary(glm(cnt_all ~ MEI + Wind_39 + CBA_North + MEI_lag1 + CBA_North_lag2 + MEI_lag3 + Upwelling_45_lag3 + CBA_North_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson')
+#w lags
+#regsubsets
+mod_select <- regsubsets(cnt_HI ~ SST_44 + SST_44_anom + Wind_39 + Upwelling_39 + Upwelling_45 + CBA_South + Wind_44_lag1 + Upwelling_39_lag1 + MEI_lag2 + SST_44_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + SST_39_anom_lag2 + MEI_lag3 + Wind_44_lag3 + Upwelling_45_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion'), nbest = 3, really.big = T)
+summary(mod_select)
+
+# nb <- summary(glm.nb(cnt_HI ~ SST_44 + SST_44_anom + Wind_39 + Upwelling_39 + Upwelling_45 + CBA_South + Wind_44_lag1 + Upwelling_39_lag1 + MEI_lag2 + SST_44_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + Upwelling_45_lag2 + SST_39_anom_lag2 + Wind_44_lag3, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
+
+qp <- summary(glm(cnt_HI ~ Wind_39 + Upwelling_39 + CBA_South + Upwelling_39_lag1 + Wind_39_lag2, data = monthly_anom %>% filter(Pinniped.Common.Name == 'Steller sea lion')), family = 'quasipoisson')
+
 pchisq(deviance(nb), df.residual(nb), lower.tail = F) 
 pchisq(deviance(qp), df.residual(qp), lower.tail = F) 
 
@@ -341,11 +433,13 @@ mod_select <- regsubsets(strand_anom_all ~ NPGO + SST_44_anom + Wind_44 + CBA_So
           NPGO_lag1 + SST_44_lag1 + SST_39_anom_lag1 + SST_39_lag2 + Wind_39_lag2 + Upwelling_39_lag2 + SST_39_anom_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb, nbest = 3, really.big = T)
 summary(mod_select)
 
-nb <- summary(glm.nb(strand_anom_all + 10 ~ Wind_44 + CBA_South + SST_39_anom_lag1 +
+nb <- summary(glm.nb(round(strand_anom_all + 10, 0) ~ Wind_44 + CBA_South + SST_39_anom_lag1 +
           SST_44_lag1 + Wind_39_lag2 + Upwelling_39_lag2 + Wind_39_lag3 + Period, data = monthly_anom_comb))
-nb1 <- summary(glm.nb(strand_anom_all + 10 ~ SST_44 + CBA_South +
+nb <- summary(glm.nb(round(strand_anom_all + 10, 0) ~ SST_44 + CBA_South +
           Wind_39_lag2 + Upwelling_39_lag2 + Period, data = monthly_anom_comb))
-pchisq(deviance(nb), df.residual(nb), lower.tail = F) 
+qp <- summary(glm(strand_anom_all + 10 ~ SST_44 + CBA_South +
+          Wind_39_lag2 + Upwelling_39_lag2 + Period, family = 'quasipoisson', data = monthly_anom_comb))
+pchisq(deviance(nb), df.residual(nb), lower.tail = F) #p = 0.28
 pchisq(deviance(qp), df.residual(qp), lower.tail = F) 
 
 # (b) Stranding anoms for separate species

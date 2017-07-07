@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = F, warning = FALSE, message = FALSE, results = 'hid
 # install.packages("data.table")
 #install.packages("devtools")
 library(devtools)
+#devtools::install_github("dgrtwo/gganimate")
 #devtools::install_github("hadley/ggplot2")
 #devtools::install_github("adletaw/captioner")
 library(tidyr)
@@ -34,6 +35,7 @@ library(stats) #kruskal.test
 library(PMCMR) # posthoc.kruskal.nemenyi.test https://cran.r-project.org/web/packages/PMCMR/vignettes/PMCMR.pdf
 library(strucchange) # chow test https://cran.r-project.org/web/packages/strucchange/strucchange.pdf  
 library(pgirmess) 
+library(gganimate)
 
 setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
@@ -113,7 +115,7 @@ pinnipeds_ocean <- pinnipeds_data %>%
   
 pinnipeds_ocean$Month.of.Observation <- factor(pinnipeds_ocean$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
 
-write.csv(pinnipeds_ocean, "pinnipeds_ocean.csv", row.names = F)
+#write.csv(pinnipeds_ocean, "pinnipeds_ocean.csv", row.names = F)
 
 #setwd("~/Documents/R/Strandings/ENSO_Mapping")
 
@@ -299,11 +301,12 @@ monthly_anom_comb_melt <- monthly_anom_comb %>%
 #Anomalies plot, combined species, strandings only
 strand_comb_plot <- ggplot(monthly_anom_comb, aes(Date, strand_anom_all)) + 
   geom_line() +
-  geom_line(aes(Date, strand_anom_HI), col = 'red') + 
-  geom_line(aes(Date, strand_anom_FI), col = 'blue') + 
+  # geom_line(aes(Date, strand_anom_HI), col = 'red') + 
+  # geom_line(aes(Date, strand_anom_FI), col = 'blue') + 
   geom_line(aes(y = 0), col = 'grey60') + 
+  #scale_x_date(limits = as.Date(c(1989, 2016)), date_breaks = "5 years", date_labels = "%Y") +
   xlab("") + ylab("Monthly Stranding Anomalies") +
-  plot_theme()
+  presfigure_theme()
 
 anom_comb_plot_data <- monthly_anom_comb_melt %>%
   filter(variable == 'strand_anom_all' | variable == 'strand_anom_HI' |
@@ -399,9 +402,11 @@ monthly_anom_melt <- monthly_anom %>%
 #Strandings anomalies plot - separate species
 strand_plot <- ggplot(monthly_anom, aes(Date, strand_anom_all, col = Pinniped.Common.Name)) +
   geom_line() +
+  scale_y_continuous(limits = c(-10, 30)) +
   geom_line(aes(y = 0), col = 'grey60') +
   xlab("") + ylab("Monthly Stranding Anomalies") +
-  plot_theme(legend.position = 'top')
+  presfigure_theme(legend.position = 'top') +
+  scale_color_manual(values = color4_HI)
 
 #Strandings and ocean anomalies plot - separate species
 anom_plot <- ggplot(monthly_anom_melt 
@@ -427,35 +432,49 @@ ocean_plot_data <- ocean %>%
   dplyr::select(-c(Year.of.Observation, Month.of.Observation)) %>%
   melt(id.vars = 'Date')
 
-#MEI, NPGO, PDO only - MEI and PDO covariance
+#MEI, NPGO, PDO and CBA- MEI and PDO covariance
 ocean_plot_small <- ggplot(data = ocean_plot_data %>% 
-                       filter(!grepl("SST", variable) & !grepl("welling", variable) & !grepl("Wind", variable)),
+                       filter(!grepl("welling", variable) & !grepl("Wind", variable)),
                      aes(Date, value, group = variable, col = variable)) +
-  geom_line() +
+  geom_line(data = ocean_plot_data %>%
+              filter(grepl("CBA", variable))) +
+  geom_line(data = ocean_plot_data %>%
+              filter(variable == 'PDO' | variable == 'MEI')) +
+  geom_line(data = ocean_plot_data %>%
+              filter(variable == 'NPGO')) +
   geom_line(aes(y = 0), col = 'grey60') +
-  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
-  plot_theme(legend.position = 'top') +
-  scale_color_manual(values = color1)
+  xlab("") + ylab("Monthly Anomalies") +
+  scale_y_continuous(limits = c(-3, 3)) +
+  pubfigure_simple_theme(legend.position = 'top') +
+  scale_color_manual(values = c("#e45f56", "#363e7e", "#4aaaa5", "#f6b61c", "#a3d39c"))
 
 #SST and wind generally same between buoys
 ocean_plot_big <- ggplot(data = ocean_plot_data %>% 
-                           filter(variable != 'MEI' & variable != 'PDO' & variable != 'NPGO' & !grepl("pwelling", variable) & variable != 'SST_39' & variable != 'SST_44'),
+        filter(variable != 'MEI' & variable != 'PDO' & variable != 'NPGO' & variable != 'SST_39' & variable != 'SST_44' & variable != 'SST_44_anom' & variable != 'Wind_44' & variable != 'Upwelling_45' & !grepl("CBA", variable)),
                      aes(Date, value, group = variable, col = variable)) +
-  geom_line() +
+  geom_line(data = ocean_plot_data %>% filter(variable == 'SST_39_anom')) +
+  geom_line(data = ocean_plot_data %>% filter(variable == 'Wind_39'), aes(Date, value/2, group = variable, col = variable)) +
+  geom_line(data = ocean_plot_data %>% 
+                           filter(variable == 'Upwelling_39'),
+                     aes(Date, value/100, group = variable, col = variable)) +
   geom_line(aes(y = 0), col = 'grey60') +
-  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
-  plot_theme(legend.position = 'top') +
-  scale_color_manual(values = color1)
+  xlab("") + ylab("Monthly Anomalies") +
+  scale_y_continuous(limits = c(-3, 3)) +
+  pubfigure_simple_theme(legend.position = 'top') +
+  scale_color_manual(values = c("#e45f56", "#3b98ee", "#a3d39c"), labels = c("SST", "Upwelling", "Wind"))
 
-#Upwelling buys mirror each other, but 39N is much higher in value, 45N is more negative
+#Upwelling buoys mirror each other, but 39N is much higher in value, 45N is more negative
 ocean_plot_biggest <- ggplot(data = ocean_plot_data %>% 
                            filter(grepl("pwelling", variable)),
-                     aes(Date, value, group = variable, col = variable)) +
+                     aes(Date, value/100, group = variable, col = variable)) +
   geom_line() +
   geom_line(aes(y = 0), col = 'grey60') +
-  xlab("") + ylab("Monthly Oceanographic Index Anomalies") +
-  plot_theme(legend.position = 'top') #+
+  xlab("") + ylab("") +
+  pubfigure_theme(legend.position = 'top') #+
   #scale_color_manual(values = color1)
+
+ocean_combined <- plot_grid(all_yr_final, statelineplot, 
+                      align = 'v', ncol = 1, labels = "auto", vjust = c(1.2, .1), label_size = 10)
 
 ```
 
@@ -570,82 +589,4 @@ summary(aov(cnt ~ ENSO_cat, data = ENSO_FI %>% filter(Pinniped.Common.Name == 'H
 
 ```{r maps}
 
-# allbox <- c(-129, 41, -117, 50)
-# ORbox <- c(-125, 41.91, -121.5, 46.28)
-# WAbox <- c(-125.2, 46, -121.7, 49.1)
-# pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
-
-pinnipeds_data_mapping <- pinnipeds_data %>% 
-  transform(Longitude = as.numeric(Longitude),
-            Latitude = as.numeric(Latitude),
-            long_corr = as.numeric(long_corr),
-            lat_corr = as.numeric(lat_corr)) 
-
-#state outline
-canada <- map_data("world", region = "Canada") %>%
-  filter(lat > 41.6 & lat < 52) %>%
-  filter(long > -131 & long < -112) 
-
-pnw_state_outline <- map_data("state", region = c("oregon", "washington")) %>%
-  bind_rows(canada) 
-
-#map template
-map <- ggplot(pnw_state_outline) +
-geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
-  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
-  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
-  geom_density2d(data = pinnipeds_data_mapping, aes(x = long_corr, y = lat_corr), bins = 4, col = 'red') +
-  scale_alpha(range = c(0, 0.1), guide = FALSE) +
-  xlab("") + ylab("") +
-  facet_wrap(~ Interaction.Type) +
-  #theme_nothing() +
-  theme_classic() +
-  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
-    axis.line = element_blank(),
-    strip.text = element_text(size = 10),
-    strip.background = element_blank(),
-    panel.border = element_rect(colour = "black", fill = NA, size = 1))
-
 ```
-
-```{r}
-
-
-all_yr_data <- pinnipeds_data %>% 
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
-  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
-
-testanimate <- ggplot(data = all_yr_data, aes(x = Year.of.Observation, y = cnt, frame = Year.of.Observation, cumulative = T)) + 
-  geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
-  xlab("") + ylab("Annual Strandings") +
-  scale_y_continuous(labels = comma) +
-  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
-  pubfigure_simple_theme(
-    axis.title = element_text(size = 10),
-    axis.text.x = element_blank(),
-    legend.position = c(.35,.85)) +
-  scale_color_manual(values = color6, guide = guide_legend(nrow = 2))
-
-
-HI_type_animate <- ggplot(pnw_state_outline) +
-geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
-  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
-  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
-  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr, frame = Month.of.Observation, cumulative = F), bins = 4, col = 'red') +
-  scale_alpha(range = c(0, 0.1), guide = FALSE) +
-  xlab("") + ylab("") +
-  #facet_wrap(~ Interaction.Type) +
-  #theme_nothing() +
-  theme_classic() +
-  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
-    axis.line = element_blank(),
-    strip.text = element_text(size = 10),
-    strip.background = element_blank(),
-    panel.border = element_rect(colour = "black", fill = NA, size = 1))
-
-gganimate(testanimate, interval = 1.0, filename = "~/Documents/R/Strandings/ENSO_Mapping/HImonthmap.gif")
-
-#ani.options(convert = shQuote('c:/program files/imagemagick/magick.exe'))
-```
-
