@@ -1,0 +1,951 @@
+---
+title: ''
+output:
+  word_document:
+    reference_docx: mytemplate.docx
+  pdf_document: default
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = 'asis', fig.width = 4, fig.height = 3.5)
+```
+
+```{r load packages, results = 'hide', message = FALSE}
+
+library(devtools)
+##devtools::install_github("hadley/ggplot2", force = TRUE)
+# install_github("hadley/ggplot2@v2.2.0")
+# devtools::install_github("dkahle/ggmap")
+#devtools::install_github("adletaw/captioner")
+library(tidyr)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(lubridate) 
+library(sciplot)
+#library(rgdal) #??
+#library(data.table)
+library(dplyr)
+library(cowplot)
+library(ggplot2)
+library(stats)
+library(captioner)
+library(knitr)
+library(reshape2)
+library(stringr)
+library(magrittr)
+library(sciplot) #se()
+library(scales)
+library(stats) #kruskal.test
+library(PMCMR) # posthoc.kruskal.nemenyi.test https://cran.r-project.org/web/packages/PMCMR/vignettes/PMCMR.pdf
+library(strucchange) # chow test https://cran.r-project.org/web/packages/strucchange/strucchange.pdf  
+library(pgirmess) #kruskalmc
+#library(GGally)
+
+case <- function(x)
+  paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
+
+figs <- captioner(prefix = "Figure")
+tbls <- captioner(prefix = "Table")
+
+presfigure_theme <- function(...) {
+  theme(text = element_text(family = 'Times'),
+    #text = element_text(size = 11),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black", size = 13),
+    axis.text.y = element_text(vjust = 0.5, color = "black", size = 13), 
+    axis.title = element_text(size = 14),
+    axis.line.y = element_line(colour = "black"), 
+    axis.line.x = element_line(colour = "black"), 
+    plot.background = element_rect(), 
+    panel.background = element_blank(), 
+    panel.grid = element_blank(), 
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.text = element_text(size = 12),
+    ...)
+}
+
+color6 <- c("#e45f56", "#363e7e", "#4aaaa5", "#a3d39c", "#f6b61c", "#3b98ee", "#999aa7")
+color3 <- c("#e45f56", "#363e7e", "#a3d39c")
+color4_HI <- c("#3b98ee", "#a3d39c", "#e45f56", "#f6b61c")
+color4_age <- c("#ff8000", "#363e7e", "#3b98ee", "#a3d39c")
+color2 <- c("#e45f56", "#363e7e")
+color_maps <- c("grey30", "#3b98ee", "#a3d39c", "#e45f56", "#f6b61c")
+color_seas <- c("#a3d39c", "#e45f56", "#f6b61c", "#6ea3ec")
+
+
+```
+
+```{r load tables, echo = FALSE, results = 'hide'}
+# setwd("./Figures")
+# 
+# #Creating tables for inline references
+# 
+# #Sex and age disposition proportion table
+# age_sex_composition_table <- read.csv("age_sex_composition_table.csv", check.names = FALSE)
+# tbls("age_sex_composition_table", caption = "Age and sex composition of all strandings (*n* = 14,939), regional strandings, number of human interaction (HI) cases (*n* = 1,628), the prevalence of HI (HI cases/all strandings) and the composition of HI cases (HI type/total HI).")
+# 
+# #Age and sex per species
+# species_age_sex_composition_table <- read.csv("species_age_sex_composition.csv", check.names = F)
+# tbls("species_age_sex_composition_table", caption = "Age and sex composition and weighted averages of all strandings (*n* = 14,939) by species shows higher proportion of males and adults for California and Steller sea lions and a higher proportion of pups for harbor seals.")
+# 
+# #HI proportion of species
+# species_HI_prop_table <- read.csv("species_HI_prop_table.csv", check.names = F)
+# tbls("species_HI_prop_table", caption = "Species composition of all strandings (*n* = 14,939), regional strandings, number of human interaction (HI) cases (*n* = 1,628), the prevalence of HI (HI cases/all strandings) and the composition of HI cases (HI type/total HI).")
+# 
+# #Washington counties
+# WAcounties_table <- read.csv("WAcounties_table.csv", check.names = FALSE)
+# tbls("WAcounties_table", caption = "The number and proportion of all strandings and human interaction (HI) cases and the composition of HI cases for each county in Washington (*n* = 9,413).")
+# 
+# #Oregon counties
+# ORcounties_table <- read.csv("ORcounties_table.csv", check.names = FALSE)
+# tbls("ORcounties_table", caption = "The number and proportion of all strandings and human interaction (HI) cases and the composition of HI cases for each county in Oregon (*n* = 5,435).")
+# 
+# #Combined with other tables, now just for inline stats
+# age_sex_table <- read.csv("age_sex_table.csv", check.names = F)
+# age_sex_table$Age.Class <- as.character(age_sex_table$Age.Class)
+# age_sex_table[6, 1] <- "Average"
+# colnames(age_sex_table) <- c("Age Class", "Total (N)", "Female (N)", "Female (%)", "Male (N)", "Male (%)", "Unid. (N)", "Unid. (%)")
+# 
+# setwd("..") 
+```
+
+```{r load pre-cleaned csv, echo = FALSE}
+
+setwd("~/Documents/R/Strandings/ENSO")
+
+pinnipeds_ocean <- read.csv("pinnipeds_ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2005, 'Pre_Prescott', 'Post_Prescott')) 
+pinnipeds_ocean$Season = factor(pinnipeds_ocean$Season, levels = c("Spring", "Summer", "Fall", "Winter"))
+
+setwd("..") 
+
+pinnipeds_data <- read.csv("pinnipeds_data_protected.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+
+pinnipeds_data$Age.Class <- gsub("NA", "Unid", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- gsub("UNKNOWN", "Unid", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- gsub("PUP/CALF", "PUP", pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- case(pinnipeds_data$Age.Class)
+pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
+    levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+ 
+pinnipeds_data$Sex <- gsub("NA", "Unid", pinnipeds_data$Sex)
+pinnipeds_data$Sex <- gsub("UNKNOWN", "Unid", pinnipeds_data$Sex)
+pinnipeds_data$Sex <- case(pinnipeds_data$Sex)
+
+pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+
+pinnipeds_data$County <- factor(pinnipeds_data$County, levels = c('Whatcom', 'San Juan', 'Island', 'Skagit', 'Snohomish', 'King', 'Kitsap', 'Pierce', 'Thurston', 'Mason', 'Clallam', 'Jefferson', 'Grays Harbor', 'Pacific', 'Cowlitz', 'Clark', 'Clatsop', 'Columbia', 'Multnomah', 'Tillamook', 'Lincoln', 'Lane', 'Douglas', 'Coos', 'Curry'))
+
+
+```
+
+```{r all figures, echo = FALSE, results = 'hide'}
+
+#Figures
+
+#Species boxplots
+# species_all_final <- pinnipeds_data %>%
+#   filter(Pinniped.Common.Name != 'Unidentified') %>%
+#   group_by(Year.of.Observation, Short_name) %>%
+#   dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   ggplot(aes(Short_name, cnt)) +
+#   geom_boxplot() +
+#   scale_y_continuous(labels = comma) +
+#   xlab("") + ylab("Annual Strandings") +
+#   pubfigure_simple_theme(axis.text.x = element_blank(),
+#                   axis.title.y = element_text(size = 10))
+  
+species_HI_type_final <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name, Interaction.Type) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  ggplot(aes(Pinniped.Common.Name, cnt, fill = Interaction.Type)) +
+  geom_boxplot() +
+  xlab("") + ylab("Annual Human Interactions") +
+  scale_y_continuous(labels = comma) +
+  presfigure_theme(legend.position = c(.25, .9)) +
+  scale_fill_manual(values = color4_HI, guide = guide_legend(nrow = 1))
+
+################
+
+#annual time series by species
+all_yr_data <- pinnipeds_data %>% 
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
+
+all_yr_final <- ggplot(data = all_yr_data, aes(x = Year.of.Observation, y = cnt)) + 
+  geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
+  # geom_smooth(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1, method = 'loess', se = F, linetype = 3) +
+  geom_smooth(data = all_yr_data %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), method = "loess", se = FALSE, col = 'black', size = 0.8, linetype = 3) +
+  xlab("") + ylab("Annual Strandings") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  presfigure_theme(
+    legend.position = c(.35,.95)) +
+  scale_color_manual(values = color6, guide = guide_legend(nrow = 2))
+
+#Annual timeseries by region
+statelineplotdata <- pinnipeds_data %>%
+  filter(!is.na(Water.Body) & Water.Body != 'NA') %>% 
+  group_by(Water.Body, Year.of.Observation) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  transform(Water.Body = gsub("_", " ", Water.Body)) 
+
+statelineplot <- 
+  ggplot(data = statelineplotdata, aes(x = Year.of.Observation, y = cnt)) +
+  geom_line(data = statelineplotdata, aes(x = Year.of.Observation, y = cnt, group = Water.Body, col = Water.Body), size = 1) +
+  geom_smooth(data = data_by_year,
+              aes(x = Year.of.Observation, y = cnt), method = "loess", se = FALSE, col = 'black', size = 0.8, linetype = 3) +
+  #geom_smooth(method = 'loess', se = T, size = 0) +
+  xlab("") + ylab("Annual Strandings") +
+  presfigure_theme(legend.position = c(0.33, 0.97)) +
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  scale_color_manual(values = color3, guide = guide_legend(nrow = 1))
+
+#all and HI by species time series
+
+HI_data_sp <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
+
+HI_species_final <- ggplot(data = HI_data_sp, aes(x = Year.of.Observation, y = cnt)) +
+  geom_line(aes(group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) + 
+  geom_smooth(data = HI_data_sp %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), aes(x = Year.of.Observation, y = cnt), 
+              method = 'loess', se = F, col = "black", linetype = 3) +
+  ylab("Human Interaction Cases") + xlab("") + 
+  scale_y_continuous(labels = comma) + 
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  presfigure_theme(legend.position = c(.3,.95)) +
+  scale_color_manual(values = color6, guide = guide_legend(nrow = 2))
+
+HI_type_data <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Year.of.Observation, Interaction.Type) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
+
+HI_type_final <- ggplot(data = HI_type_data, aes(x = Year.of.Observation, y = cnt)) +
+  geom_line(aes(group = Interaction.Type, col = Interaction.Type), size = 1) + 
+  geom_smooth(data = HI_type_data %>% group_by(Year.of.Observation) %>% dplyr::summarize(cnt = sum(cnt)), method = 'loess', se = F, col = "black", linetype = 3) +
+  ylab("Human Interaction Cases") + xlab("") + 
+  scale_y_continuous(labels = comma) +
+  presfigure_theme(legend.position = c(.35,.95)) + 
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  scale_color_manual(values = color4_HI, guide = guide_legend(nrow = 1))
+
+#######
+#strandings per year for denominators
+numberperyear <- pinnipeds_data %>%
+  group_by(Year.of.Observation) %>%
+  dplyr::summarize(yr.cnt = n_distinct(National.Database.Number))
+
+#HI over time - by species
+allprev_sp <- pinnipeds_data %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Findings.of.Human.Interaction, Year.of.Observation, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation + Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt') 
+allprev_sp[is.na(allprev_sp)] <- 0
+allprev_sp <- allprev_sp %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
+  dplyr::select(Year.of.Observation, Pinniped.Common.Name, HI.Prev) 
+
+HI_prev_sp_figure <- ggplot(allprev_sp, aes(Year.of.Observation, HI.Prev)) +
+  geom_smooth(aes(Year.of.Observation, HI.Prev,
+                group = Pinniped.Common.Name, col = Pinniped.Common.Name),
+              method = 'lm', size = 1, se = F) +
+  # geom_line(aes(Year.of.Observation, HI.Prev, group = Pinniped.Common.Name, col = Pinniped.Common.Name), size = 1) +
+  geom_smooth(method = 'lm', se = F, col = 'black', linetype = 3) +
+  xlab("") + ylab("HI Proportion") +
+  presfigure_theme(legend.position = c(.3,.95)) + 
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  scale_color_manual(values = color6, guide = guide_legend(nrow = 2))
+
+#HI prevalence by HI type
+allprev_type <- pinnipeds_data %>%
+  filter(Interaction.Type != 'NA') %>%
+  group_by(Interaction.Type, Year.of.Observation) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Year.of.Observation ~ Interaction.Type, value.var = 'cnt') 
+allprev_type[is.na(allprev_type)] <- 0
+allprev_type <- allprev_type %>%
+  merge(numberperyear, by = 'Year.of.Observation') %>%
+  transform(Boat = (Boat/yr.cnt), 
+            Fisheries = (Fisheries/yr.cnt),
+            Gunshot = (Gunshot/yr.cnt),
+            Other = (Other/yr.cnt)) %>%
+  dplyr::select(Year.of.Observation, Boat, Gunshot, Fisheries, Other) %>%
+  melt(id.vars = "Year.of.Observation")
+
+HI_type_prev_figure <- 
+  ggplot(allprev_type, aes(Year.of.Observation, value)) +
+  #geom_line(aes(Year.of.Observation, value, group = variable, col = variable), size = 1) + 
+  geom_smooth(method = 'lm', se = F, aes(Year.of.Observation, value, group = variable, col = variable), size = 1) +
+  geom_smooth(method = 'lm', se = F, col = "black", linetype = 3) +
+  xlab("") + ylab("HI Case Type Proportion") +
+  presfigure_theme(legend.position = c(.25, .95)) + 
+  scale_x_continuous(breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) +
+  scale_color_manual(values = color4_HI, guide = guide_legend(nrow = 1))
+
+####################
+
+monthly_HI <- pinnipeds_data %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
+  group_by(Month.of.Observation, Year.of.Observation, Interaction.Type, Sex, Age.Class, Pinniped.Common.Name) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) 
+
+#Species
+monthly_sp_data <- pinnipeds_data %>% 
+  #filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  group_by(Month.of.Observation, Pinniped.Common.Name, Year.of.Observation) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Pinniped.Common.Name, Month.of.Observation) %>%
+  dplyr::summarize(mean = mean(cnt, na.rm = T), se = se(cnt, na.rm = T)) 
+
+monthly_sp_final_line <- ggplot(monthly_sp_data, 
+                aes(x = factor(Month.of.Observation), y = mean, 
+                    col = Pinniped.Common.Name, group = Pinniped.Common.Name, fill = Pinniped.Common.Name)) +
+  geom_line() + geom_point(size = 1) +
+  #geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Pinniped.Common.Name), width = .1) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se), alpha = 0.4, linetype = 'blank') +
+  ylab("Mean Monthly Strandings") + xlab("") + 
+  presfigure_theme(legend.position = c(.25, .9),
+                         legend.key.size = unit(1.3, 'lines')) + 
+  scale_color_manual(values = color6, guide = guide_legend(nrow = 3)) +
+  scale_fill_manual(values = color6, guide = guide_legend(nrow = 3))
+
+#Age
+monthly_age_data <- pinnipeds_data %>% 
+  #filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  filter(Age.Class != 'Unid') %>%
+  group_by(Month.of.Observation, Age.Class, Year.of.Observation) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Age.Class, Month.of.Observation) %>%
+  dplyr::summarize(mean = mean(cnt, na.rm = T), se = se(cnt, na.rm = T)) 
+
+monthly_age_final_line <- ggplot(monthly_age_data, 
+                aes(x = factor(Month.of.Observation), y = mean, 
+                    col = Age.Class, group = Age.Class, fill = Age.Class)) +
+  geom_line() + geom_point(size = 1) +
+  #geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Age.Class), width = .1) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se), alpha = 0.4, linetype = 'blank') +
+  ylab("Mean Monthly Strandings") + xlab("") + 
+  presfigure_theme(legend.position = c(.25, .95),
+                         legend.key.size = unit(1.3, 'lines')) + 
+  scale_color_manual(values = color4_age, guide = guide_legend(nrow = 1)) +
+  scale_fill_manual(values = color4_age, guide = guide_legend(nrow = 1))
+
+#HI type
+monthly_HI_data <- pinnipeds_data %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+  group_by(Month.of.Observation, Interaction.Type, Year.of.Observation) %>%
+  dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+  group_by(Interaction.Type, Month.of.Observation) %>%
+  dplyr::summarize(mean = mean(cnt, na.rm = T), se = se(cnt, na.rm = T)) 
+
+monthly_HI_final_line <- ggplot(monthly_HI_data, 
+                aes(x = factor(Month.of.Observation), y = mean, 
+                    col = Interaction.Type, group = Interaction.Type, fill = Interaction.Type)) +
+  geom_line() + geom_point(size = 1) +
+  #geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Interaction.Type), width = .1) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se), alpha = 0.4, linetype = 'blank') +
+  ylab("Mean Monthly HI Cases") + xlab("") + 
+  presfigure_theme(
+    legend.position = c(.25, .95),
+    legend.key.size = unit(1.3, 'lines')) + 
+  scale_y_continuous(breaks = seq(0, 10, 2)) +
+  scale_color_manual(values = color4_HI, guide = guide_legend(nrow = 1)) +
+  scale_fill_manual(values = color4_HI, guide = guide_legend(nrow = 1))
+
+##############
+
+##all and HI cases by county
+# all_county_final <- pinnipeds_data %>% 
+#   filter(County != 'NA' & County != 'Unknown' & Pinniped.Common.Name != 'Unidentified') %>% 
+#   group_by(County, Pinniped.Common.Name) %>%
+#   dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   ggplot(aes(x = County, y = cnt, fill = Pinniped.Common.Name)) + 
+#   geom_bar(stat = 'identity', width = 0.6)  + 
+#   geom_vline(xintercept = 16.5, linetype = "dashed") +
+#   annotate("text", x = 2, y = 2000, label = "*") +  annotate("text", x = 3, y = 900, label = "*") +
+#   annotate("text", x = 8, y = 1240, label = "*") +  annotate("text", x = 17, y = 850, label = "*") +
+#   annotate("text", x = 21, y = 1800, label = "*") +  
+#   ylab("All Strandings") +
+#   scale_y_continuous(labels = comma) +
+#   presfigure_theme(legend.position = c(.35, .9),
+#                   axis.title.x = element_blank(),
+#             plot.margin = unit(c(.1, .1, .1, .1), "cm")) +
+#   scale_fill_manual(values = color6, guide = guide_legend(nrow = 3))
+# 
+# HI_county_final <- pinnipeds_data %>% 
+#   filter(County != 'NA' & County != 'Unknown' &
+#         Findings.of.Human.Interaction == 'Y' & 
+#         Interaction.Type != 'NA') %>% 
+#   group_by(County, Interaction.Type) %>%
+#   dplyr::summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   ggplot(aes(x = County, y = cnt, fill = Interaction.Type)) + 
+#   geom_bar(stat = 'identity', width = 0.6)  + 
+#   geom_vline(xintercept = 16.5, linetype = "dashed") +
+#   annotate("text", x = 1, y = 110, label = "*") +  annotate("text", x = 8, y = 175, label = "*") +
+#   annotate("text", x = 13, y = 120, label = "*") + annotate("text", x = 14, y = 160, label = "*") +
+#   annotate("text", x = 17, y = 267, label = "*") +  annotate("text", x = 21, y = 155, label = "*") +
+#   #annotate("text", x = c(8, 20), y = -120, label = c("Washington", "Oregon")) +
+#   ylab("Human Interactions") + 
+#   scale_y_continuous(labels = comma) +
+#   presfigure_theme(legend.position = c(.3, .9),
+#                   axis.title.x = element_blank(),
+#                   plot.margin = unit(c(.1, .1, .1, .1), "cm")) + 
+#   scale_fill_manual(values = color4_HI, guide = guide_legend(nrow = 1))
+
+# countyfigure <- plot_grid(all_county_final, HI_county_final,
+#           align = 'v', ncol = 1, rel_heights = c(1, 1.1), label_size = 10, labels = "auto")
+
+
+```
+
+```{r density plots}
+
+monthly_all_dens_date <- pinnipeds_data %>%
+  transform(Month = as.integer(Month.of.Observation)) %>%
+  transform(Date = as.Date(paste(Year.of.Observation, Month, Day.of.Observation, sep = "-"), format = '%Y-%m-%d')) %>%
+  transform(yday = yday(Date))
+
+#Species
+monthly_all_sp_dens <-
+  ggplot(data = monthly_all_dens_date %>% filter(Pinniped.Common.Name != 'Unidentified'), aes(yday, col = Pinniped.Common.Name)) +
+  geom_line(data = monthly_all_dens_date  %>% filter(Pinniped.Common.Name != 'Unidentified' & Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), stat = 'density', aes(yday, col = Pinniped.Common.Name), linetype = 'dashed') +
+  geom_line(data = monthly_all_dens_date %>% filter(Pinniped.Common.Name != 'Unidentified'), stat = 'density') +
+  geom_rug(sides = "b", aes(y = 0), position = 'jitter', alpha = 0.35) +
+  ylab("Relative Frequency Density") + xlab("") +
+  presfigure_theme(legend.position = c(.22, .9)) +
+  scale_color_manual(values = c("grey80", "grey80", "grey80", "#a3d39c", "grey80", "grey80"), 
+                     guide = guide_legend(nrow = 3)) +
+  # scale_color_manual(values = c("#e45f56", "#363e7e", "#4aaaa5", "#a3d39c", "#f6b61c", "#3b98ee"), 
+  #                    guide = guide_legend(nrow = 3)) +
+  scale_y_continuous(limit = c(0, 0.022)) +
+  scale_x_continuous(limit = c(0, 365), breaks = c(0, 30, 60, 90, 120, 150, 180, 210,
+                                                   240, 270, 300, 330),
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                'Sep', 'Oct', 'Nov', 'Dec'))
+
+#Age all
+monthly_all_age_dens <-
+  ggplot(data = monthly_all_dens_date %>% filter(Age.Class != 'Unid'), aes(yday, col = Age.Class)) +
+  geom_line(data = monthly_all_dens_date  %>% filter(Age.Class != 'Unid' & Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), stat = 'density', aes(yday, col = Age.Class), linetype = 'dashed') +
+  geom_line(data = monthly_all_dens_date %>% filter(Age.Class != 'Unid'), stat = 'density') +
+  geom_rug(sides = "b", aes(y = 0), position = 'jitter', alpha = 0.35) +
+  ylab("Relative Frequency Density") + xlab("") +
+  presfigure_theme(legend.position = c(.23, .93)) +
+  scale_color_manual(values = color4_age, guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(limit = c(0, 0.01)) +
+  scale_x_continuous(limit = c(0, 365), breaks = c(0, 30, 60, 90, 120, 150, 180, 210,
+                                                   240, 270, 300, 330),
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                'Sep', 'Oct', 'Nov', 'Dec'))
+
+#HI type
+monthly_HI_type_dens <-
+  ggplot(monthly_all_dens_date %>% filter(Interaction.Type != 'NA'
+                                           & Findings.of.Human.Interaction == 'Y'), aes(yday, col = Interaction.Type)) +
+  #geom_density(col = NA, alpha = .35) +
+  geom_line(stat = 'density') +
+  #stat_density(geom = "line", position = "identity") +
+  geom_rug(sides = "b", aes(y = 0), position = 'jitter', alpha = 0.35) +
+  ylab("Relative Frequency Density") + xlab("") +
+  presfigure_theme(legend.position = c(.23, .93)) +
+  scale_color_manual(values = color4_HI, guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(limit = c(0, 0.008)) +
+  scale_x_continuous(limit = c(0, 365), breaks = c(0, 30, 60, 90, 120, 150, 180, 210,
+                                                   240, 270, 300, 330),
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                'Sep', 'Oct', 'Nov', 'Dec'))
+
+#All sex
+monthly_all_sex_dens <-
+  ggplot(data = monthly_all_dens_date %>% filter(Sex != 'Unid'), aes(yday, col = Sex)) +
+  geom_line(data = monthly_all_dens_date  %>% filter(Sex != 'Unid' & Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), stat = 'density', aes(yday, col = Sex), linetype = 'dashed') +
+  geom_line(data = monthly_all_dens_date %>% filter(Sex != 'Unid'), stat = 'density') +
+  geom_rug(sides = "b", aes(y = 0), position = 'jitter', alpha = 0.35) +
+  #ylab("Density of Seasonal HI Cases") + xlab("") +
+  ylab("Relative Frequency Density") + xlab("") +
+  presfigure_theme(legend.position = c(.2, .95)) +
+  scale_color_manual(values = color2, guide = guide_legend(nrow = 1)) +
+  scale_y_continuous(limit = c(0, 0.008)) +
+  scale_x_continuous(limit = c(0, 365), breaks = c(0, 30, 60, 90, 120, 150, 180, 210,
+                                                   240, 270, 300, 330),
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                'Sep', 'Oct', 'Nov', 'Dec'))
+
+monthly_all_density <- plot_grid(monthly_all_sp_dens, monthly_all_age_dens, monthly_all_sex_dens, align = 'v', ncol = 1, label_size = 10, labels = "auto")
+
+
+```
+
+```{r map basics}
+
+#ani.options(convert = shQuote('c:/program files/imagemagick/magick.exe'))
+animation::ani.options(ani.width = 900, ani.height = 1000, loop = 5)
+
+allbox <- c(-129, 41, -117, 50)
+ORbox <- c(-125, 41.91, -121.5, 46.28)
+WAbox <- c(-125.2, 46, -121.7, 49.1)
+pugetbox <- c(-123.4, 46.96, -121.7, 48.86)
+
+pinnipeds_data_mapping <- pinnipeds_data %>% 
+  transform(Longitude = as.numeric(Longitude),
+            Latitude = as.numeric(Latitude),
+            long_corr = as.numeric(long_corr),
+            lat_corr = as.numeric(lat_corr)) %>%
+  transform(Season = 
+              factor(ifelse(Month.of.Observation == 'DEC' | Month.of.Observation == 'JAN' |Month.of.Observation == 'FEB', 'Winter', 
+                ifelse(Month.of.Observation == 'MAR' | Month.of.Observation == 'APR' |Month.of.Observation == 'MAY', 'Spring',
+                       ifelse(Month.of.Observation == 'JUN' |Month.of.Observation == 'JUL' |Month.of.Observation == 'AUG', 'Summer', 'Fall'))), levels = c("Spring", "Summer", "Fall", "Winter"))) 
+
+# weight_sp <- pinnipeds_data %>%
+#   filter(Pinniped.Common.Name != 'Unidentified') %>%
+#    group_by(Pinniped.Common.Name) %>%
+#   dplyr::summarize(weight = n()/nrow(pinnipeds_data))
+
+pinnipeds_data_mapping_sp <- pinnipeds_data_mapping %>% filter(Pinniped.Common.Name != 'Unidentified') 
+#%>%
+  #merge(weight_sp, by = 'Pinniped.Common.Name')
+
+pinnipeds_data_mapping_HI <- pinnipeds_data_mapping %>% 
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA')
+
+#state outline
+canada <- map_data("world", region = "Canada") %>%
+  filter(lat > 41.6 & lat < 52) %>%
+  filter(long > -131 & long < -112) 
+
+pnw_state_outline <- map_data("state", region = c("oregon", "washington")) %>%
+  bind_rows(canada) 
+
+```
+
+```{r static maps}
+
+HI_type_facet <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Interaction.Type) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    strip.text = element_text(size = 12),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+HI_type_facet_all <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_grid(Interaction.Type ~ Season) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -20, 0, -20), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 12),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+ggsave(file = 'HI_type_facet_all.jpeg', HI_type_facet_all, device = 'jpeg', height = 8.5, width = 11, units = 'in', dpi = 600)
+
+HI_type_facet_seas <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr, col = Season), bins = 2) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Interaction.Type) +
+  #theme_nothing() +
+  theme_classic() +
+  theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    legend.title = element_blank(), legend.text = element_text(size = 12),
+    strip.text = element_text(size = 12),
+    strip.background = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+  scale_color_manual(values = color_seas)
+
+HIstrands_species <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'),
+  #            aes(x = long_corr, y = lat_corr), col = 'grey40', size = 0.05, alpha = 1)  +
+  # geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr, col = 'HI cases'), bins = 3, size = .5) +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, col = 'All cases'), bins = 3, size = .5) +  
+  #scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Pinniped.Common.Name) +
+  theme_classic() +
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 10),
+    strip.background = element_blank(),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 10),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+  scale_color_manual(values = c("black", "red"))
+
+# ggsave(file = 'HIstrands_species1.jpeg', HIstrands_species, device = 'jpeg', height = 8.5, width = 11, units = 'in', dpi = 600)
+
+strands_species_seas1 <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'),
+  #            aes(x = long_corr, y = lat_corr), col = 'grey40', size = 0.05, alpha = 1)  +
+  # geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr, col = 'HI cases'), bins = 3, size = .5) +
+  geom_density2d(data = pinnipeds_data_mapping_sp %>%
+                   filter(Pinniped.Common.Name %in%
+                            c('Northern fur seal', 'Northern elephant seal', 'Guadalupe fur seal')),
+                            #c('California sea lion', 'Harbor seal', 'Steller sea lion')), 
+aes(x = long_corr, y = lat_corr), col = 'black', bins = 2, size = .5) +  
+  #scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_grid(Pinniped.Common.Name ~ Season) +
+  theme_classic() +
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 9),
+    strip.background = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 10),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) #+
+  #scale_color_manual(values = c("black", "red"))
+
+ggsave(file = 'strands_species_seas1.jpeg', strands_species_seas1, device = 'jpeg', height = 8.5, width = 11, units = 'in', dpi = 1000)
+
+strands_species_seas_HI1 <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  geom_density2d(data = pinnipeds_data_mapping_sp %>%
+                   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+                   filter(Pinniped.Common.Name %in%
+                            c('Northern fur seal', 'Northern elephant seal', 'Guadalupe fur seal')),
+                            #c('California sea lion', 'Harbor seal', 'Steller sea lion')),
+                 aes(x = long_corr, y = lat_corr), col = 'red', bins = 3, size = .5) +
+  # geom_density2d(data = pinnipeds_data_mapping_sp %>%
+  #                  filter(Pinniped.Common.Name %in% 
+  #                           c('Northern fur seal', 'Guadalupe fur seal', 'Northern elephant seal')),
+  #                           #c('California sea lion', 'Harbor seal', 'Steller sea lion')),
+                 # aes(x = long_corr, y = lat_corr), col = 'black', bins = 3, size = .5) +
+  xlab("") + ylab("") +
+  facet_grid(Pinniped.Common.Name ~ Season) +
+  theme_classic() +
+   theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+    axis.line = element_blank(),
+    strip.text = element_text(size = 9),
+    strip.background = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 10),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+ggsave(file = 'strands_species_seas_HI1.jpeg', strands_species_seas_HI1, device = 'jpeg', height = 8.5, width = 11, units = 'in', dpi = 1000)
+
+```
+
+
+```{r species seas gif}
+
+HIstrands_species_an_seas <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+  # geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'),
+  #            aes(x = long_corr, y = lat_corr), col = 'grey40', size = 0.05, alpha = 1)  +
+  geom_density2d(data = pinnipeds_data_mapping_sp %>% 
+                   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), 
+                 aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, col = 'HI cases'), bins = 2) +
+  geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, col = 'All cases'), bins = 2) +  
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~ Pinniped.Common.Name) +
+  theme_classic() +
+   theme(plot.margin = unit(c(10, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    legend.text = element_text(size = 15),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    strip.background = element_blank(),
+    axis.text = element_text(size = 12),
+    legend.position = 'top', legend.title = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+  scale_color_manual(values = c("black", "red"))
+
+gganimate(HIstrands_species_an_seas, interval = 4.0, filename = "~/Documents/R/Strandings/ENSO_Mapping/HIstrands_species_an_seas.gif") 
+```
+
+```{r seasonal HI}
+
+HI_contours_seas <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
+  geom_point(data = pinnipeds_data_mapping, aes(x = long_corr, y = lat_corr, group = Season, frame = Season, cumulative = F), color = 'grey20', size = 0.2, alpha = 0.8)  +
+  
+  geom_density2d(data = pinnipeds_data_mapping_HI %>% filter(Interaction.Type == 'Boat'), aes(x = long_corr, y = lat_corr, group = Season, frame = Season, cumulative = F, col = Interaction.Type), bins = 2) +
+
+  geom_density2d(data = pinnipeds_data_mapping_HI %>% filter(Interaction.Type == 'Fisheries'), aes(x = long_corr, y = lat_corr, group = Season, frame = Season, cumulative = F, col = Interaction.Type), bins = 2) +
+  
+  geom_density2d(data = pinnipeds_data_mapping_HI %>% filter(Interaction.Type == 'Gunshot'), aes(x = long_corr, y = lat_corr, group = Season, frame = Season, cumulative = F, col = Interaction.Type), bins = 2) +
+  geom_density2d(data = pinnipeds_data_mapping, aes(x = long_corr, y = lat_corr, group = Season, frame = Season, cumulative = F, col = 'All Cases'), bins = 2, linetype = 'dashed') +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") + 
+  #ggtitle("Season: ") +
+  #facet_wrap(~ Interaction.Type) +
+  theme_classic() +
+  theme(
+    plot.margin = unit(c(10, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    legend.text = element_text(size = 15),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    strip.background = element_blank(),
+    axis.text = element_text(size = 12),
+    legend.position = 'top', legend.title = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+  scale_color_manual(values = color_maps)
+
+gganimate(HI_contours_seas, interval = 4.0, filename = "~/Documents/R/Strandings/ENSO_Mapping/HI_contours_seas.gif") 
+
+  
+```
+
+```{r annual hotspots}
+
+#All combined species
+
+all_strands_year_an <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
+  geom_point(data = pinnipeds_data_mapping_sp  %>% 
+                 filter(Year.of.Observation < 2016), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F), color = 'grey50', size = 0.2, alpha = 0.8)  +
+geom_density2d(data = pinnipeds_data_mapping_sp %>%
+                 filter(Year.of.Observation < 2016 & Findings.of.Human.Interaction == 'Y' &
+                          Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, col = 'HI Cases'), bins = 2) +
+  geom_density2d(data = pinnipeds_data_mapping_sp  %>% 
+                 filter(Year.of.Observation < 2016), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, col = 'All Cases'), bins = 2) +
+  # stat_density2d(data = pinnipeds_data_mapping  %>%
+  #                filter(Year.of.Observation < 2016), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  theme_classic() +
+  theme(
+    plot.margin = unit(c(10, -10, 0, -10), "mm"),
+    axis.line = element_blank(),
+    legend.text = element_text(size = 17),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    strip.background = element_blank(),
+    axis.text = element_text(size = 11),
+    legend.position = 'top', legend.title = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) + 
+  scale_color_manual(values = c("black", "red")) 
+
+gganimate(all_strands_year_an, interval = 1.5, filename = "~/Documents/R/Strandings/ENSO_Mapping/all_strands_year_an.gif")
+
+#Faceted for three species
+all_strands_year_an_sp <- ggplot(pnw_state_outline) +
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
+  geom_point(data = pinnipeds_data_mapping_sp  %>% 
+               filter(Pinniped.Common.Name %in% c('California sea lion', 'Harbor seal', 'Northern elephant seal')) %>%
+                 filter(Year.of.Observation < 2016), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F), color = 'grey50', size = 0.2, alpha = 0.8)  +
+# geom_density2d(data = pinnipeds_data_mapping_sp %>%
+#                  filter(Year.of.Observation < 2016 & Findings.of.Human.Interaction == 'Y' &
+#                           Interaction.Type != 'NA') %>%
+#                  filter(Pinniped.Common.Name %in% c('California sea lion', 'Harbor seal', 'Northern elephant seal')), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, col = 'HI Cases'), bins = 2) +
+  geom_density2d(data = pinnipeds_data_mapping_sp  %>% 
+                 filter(Year.of.Observation < 2016) %>%
+                   filter(Pinniped.Common.Name %in% c('California sea lion', 'Harbor seal', 'Northern elephant seal')), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F), col = 'black', bins = 2) +
+  # stat_density2d(data = pinnipeds_data_mapping  %>%
+  #                filter(Year.of.Observation < 2016), aes(x = long_corr, y = lat_corr, group = Year.of.Observation, frame = Year.of.Observation, cumulative = F, fill = ..level.., alpha = ..level..), size = 0.01, bins = 100, geom = "polygon") +
+  scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+  xlab("") + ylab("") +
+  facet_wrap(~Pinniped.Common.Name) +
+  theme_classic() +
+  theme(strip.text = element_text(size = 17),
+    plot.margin = unit(c(10, 5, 0, 0), "mm"),
+    axis.line = element_blank(),
+    legend.text = element_text(size = 15),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    strip.background = element_blank(),
+    axis.text = element_text(size = 11),
+    legend.position = 'top', legend.title = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)) 
+
+gganimate(all_strands_year_an_sp, interval = 1.5, filename = "~/Documents/R/Strandings/ENSO_Mapping/all_strands_year_an_sp.gif")
+
+```
+
+```{r unused figures}
+
+#from figure, before switch to ggplot
+
+# #HI type facet map
+# HI_type_facet <- ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+#   geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 5, col = 'grey30') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   facet_wrap(~ Interaction.Type) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) +
+#    theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+#     axis.line = element_blank(),
+#     #axis.ticks = element_blank(),
+#     #axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 1))
+#   
+# figs("HI_type_facet", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout inland Washington waters and at the mouth of the Columbia River, and a gunshot wound cluster centered at the mouth of the Columbia River.")
+# 
+# #HI and strandings - species facet, red and black
+# HIstrands_species <-
+#  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+#   geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), 
+#              aes(x = long_corr, y = lat_corr), col = 'grey35', size = 0.2, alpha = 0.5)  +
+#   geom_density2d(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr, weight = weight), bins = 3, col = 'red') +
+#   geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, weight = weight), bins = 2, col = 'grey20') +  scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   facet_wrap(~ Pinniped.Common.Name) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.9, 48.95)) +
+#    theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+#     axis.line = element_blank(),
+#     #axis.ticks = element_blank(),
+#     #axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 1))
+# 
+# figs("HIstrands_species", caption = "Strandings (grey points) and kernel density hotspot contour lines showing overlapping hotspots for all strandings (black) and human interaction cases (red) for all species, with hotspots occurring throughout inland Washington for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")
+
+
+
+#county lines
+# counties <- tolower(unique(pinnipeds_data_mapping_sp$County)) 
+# 
+# pnw_outline <- map_data("county", region = c("oregon", "washington")) %>%
+#   filter(subregion %in% counties) %>%
+#   mutate(subregion = ifelse(region == 'washington' & subregion == 'lincoln', 'NA',
+#                             ifelse(region == 'washington' & subregion == 'douglas', 'NA',
+#                                    ifelse(region == 'oregon' & subregion == 'jefferson', 'NA',
+#                                           ifelse(region == 'washington' & subregion == 'columbia', 'NA', subregion))))) %>%
+#   filter(subregion != 'NA')
+
+# pnw_map <- ggplot(pnw_outline) +
+# geom_polygon(aes(x = long, y = lat, group = group), fill = "grey", color = "black") + 
+#   coord_fixed(1.3) + 
+#   geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 5, col = 'grey30') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   #facet_wrap(~ Interaction.Type) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) + 
+#   #theme_nothing() +
+#   theme(plot.margin = unit(c(0, -10, 0, -10), "mm"),
+#     axis.line = element_blank(),
+#     #axis.ticks = element_blank(),
+#     #axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 1))
+
+#play with qmplot
+# test <- qmplot(long_corr, lat_corr, data = pinnipeds_data_mapping_HI,
+#                geom = "density2d")
+
+
+#All strandings - species facet
+# allstrands_species <-
+#  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+#   geom_point(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), color = 'grey40', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr), bins = 3, col = 'grey20', h = c(5, 0.5)) +
+#   # stat_density2d(data = pinnipeds_data_mapping_sp, aes(x = long_corr, y = lat_corr, fill = ..level.., alpha = ..level..), size = 0.1, geom = "polygon") +
+#   # scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   facet_wrap(~ Pinniped.Common.Name) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) +
+#    theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+#     axis.line = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 5))
+# 
+# figs("allstrands_species", caption = "All stranding cases (grey points) and kernel density hotspot contour lines showing stranding hotspots for each species, with hotspots occurring in the Salish Sea for harbor seals and along the outer coast near the mouth of the Columbia River for the other species.")
+
+#Checking whether hotspots have changed over time - definitely sort of has
+# HIstrands_yr <-
+#  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+#   # geom_point(data = pinnipeds_data_mapping_sp %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA'), aes(x = long_corr, y = lat_corr), color = 'grey50', size = 0.3, alpha = 0.5)  +
+#   geom_density2d(data = pinnipeds_data_mapping %>% filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>% filter(Year.of.Observation == 1990 |
+#                    Year.of.Observation == 1995 |
+#                    Year.of.Observation == 2000 | 
+#                    Year.of.Observation == 2005 |
+#                    Year.of.Observation == 2010 |
+#                    Year.of.Observation == 2015), aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+#   geom_density2d(data = pinnipeds_data_mapping %>% 
+#                    filter(Year.of.Observation == 1990 |
+#                    Year.of.Observation == 1995 |
+#                    Year.of.Observation == 2000 | 
+#                    Year.of.Observation == 2005 |
+#                    Year.of.Observation == 2010 |
+#                    Year.of.Observation == 2015), aes(x = long_corr, y = lat_corr), bins = 2, col = 'grey20') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   facet_wrap(~ Year.of.Observation) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42, 49.65)) +
+#    theme(plot.margin = unit(c(0, -5, 0, -5), "mm"),
+#     axis.line = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 5))
+
+
+#Option with overlapping HI types
+# HI_overlap <-
+#  ggmap(get_googlemap(center = 'Portland, OR', maptype = "terrain", zoom = 6, size = c(640, 640), style = c(feature = "all", element = "labels", visibility = "off"))) +
+#   geom_point(data = pinnipeds_data_mapping_HI, 
+#              aes(x = long_corr, y = lat_corr), color = 'grey30', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr, col = Interaction.Type), bins = 4, size = .8) +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   #facet_wrap(~ Interaction.Type) +
+#   scale_x_continuous(limits = c(-127, -120)) + scale_y_continuous(limits = c(42.8, 49.05)) +
+#    theme(legend.position = 'top', legend.title = element_blank(),
+#     plot.margin = unit(c(0, -5, 0, -5), "mm"),
+#     axis.line = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.text = element_blank(),
+#     strip.text = element_text(size = 10),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 5)) +
+#   scale_color_manual(values = color1)
+# 
+# figs("HI_overlap", caption = "Strandings (grey points) and kernel density hotspot contour lines showing hotspots of human interaction cases, with fisheries and boat collisions distributed throughout the Salish Sea and at the mouth of the Columbia River, and gunshot wound cluster centered at the mouth of the Columbia River.")
+
+
+```
