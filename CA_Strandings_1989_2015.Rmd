@@ -146,7 +146,9 @@ tbls <- captioner(prefix="Table")
 ```{r load pre-cleaned csv, echo = FALSE}
 
 pinnipeds_data_ca_recent <- read.csv("pinnipeds_data_ca.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  transform(Category = ifelse(grepl("SEAL", Common.Name) | grepl("SEA LION", Common.Name), "PINNIPED", "CETACEAN"))
+  transform(Category = ifelse(grepl("SEAL", Common.Name) | grepl("SEA LION", Common.Name), "PINNIPED", "CETACEAN")) %>%
+  dplyr::select(-matches("Flag")) %>%
+  dplyr::select(-Restrand)
 
 pinnipeds_data_ca$Age.Class <- factor(pinnipeds_data_ca$Age.Class, 
           levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
@@ -155,8 +157,11 @@ pinnipeds_data_ca$Month.of.Observation <- factor(pinnipeds_data_ca$Month.of.Obse
           levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
 
 pinnipeds_data_ca_early <- read.csv("CA_data1982_2005.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  dplyr::rename(Field.Number = Field.ID, National.Database.ID = Regional.ID,
-                Locality.Detail = Location.Details) %>%
+  dplyr::rename(Field.Number = Field.ID, National.Database.ID = Regional.ID, Affiliation = Examiner,
+                Locality.Detail = Location.Details, Observation.Status = Initial.Condition) %>%
+  dplyr::select(-matches("Tag")) %>%
+  dplyr::select(-matches("Disposition")) %>%
+  dplyr::select(-matches("Remarks")) %>%
 
 ```
 
