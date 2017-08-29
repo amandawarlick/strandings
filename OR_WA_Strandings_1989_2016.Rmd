@@ -711,16 +711,29 @@ year_prop_shot <- pinnipeds_data %>%
   dcast(Year.of.Observation ~ Shot, value.var = 'cnt') %>%
   transform(Prop.shot = round(Y/(Y + N), 2))
 
-year_prop_FI_shot <- pinnipeds_data %>%
-  group_by(Shot, Fishery.Interaction, Year.of.Observation) %>%
+sp_prop_FI_shot <- pinnipeds_data %>%
+  filter(Sex != 'Unid') %>%
+  group_by(Shot, Fishery.Interaction, Pinniped.Common.Name, Sex) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(Fishery.Shot = 
               ifelse(Fishery.Interaction == 'Y', "Y", 
                      ifelse(Shot == 'Y', "Y", "N"))) %>%
-  group_by(Fishery.Shot, Year.of.Observation) %>%
+  group_by(Fishery.Shot, Pinniped.Common.Name, Sex) %>%
   summarize(sum = sum(cnt)) %>%
-  dcast(Year.of.Observation ~ Fishery.Shot, value.var = 'sum') %>%
+  dcast(Pinniped.Common.Name + Sex ~ Fishery.Shot, value.var = 'sum') %>%
   transform(Prop.FI.shot = round(Y/(Y + N), 2))
+
+sp_prop_shot <- pinnipeds_data %>%
+  filter(Sex != 'Unid') %>%
+  group_by(Shot, Pinniped.Common.Name, Sex) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  # transform(Fishery.Shot = 
+  #             ifelse(Fishery.Interaction == 'Y', "Y", 
+  #                    ifelse(Shot == 'Y', "Y", "N"))) %>%
+  group_by(Shot, Pinniped.Common.Name, Sex) %>%
+  summarize(sum = sum(cnt)) %>%
+  dcast(Pinniped.Common.Name + Sex ~ Shot, value.var = 'sum') %>%
+  transform(Prop.shot = round(Y/(Y + N), 2))
 
 HI_species_prev <- pinnipeds_data %>%
   filter(Pinniped.Common.Name != 'Unidentified') %>%
@@ -742,6 +755,24 @@ HI_species_prev_figure <-
   xlab("") + ylab("Proportion of HI") +
   pubfigure_theme(legend.position = 'top') + 
   scale_color_grey()
+
+HI_prev_condition <- pinnipeds_data %>%
+  group_by(Findings.of.Human.Interaction, Observation.Status.clean) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(Observation.Status.clean ~ Findings.of.Human.Interaction, value.var = 'cnt')
+HI_prev_condition[is.na(HI_prev_condition)] <- 0
+HI_prev_condition <- HI_prev_condition %>%
+    transform(Prop.HI = round(Y/(Y+N+CBD), 2))
+
+HI_prev_allconds <- pinnipeds_data %>%
+  group_by(Findings.of.Human.Interaction) %>%
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  dcast(. ~ Findings.of.Human.Interaction) %>%
+  transform(prop = Y/(CBD+N))
+HI_prev_allconds[is.na(HI_prev_allconds)] <- 0
+HI_prev_allconds <- HI_prev_allconds %>%
+    transform(Prop.HI = round(Y/(Y+N+CBD), 2))
+
 ```
 
 ```{r monthly all HI FI}
