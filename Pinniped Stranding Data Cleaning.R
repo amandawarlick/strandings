@@ -31,6 +31,11 @@ pnw_1989_2015$Latitude <- gsub(" ", ".", pnw_1989_2015$Latitude)
 
 all_data_pnw <- bind_rows(pnw_1989_2015, pnw_2016)
 
+resting_test <- all_data_pnw %>%
+  filter(Observation.Status == 'ALIVE') %>%
+  group_by(Year.of.Observation, Left.at.Site) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
+
 all_data_pnw$Longitude <- as.numeric(all_data_pnw$Longitude)
 all_data_pnw$Longitude <- all_data_pnw$Longitude * (-1)
 all_data_pnw$Latitude <- as.numeric(all_data_pnw$Latitude)

@@ -146,23 +146,54 @@ tbls <- captioner(prefix="Table")
 ```{r load pre-cleaned csv, echo = FALSE}
 
 pinnipeds_data_ca_recent <- read.csv("pinnipeds_data_ca.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  transform(Category = ifelse(grepl("SEAL", Common.Name) | grepl("SEA LION", Common.Name), "PINNIPED", "CETACEAN")) %>%
   dplyr::select(-matches("Flag")) %>%
-  dplyr::select(-Restrand)
+  dplyr::select(-Restrand) %>%
+  dplyr::select(-matches("Hazardous"))
+
+pinnipeds_data_ca_early <- read.csv("CA_data1982_2005.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
+  mutate(Date.of.Occurrence = mdy(Date.of.Occurance)) %>%
+  dplyr::select(-Date.of.Occurance) %>%
+  transform(Month.of.Observation = toupper(month(Date.of.Occurrence, label = T, abbr = T)),
+            Year.of.Observation = year(Date.of.Occurrence),
+            Day.of.Observation = day(as.Date(Date.of.Occurrence))) %>%
+  transform(Pinniped.Common.Name = case(Common.Name.Earlyyrs)) %>%
+  transform(Sex = ifelse(Sex == 'M', 'Male', ifelse(Sex == 'F', 'Female', 'Unid'))) %>%
+  transform(Age.Class = case(Age.Class)) %>%
+  transform(Age.Class = ifelse(Age.Class == 'Unknown', 'Unid', Age.Class)) %>%
+  transform(Genus = case(Genus)) %>%
+  transform(Species = tolower(Species)) %>%
+  transform(County = case(County)) %>%
+  transform(City = case(City)) %>%
+  dplyr::rename(Observation.Status = Initial.Condition) %>%
+  transform(Evidence.of.Human.Interaction = 
+              ifelse(grepl("FISHERY", Type.of.Occurance) | grepl("GILLNET", Type.of.Occurance) | 
+                       grepl("COLLISION", Type.of.Occurance) | grepl("HUMAN", Type.of.Occurance) |
+                       grepl("MARINE DEBRIS", Type.of.Occurance) | Type.of.Occurance %in% c("ENTRAINMENT", "SHOOTING-RELATED", "GAFFING-RELATED", "CLUBBING-RELATED", "EXPLOSION-RELATED", "HARPOONING-RELATED", "ILLEGAL CAPTURE", "OIL/TAR SPILL-RELATED", "POACHING-RELATED"), 'Y', 'N')) %>%
+  transform(Interaction.Type = ifelse(Evidence.of.Human.Interaction == 'N', 'NA', 
+              ifelse(grepl("FISHERY", Type.of.Occurance) | grepl("GILLNET", Type.of.Occurance), 'Fisheries',
+                  ifelse(Type.of.Occurance == 'BOAT COLLISION', 'Boat', 
+                         ifelse(Type.of.Occurance == 'SHOOTING-RELATED', 'Gunshot', 'Other'))))) %>%
+  dplyr::select(-Common.Name.Earlyyrs) %>%
+  transform(Mammal.Type = 
+        ifelse(Genus %in% c('Phoca', 'Zalophus', 'Mirounga', 'Arctocephalus', 'Callorhinus') | 
+                 grepl('sea lion', Pinniped.Common.Name) | grepl('pinniped', Pinniped.Common.Name) |
+                 grepl('phocid', Pinniped.Common.Name) | grepl('otariid', Pinniped.Common.Name) |
+                 grepl('fur seal', Pinniped.Common.Name), 'Pinniped', 
+               ifelse(grepl("sea turtle", Pinniped.Common.Name) | grepl("shark", Pinniped.Common.Name), 'Other', 'Cetacean'))) 
+
+pinnipeds_data_ca <- bind_rows(pinnipeds_data_ca_early, pinnipeds_data_ca_recent)
+
+
+
+# typecleanup <- pinnipeds_data_ca_early %>%
+#   group_by(Mammal.Type, Pinniped.Common.Name) %>%
+#   summarize(n_distinct(National.Database.Number))
 
 pinnipeds_data_ca$Age.Class <- factor(pinnipeds_data_ca$Age.Class, 
           levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
 
 pinnipeds_data_ca$Month.of.Observation <- factor(pinnipeds_data_ca$Month.of.Observation, 
           levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
-
-pinnipeds_data_ca_early <- read.csv("CA_data1982_2005.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
-  dplyr::rename(Field.Number = Field.ID, National.Database.ID = Regional.ID, Affiliation = Examiner,
-                Locality.Detail = Location.Details, Observation.Status = Initial.Condition) %>%
-  dplyr::select(-matches("Tag")) %>%
-  dplyr::select(-matches("Disposition")) %>%
-  dplyr::select(-matches("Remarks")) %>%
-
 ```
 
 ```{r sex of all strandings, echo = TRUE}

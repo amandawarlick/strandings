@@ -39,10 +39,11 @@ detach("package:MASS")
 # Data Load 
 ###############################################################################
 # Data are pre-cleaned
-pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
+pinnipeds_data <- read.csv("pinnipeds_data_protected.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
   transform(Decade = ifelse(Year.of.Observation < 2000, '1990s', 
                             ifelse(Year.of.Observation < 2010, '2000s', '2010s'))) %>%
-  transform(Period = ifelse(Year.of.Observation < 2005, 'Pre-Prescott', 'Post-Prescott'))
+  transform(Period = ifelse(Year.of.Observation < 2005, 'Pre-Prescott', 'Post-Prescott')) %>%
+  filter(Year.of.Observation > 1990)
 
 # Set Up Factors
 pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
@@ -67,6 +68,11 @@ data_by_year <- pinnipeds_data %>%
   group_by(Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
+sctest_data <- data_by_year %>%
+  arrange(cnt)
+
+sctest(Year.of.Observation ~ cnt, type = "Chow", point = 12, data = sctest_data)
+
 data_by_decade <- pinnipeds_data %>% 
   group_by(Decade) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
@@ -78,6 +84,7 @@ summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = data
 #Negative binomial GLM
 summary(glm.nb(cnt ~ Year.of.Observation, data = data_by_year))
 #slope of line =  exp(0.046800*x) = y = 1.0479^x = 4.8%/year
+#new: exp(0.044076) = y = 1.045062^x = 4.5%/year
 
 #Linear
 # summary(lm(cnt ~ Year.of.Observation, data_by_year)) #y = 25x
@@ -96,31 +103,31 @@ all_sp <- pinnipeds_data %>%
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) # y = 1.1^x
 
 #Negative binomial - use to avoid concerns of overdispersion
-summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) # y = exp(5.575e-02x) = 1.057 = 5.7% per year
+summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) # y = exp(0.04428) = 1.04527 = 4.5% per year
 
 ###CSL
 #Linear
 # summary(lm(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 7.9x
 
 #GLM with Poisson
-summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 1.1^x
+# summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 1.1^x
 
 #Negative binomial
-summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 1.1^x = 2.63 fold per decade
+summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # exp(0.0744) = y = 1.077^x 
 
 ###SSL
 # summary(lm(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = 3.9x
 
-summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = 1.1^x
+# summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = 1.1^x
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = exp(0.13372x) = 1.14^x = 14%
+summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = exp(0.11959x) = 1.127^x = 12%
 
 #GFS
 # summary(lm(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = 1.4x
 
-summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = 1.1^x
+# summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = 1.1^x
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = exp(.15444x) = y = 1.167^x = 1.0 = 100%/decade, p < 0.1
+summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = exp(0.1159x) = y = 1.122^x = 12%
 
 ###NES
 # summary(lm(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Northern elephant seal'))) 
@@ -134,7 +141,7 @@ summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Comm
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = all_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal')))
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal')))
+summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #exp(0.0473) = y = 1.0484
 
 ```
 
@@ -149,11 +156,11 @@ HI_by_year <- pinnipeds_data %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
 # <--- Yes, significant increase of all HI cases, 
-summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_by_year))
+# summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_by_year))
 #regression equation: y = exp(0.1089*x) = 1.11^x
 
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_by_year))
-#regression equation: y = exp(0.09643*x) = 1.10^x = 10% per year
+#regression equation: y = exp(0.07377*x) = 1.10^x = 10% per year
 
 # (b) certain HI types
 HI_type_by_year <- pinnipeds_data %>%
@@ -161,14 +168,14 @@ HI_type_by_year <- pinnipeds_data %>%
   group_by(Year.of.Observation, Interaction.Type) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
-summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot')))
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot')))
+# summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot')))
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot'))) #exp(0.04955) = y = 1.051
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))  #exp(0.06605) = y = 1.068
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Boat')))
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Boat')))
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Boat'))) #exp(0.07688) = 1.0799
 
 # (c) for individual species?  
 HI_sp <- pinnipeds_data %>%
@@ -176,15 +183,15 @@ HI_sp <- pinnipeds_data %>%
   group_by(Year.of.Observation, Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) # y = 1.11^x
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) # y = 1.073^x
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 1.1^x
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'California sea lion'))) # y = 1.075^x
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = 1.095^x
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) # y = 1.096^x
 
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Northern elephant seal'))) # not sig
 
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = .159^x
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) # y = 1.110^x
 
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal')))  #insufficient observations?
 ```
@@ -192,9 +199,12 @@ summary(glm.nb(cnt ~ Year.of.Observation, data = HI_sp %>% filter(Pinniped.Commo
 - Is the *prevalence* of human interaction cases increasing or decreasing over time for certain species? 
 ```{r}
 
-#Changing prevalence over time
+#Changing prevalence over time - by year and by period
 
 # (a) All HI cases, species combined
+
+###YEAR####
+
 HI_yes_no <- pinnipeds_data %>%
   group_by(Year.of.Observation, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
@@ -204,12 +214,22 @@ HI_yes_no <- HI_yes_no %>%
     transform(Yes = Y, No = (N+CBD)) %>%
   dplyr::select(-c(CBD, N, Y)) 
 
+#link = logit default
+summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = logit), data = HI_yes_no)) # y = 0.046x = 0.05 per year untransformed - prop change over time
 
-#Same as above; link = logit default
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = logit), data = HI_yes_no)) # y = 0.063x = 0.06 per year untransformed - prop change over time
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = log), 
+#             data = HI_yes_no)) # y = 1.059^x = 5.9%/year 
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = log), 
-            data = HI_yes_no)) # y = 1.059^x = 5.9%/year 
+
+####PERIOD####
+HI_yes_no_period <- HI_yes_no %>%
+  transform(period = ifelse(Year.of.Observation < 2000, '1991-1999',
+                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2009-2016'))) %>%
+  group_by(period) %>%
+  summarize(Yes = sum(Yes), No = sum(No))
+
+summary(glm(cbind(Yes, No) ~ period, family = binomial(link = logit), data = HI_yes_no_period)) 
+
 
 # (b) All HI cases, separate species
 HI_yes_no_sp <- pinnipeds_data %>%
@@ -222,18 +242,38 @@ HI_yes_no_sp <- HI_yes_no_sp %>%
   transform(Yes = Y, No = (N+CBD)) %>%
   dplyr::select(Pinniped.Common.Name, Year.of.Observation, Yes, No) 
 
-#Repeat for each species
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) 
+HI_yes_no_sp_period <- HI_yes_no_sp %>%
+  transform(period = ifelse(Year.of.Observation < 2000, '1991-1999',
+                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2009-2016'))) %>%
+  group_by(period, Pinniped.Common.Name) %>%
+  summarize(Yes = sum(Yes), No = sum(No)) %>%
+  transform(HI_perc = Yes/(Yes+No))
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'California sea lion')))
+#per year
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) 
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) #not sig
+#per period
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #higher late: p < 0.001, z = 6.6, y = 0.6x
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Northern elephant seal')))
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) #not sig
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'California sea lion'))) #lower in middle, p < 0.001, z = -4.4, y = -0.7x
 
-summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #not sig
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) #significant
+
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Steller sea lion'))) 
+
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Northern elephant seal')))
+
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Northern elephant seal'))) #late is almost high, p<0.1, z = 1.8, y = 0.8x
+
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) #not sig
+
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Guadalupe fur seal'))) #not sig
+
+# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #not sig
+
+summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Northern fur seal'))) #not significant
 
 # (c) Separate HI types, combined species
 numberperyear <- pinnipeds_data %>% 
@@ -254,6 +294,27 @@ HI_type_yes_no <- HI_type_yes_no %>%
             NoOther = yr.cnt - Other) %>%
   dplyr::select(-c(yr.cnt)) 
 
+HI_type_yes_no_per <- HI_type_yes_no %>% 
+  transform(period = ifelse(Year.of.Observation < 2000, '1991-1999', 
+              ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2009-2016'))) %>%
+  group_by(period) %>%
+  summarize(Boat = sum(Boat), NoBoat = sum(NoBoat),
+            Fisheries = sum(Fisheries), NoFish = sum(NoFish),
+            Gunshot = sum(Gunshot), NoGun = sum(NoGun),
+            Other = sum(Other), NoOther = sum(NoOther))
+
+#by period
+
+#significantly higher late: p < 0.05, z = 2.4, y = 0.34x
+summary(glm(cbind(Fisheries, NoFish) ~ period, family = binomial, data = HI_type_yes_no_per))
+#significantly higher in both periods: p < 0.001, z = 3.4, y = 1.7x
+summary(glm(cbind(Boat, NoBoat) ~ period, family = binomial, data = HI_type_yes_no_per))
+#sig high late: p < 0.01, z = 3.1, y = 0.3x
+summary(glm(cbind(Gunshot, NoGun) ~ period, family = binomial, data = HI_type_yes_no_per))
+#sig higher in both: p < 0.001, z = 8.7, y = 1.2x
+summary(glm(cbind(Other, NoOther) ~ period, family = binomial, data = HI_type_yes_no_per))
+
+##yearly
 # <-- Proportion of each interaction type changing over time, boat and other increasing at a faster rate than fisheries and gunshot wounds?
 summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data = HI_type_yes_no)) # y = 0.08687x
 summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HI_type_yes_no)) # y = 0.043703x
@@ -283,16 +344,16 @@ HIcount_type_species <- HIcount_type_species %>%
 
 #(e) Which types of cases might be increasing or decreasing for which species?
 #Not sig or insuff data for CSL, SSL, NFS, NES, GFS
-summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Steller sea lion')))
 
 #not sig for SSL, NFS, NES, GFS
-summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
 #not sig for harbors, SSL, NFS, NES, GFS
-summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
+summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
 #sig for CSL, HS, 
-summary(glm(cbind(Other, NoOther) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
+summary(glm(cbind(Other, NoOther) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
 
 ```
 
@@ -391,6 +452,7 @@ posthoc.kruskal.nemenyi.test(cnt ~ Month.of.Observation, data = monthly_HI_type 
 
 #age class across all strands by month? Help uncertain if I should have year here
 monthly_age <- pinnipeds_data %>%
+  filter(Year.of.Observation > 2001) %>%
   filter(Observation.Status == 'ALIVE' | Observation.Status == 'FRESH DEAD') %>%
   filter(Age.Class != 'Unid') %>%
   group_by(Month.of.Observation, Age.Class, Year.of.Observation) %>%
@@ -716,6 +778,7 @@ kruskalmc(Sex_HI_yr$cnt ~ Sex_HI_yr$Sex)
 
 #(a) all strandings
 age_all <- pinnipeds_data %>%
+  filter(Year.of.Observation > 2001) %>%
   group_by(Age.Class, Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 

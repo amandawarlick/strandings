@@ -170,10 +170,11 @@ tbls <- captioner(prefix="Table")
 
 ```{r load pre-cleaned csv, echo = FALSE}
 
-pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE)
+pinnipeds_data <- read.csv("pinnipeds_data_protected.csv", header = TRUE, na.strings = "", stringsAsFactors = FALSE) %>%
+  filter(Year.of.Observation > 1990)
 
 pinnipeds_data$Age.Class <- factor(pinnipeds_data$Age.Class, 
-          levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid"))
+          levels = c("Pup", "Yearling", "Subadult", "Adult", "Unid", "NA"))
 
 pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, 
           levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
@@ -308,6 +309,8 @@ HI_type_sex_figure <- ggplot(Sex_HI_yr, aes(x = Interaction.Type, y = cnt, fill 
 #Do specific age classes strand more or less frequently than others?
 
 age_all <- pinnipeds_data %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  #filter(Year.of.Observation > 2001) %>%
   group_by(Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(Age.Class = factor(Age.Class))
@@ -318,6 +321,8 @@ age_all <- pinnipeds_data %>%
 # colnames(age_all_table) <- c("Age", "Number", "Proportion (%)")
 
 age_sex_all <- pinnipeds_data %>%
+  #filter(Year.of.Observation > 2001) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
   group_by(Sex, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
@@ -331,6 +336,7 @@ age_sex_all <- pinnipeds_data %>%
 
 age_sex_table <- age_sex_all %>% 
   dcast(Age.Class ~ Sex, value.var = 'cnt') %>% 
+  filter(Age.Class != 'NA') %>%
   transform(Prop.Fem = round(Female/(Female + Male + Unid), 3)*100,
             Prop.Male = round(Male/(Female + Male + Unid), 3)*100,
             Prop.Unid = round(Unid/(Female + Male + Unid), 3)*100) %>%
@@ -1523,7 +1529,7 @@ species_prop <- pinnipeds_data %>%
   group_by(Pinniped.Common.Name) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   transform(all.prop = round(cnt/sum(cnt), 2) *100) %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  #filter(Pinniped.Common.Name != 'Unidentified') %>%
   select(Pinniped.Common.Name, all.prop)
 
 #colnames(species_prop) <- c("Species", "Number", "Percent")
@@ -1547,28 +1553,6 @@ sex_HI_table <- pinnipeds_data %>%
   merge(sex_table, by = 'Sex') %>%
   transform(HI.prop = round((HI.cnt)/(all.cnt), 3)*100)
 
-#region - all
-# sex_region <- pinnipeds_data %>%
-#   filter(Water.Body != 'NA') %>%
-#   group_by(Sex, Water.Body) %>%
-#   summarize(reg.cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Sex ~ Water.Body, value.var = 'reg.cnt') %>%
-#   transform(OR_Coast_p = round(OR_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
-#             WA_Coast_p = round(WA_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
-#             Inland_WA_p = round(Inland_WA/(Inland_WA+OR_Coast+WA_Coast)*100, 1)) %>%
-#   dplyr::select(Sex, OR_Coast_p, WA_Coast_p, Inland_WA_p)
-
-#prevalence
-# sex_HI_prev <- pinnipeds_data %>%
-#   group_by(Sex, Findings.of.Human.Interaction) %>%
-#   summarize(cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Sex ~ Findings.of.Human.Interaction, value.var = 'cnt')
-# sex_HI_prev[is.na(sex_HI_prev)] <- 0
-# sex_HI_prev <- sex_HI_prev %>%
-#     transform(Prev.HI = round(Y/(Y+N+CBD), 3)*100) %>%
-#   dplyr::select(Sex, Prev.HI) %>%
-#   merge(Sex_table, by = 'Sex')
-
 #Adding in HI type and merging all three mini tables
 Sex_HI_type_table <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
@@ -1588,26 +1572,20 @@ colnames(Sex_HI_type_table) <- c("Class", "All Strandings (n)", "All Strandings 
 #Big table for age class
 
 Age_table <- pinnipeds_data %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class) %>%
-  summarize(all.cnt = n_distinct(National.Database.Number))
+  summarize(all.cnt = n_distinct(National.Database.Number)) %>%
+  filter(Age.Class != 'NA')
 
 Age_table$All.prop <- round(Age_table$all.cnt/sum(Age_table$all.cnt), 3)*100
 
-# age_region <- pinnipeds_data %>%
-#   filter(Water.Body != 'NA') %>%
-#   group_by(Age.Class, Water.Body) %>%
-#   summarize(reg.cnt = n_distinct(National.Database.Number)) %>%
-#   dcast(Age.Class ~ Water.Body, value.var = 'reg.cnt') %>%
-#   transform(OR_Coast_p = round(OR_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
-#             WA_Coast_p = round(WA_Coast/(Inland_WA+OR_Coast+WA_Coast)*100, 1),
-#             Inland_WA_p = round(Inland_WA/(Inland_WA+OR_Coast+WA_Coast)*100, 1)) %>%
-#   dplyr::select(Age.Class, OR_Coast_p, WA_Coast_p, Inland_WA_p)
-
 #Prevalence
 age_HI_prev <- pinnipeds_data %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(Age.Class ~ Findings.of.Human.Interaction, value.var = 'cnt')
+  dcast(Age.Class ~ Findings.of.Human.Interaction, value.var = 'cnt') %>%
+  filter(Age.Class != 'NA')
 age_HI_prev[is.na(age_HI_prev)] <- 0
 age_HI_prev <- age_HI_prev %>%
     transform(Prev.HI = round(Y/(Y+N+CBD), 3)*100) %>%
@@ -1639,26 +1617,28 @@ comb_age_sex_comp[8, 1] <- "Unid. Age"
 age_sex_composition_table <- write.csv(comb_age_sex_comp, file = "./Figures/age_sex_composition_table.csv", row.names = FALSE)
 
 #Species and age/sex composition
-species_age_props <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
-  group_by(Pinniped.Common.Name, Age.Class) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  ggplot(., aes(Age.Class, cnt)) +
-  #geom_boxplot() +
-    geom_bar(stat = 'identity') +
-    xlab("") + ylab("Strandings") +
-    facet_wrap(~ Pinniped.Common.Name) +
-    pubfigure_theme()
+# species_age_props <- pinnipeds_data %>%
+#   transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', Age.Class)) %>%
+#   filter(Pinniped.Common.Name != 'Unidentified') %>%
+#   group_by(Pinniped.Common.Name, Age.Class) %>%
+#   summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   filter(Age.Class != 'NA') %>%
+#   ggplot(., aes(Age.Class, cnt)) +
+#   #geom_boxplot() +
+#     geom_bar(stat = 'identity') +
+#     xlab("") + ylab("Strandings") +
+#     facet_wrap(~ Pinniped.Common.Name) +
+#     pubfigure_theme()
 
 species_sex_props <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  #filter(Pinniped.Common.Name != 'Unidentified') %>%
   group_by(Pinniped.Common.Name, Sex) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 
-ggplot(species_sex_props, aes(Pinniped.Common.Name, cnt, fill = Sex)) +
-  geom_bar(stat = 'identity', position = 'fill') +
-  xlab("") + ylab("Strandings") +
-  pubfigure_theme()
+# ggplot(species_sex_props, aes(Pinniped.Common.Name, cnt, fill = Sex)) +
+#   geom_bar(stat = 'identity', position = 'fill') +
+#   xlab("") + ylab("Strandings") +
+#   pubfigure_theme()
 
 formerge <- species_sex_props %>% 
   dcast(Pinniped.Common.Name ~ Sex, value.var = 'cnt') %>%
@@ -1668,9 +1648,11 @@ formerge <- species_sex_props %>%
   dplyr::select(Pinniped.Common.Name, Prop.Fem, Prop.Male, Prop.Unid)
 
 species_props <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>%
+  #filter(Pinniped.Common.Name != 'Unidentified') %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
   group_by(Pinniped.Common.Name, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
+  filter(Age.Class != 'NA') %>%
   dcast(Pinniped.Common.Name ~ Age.Class, value.var = 'cnt') %>%
   transform(Tot = Pup+Yearling+Subadult+Adult+Unid) %>%
   transform(Prop.pup = round(Pup/(Tot), 3)*100, 
@@ -1687,10 +1669,16 @@ colnames(species_props) <- c("Species", "All Strandings (n)", "All Strandings (%
 by_sex <- pinnipeds_data %>%
   group_by(Sex) %>%
   summarize(cnt = n_distinct(National.Database.Number))
+# 
+# test <- pinnipeds_data %>%
+#   filter(is.na(Sex))
+  
 #by age
 by_age <- pinnipeds_data %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class) %>%
-  summarize(cnt = n_distinct(National.Database.Number))
+  summarize(cnt = n_distinct(National.Database.Number)) %>%
+  filter(Age.Class != 'NA')
 
 average_species_props <- c("Average", "--", "--",
                 round(as.numeric(by_sex[by_sex$Sex == 'Male', 'cnt']/sum(by_sex$cnt)*100),1),
@@ -1709,7 +1697,7 @@ species_age_sex_composition <- write.csv(species_age_sex_composition, file =
 
 ########same but HI - looks very similar to all combined strandings
 formerge_HI <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified' & Findings.of.Human.Interaction == 'Y') %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
   group_by(Pinniped.Common.Name, Sex) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Pinniped.Common.Name ~ Sex, value.var = 'cnt') %>%
@@ -1718,10 +1706,12 @@ formerge_HI <- pinnipeds_data %>%
   select(Pinniped.Common.Name, Prop.Fem, Prop.Male)
 
 species_props_HI <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified' & Findings.of.Human.Interaction == 'Y') %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  filter(Findings.of.Human.Interaction == 'Y') %>%
   group_by(Pinniped.Common.Name, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Pinniped.Common.Name ~ Age.Class, value.var = 'cnt') %>%
+  #filter(Age.Class != 'NA') %>%
   transform(Tot = Pup+Yearling+Subadult+Adult+Unid) %>%
   transform(Prop.pup = round(Pup/(Tot), 3)*100, 
             Prop.year = round(Yearling/(Tot), 3)*100,
@@ -1756,7 +1746,7 @@ species_bigtable <- pinnipeds_data %>%
   transform(all.prop = round(cnt/sum(cnt), 3)*100)
 
 species_HI_prev <- pinnipeds_data %>%
-  filter(Pinniped.Common.Name != 'Unidentified') %>% 
+  #filter(Pinniped.Common.Name != 'Unidentified') %>% 
   group_by(Pinniped.Common.Name, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt')
@@ -1889,19 +1879,12 @@ allprev_type_species <- allprev_type_species %>%
             Other = (Other/yr.cnt)) %>%
   select(Year.of.Observation, Pinniped.Common.Name, HI.Prev, Boat, Gunshot, Fisheries, Other)
 
+write.csv(allprev_type_species, "allprev.csv", row.names = F)
+
 allprev_species_stats <- allprev_type_species %>% 
   select(-c(HI.Prev)) %>% 
   melt(id.vars = c("Year.of.Observation", "Pinniped.Common.Name")) %>%
   filter(Pinniped.Common.Name != 'Unidentified')
-
-HI_type_prev_species_figure <- 
-  ggplot(allprev_species_stats, aes(Year.of.Observation, value, group = c(Pinniped.Common.Name + variable), col = variable, shape = Pinniped.Common.Name)) +
-  geom_point() + 
-  #geom_line() +
-  geom_smooth(method = 'lm', se = F) +
-  xlab("") + ylab("Prevalence") +
-  pubfigure_theme(legend.position = 'top') + 
-  scale_color_brewer(palette = 'Set1')
 
 #Shows increasing significantly for fisheries for nfs and gfs and decreasing for gunshot wounds, but overall gunshot has positive slope?! HELP.
 HItype_model_sp <- glm(value ~ Year.of.Observation + Pinniped.Common.Name*variable, family = poisson(link = log), data = allprev_species_stats)
@@ -1921,6 +1904,41 @@ autoplot((lm(value ~ Year.of.Observation + Pinniped.Common.Name*variable, data =
 # species_prop_HI_2[is.na(species_prop_HI_2)] <- 0
 
 #chisq.test(species_prop_HI_2)
+
+```
+
+```{r datacleaningexploring, echo = F, eval = F}
+
+#bag of words experimenting
+
+HIOtherID_all <- pinnipeds_data %>%
+  filter(Interaction.Type == 'Other') %>%
+  #filter(!is.na(Other.Human.Int.Description)) %>%
+  filter(Other.Human.Int.Description != 'NA') %>%
+  select(National.Database.Number, Pinniped.Common.Name, Year.of.Observation, Affiliation, State, County, Other.Human.Int.Description) %>%
+  transform(Other.Cat = ifelse(grepl("dog", Other.Human.Int.Description) | 
+                                 grepl("Dog", Other.Human.Int.Description) |
+                                 grepl("canine", Other.Human.Int.Description), 'Dog', 
+                               ifelse(grepl("arass", Other.Human.Int.Description) |
+                                   grepl("arrass", Other.Human.Int.Description) |
+                                   grepl("eople", Other.Human.Int.Description) |
+                                   grepl("ublic", Other.Human.Int.Description) |
+                                   grepl("itizen", Other.Human.Int.Description), 'Harassment', 
+                                 ifelse(grepl("oil ", Other.Human.Int.Description), 'Oil Spill',
+                                 ifelse(grepl("pick up", Other.Human.Int.Description) |
+                                          grepl("llegal", Other.Human.Int.Description) |
+                                          grepl("picked up", Other.Human.Int.Description), 'Illegal pick-up', 
+                                        ifelse(grepl("decapita", Other.Human.Int.Description) | 
+                                                 grepl("Decapit", Other.Human.Int.Description) |
+                                                 grepl("head removed", Other.Human.Int.Description) |
+                                                 grepl("behead", Other.Human.Int.Description), 'Decapitated',
+                                               ifelse(grepl("debris", Other.Human.Int.Description) |
+                                                        grepl("entangle", Other.Human.Int.Description) |
+                                                        grepl("around neck", Other.Human.Int.Description) |
+                                                        grepl("rope", Other.Human.Int.Description), 'Marine debris',
+                                          'Other'))))))) %>%
+  group_by(Other.Cat) %>%
+  summarize(cnt = n_distinct(National.Database.Number))
 
 ```
 

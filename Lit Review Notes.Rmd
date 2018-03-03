@@ -7,6 +7,22 @@ output: word_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Notes from Jeremy Stirling's postdoc, Noel Pelland
+
+* Mean latitude of stranding of NFS or other species - interannual
+* CUI PFEG - cumulative upwelling index: take anomaly from monthly average
+* ERSST: Johnstone & Mantua (2014): monthly
+* NDBC: National Data Buoy Center
+* All notes also summarized in an email:
+Here's a link to the page containing the upwelling indices: https://www.pfeg.noaa.gov/products/PFEL/modeled/indices/upwelling/upwelling.html  There is a strong seasonal cycle in upwelling so it might be good to look at monthly or seasonal anomalies as a predictor as well.
+
+Attached is Johnstone & Manuta 2014 which uses the NOAA ERSST sea surface temperature product.  As I mentioned, one way to create an SST predictor variable for your models might be to take an average SST in some near-coastal box, thereby getting around biases associated with only a couple of data points.
+
+For Puget Sound SST, which the ERSST dataset may have a tough time with, I would suggest checking out the NDBC site, and seeing if you can find an observation station that has a long enough time record to be useful for your modeling.  With some of those stations you might be able to consider air temperature as an additional predictor.  I would first look for water temperature stations within Admiralty Inlet or the main basin of the Sound - that might be more applicable than a station in a more isolated fjord, which could have different dynamics.
+
+Lastly, one idea might be to consider the mean latitude of coastal strandings year to year, in addition to the absolute number -- if you do see variations in mean latitude, I'd hypothesize they could relate to surface winds, copepod indices, or the basin-scale climate indices such as ENSO/PDO/NPGO.
+
+
 ## Notes - from stranding network members
 
 Erin d'Agnese

@@ -16,6 +16,7 @@ Helpful readme on regression methods: http://www.statmethods.net/stats/regressio
 - How will the models deal with certain oceanographic variables not being available for the whole time series?
 
 ##To Dos
+- Learn distance() package
 - Learn about rgdal package
 - Jenn wants arrow on maps for North
 - Y/N stranding network member rates
