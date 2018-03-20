@@ -65,7 +65,7 @@ library(strucchange) # chow test https://cran.r-project.org/web/packages/strucch
 library(pgirmess) #kruskalmc https://cran.r-project.org/web/packages/pgirmess/pgirmess.pdf 
 library(coin) #independence_test?? https://cran.r-project.org/web/packages/coin/coin.pdf
 
-#setwd("~/Documents/R/Strandings")
+setwd("~/Documents/R/Strandings")
 
 # Define PlotTheme ----
 plot_theme <- function(...) {
@@ -309,7 +309,7 @@ HI_type_sex_figure <- ggplot(Sex_HI_yr, aes(x = Interaction.Type, y = cnt, fill 
 #Do specific age classes strand more or less frequently than others?
 
 age_all <- pinnipeds_data %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   #filter(Year.of.Observation > 2001) %>%
   group_by(Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
@@ -322,7 +322,7 @@ age_all <- pinnipeds_data %>%
 
 age_sex_all <- pinnipeds_data %>%
   #filter(Year.of.Observation > 2001) %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   group_by(Sex, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
@@ -1445,10 +1445,10 @@ bigtable_WA_HI_type <- pinnipeds_data %>%
 bigtable_WA_HI_type[is.na(bigtable_WA_HI_type)] <- 0
 
 bigtable_WA_HI_table <- bigtable_WA_HI_type %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
+  transform(Prop.boat = round((Boat/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.fish = round((Fisheries/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.shot = round((Gunshot/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.other = round((Other/(Boat + Fisheries + Gunshot + Other)*100), 1)) %>%
   dplyr::select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
   merge(bigtable_WA_HI, by = 'County') %>%
   dplyr::select(County, cnt.y, all.prop, cnt.x, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
@@ -1483,10 +1483,10 @@ bigtable_OR_HI_type <- pinnipeds_data %>%
 bigtable_OR_HI_type[is.na(bigtable_OR_HI_type)] <- 0
 
 bigtable_OR_HI_table <- bigtable_OR_HI_type %>%
-  transform(Prop.boat = round(Boat/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.fish = round(Fisheries/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.shot = round(Gunshot/(Boat + Fisheries + Gunshot + Other)*100),
-            Prop.other = round(Other/(Boat + Fisheries + Gunshot + Other)*100)) %>%
+  transform(Prop.boat = round((Boat/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.fish = round((Fisheries/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.shot = round((Gunshot/(Boat + Fisheries + Gunshot + Other)*100), 1),
+            Prop.other = round((Other/(Boat + Fisheries + Gunshot + Other)*100), 1)) %>%
   dplyr::select(County, Prop.boat, Prop.fish, Prop.shot, Prop.other) %>%
   merge(bigtable_OR_HI, by = 'County') %>%
   dplyr::select(County, cnt.y, all.prop, cnt.x, HI.prop, Prop.fish, Prop.shot, Prop.boat, Prop.other)
@@ -1572,7 +1572,7 @@ colnames(Sex_HI_type_table) <- c("Class", "All Strandings (n)", "All Strandings 
 #Big table for age class
 
 Age_table <- pinnipeds_data %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class) %>%
   summarize(all.cnt = n_distinct(National.Database.Number)) %>%
   filter(Age.Class != 'NA')
@@ -1581,7 +1581,7 @@ Age_table$All.prop <- round(Age_table$all.cnt/sum(Age_table$all.cnt), 3)*100
 
 #Prevalence
 age_HI_prev <- pinnipeds_data %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Age.Class ~ Findings.of.Human.Interaction, value.var = 'cnt') %>%
@@ -1618,7 +1618,7 @@ age_sex_composition_table <- write.csv(comb_age_sex_comp, file = "./Figures/age_
 
 #Species and age/sex composition
 # species_age_props <- pinnipeds_data %>%
-#   transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', Age.Class)) %>%
+#   transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', Age.Class)) %>%
 #   filter(Pinniped.Common.Name != 'Unidentified') %>%
 #   group_by(Pinniped.Common.Name, Age.Class) %>%
 #   summarize(cnt = n_distinct(National.Database.Number)) %>%
@@ -1649,7 +1649,7 @@ formerge <- species_sex_props %>%
 
 species_props <- pinnipeds_data %>%
   #filter(Pinniped.Common.Name != 'Unidentified') %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   group_by(Pinniped.Common.Name, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   filter(Age.Class != 'NA') %>%
@@ -1675,7 +1675,7 @@ by_sex <- pinnipeds_data %>%
   
 #by age
 by_age <- pinnipeds_data %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   group_by(Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   filter(Age.Class != 'NA')
@@ -1706,7 +1706,7 @@ formerge_HI <- pinnipeds_data %>%
   select(Pinniped.Common.Name, Prop.Fem, Prop.Male)
 
 species_props_HI <- pinnipeds_data %>%
-  transform(Age.Class = ifelse(Year.of.Observation < 2001, 'NA', as.character(Age.Class))) %>%
+  transform(Age.Class = ifelse(Year.of.Observation < 2002, 'NA', as.character(Age.Class))) %>%
   filter(Findings.of.Human.Interaction == 'Y') %>%
   group_by(Pinniped.Common.Name, Age.Class) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
@@ -1747,6 +1747,8 @@ species_bigtable <- pinnipeds_data %>%
 
 species_HI_prev <- pinnipeds_data %>%
   #filter(Pinniped.Common.Name != 'Unidentified') %>% 
+  transform(drop_HI = ifelse(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'NA', 'Y', 'N')) %>%
+  filter(drop_HI == 'N') %>%
   group_by(Pinniped.Common.Name, Findings.of.Human.Interaction) %>%
   summarize(cnt = n_distinct(National.Database.Number)) %>%
   dcast(Pinniped.Common.Name ~ Findings.of.Human.Interaction, value.var = 'cnt')
@@ -1780,8 +1782,10 @@ region <- pinnipeds_data %>%
   filter(Water.Body != 'NA') %>% group_by(Water.Body) %>%
   summarize(cnt = n_distinct(National.Database.Number))
 HI <- pinnipeds_data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  summarize(cnt = round((n_distinct(National.Database.Number)/14939*100), 1))
+  transform(drop_HI = ifelse(Findings.of.Human.Interaction == 'Y' & Interaction.Type == 'NA', 'Y', 'N')) %>%
+  filter(drop_HI == 'N') %>%
+  filter(Findings.of.Human.Interaction == 'Y') 
+  summarize(cnt = round((n_distinct(National.Database.Number)/14729*100), 1))
 HI_type_p <- pinnipeds_data %>%
   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Interaction.Type) %>%

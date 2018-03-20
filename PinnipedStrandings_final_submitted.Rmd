@@ -229,11 +229,12 @@ year_prop_HI[is.na(year_prop_HI)] <- 0
 year_prop_HI <- year_prop_HI %>% transform(Prop.HI = round(Y/(Y + N + CBD), 2)*100)
 
 oregon <- pinnipeds_data %>%
-  #filter(Water.Body != 'OR_Coast') %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
-  #filter(Pinniped.Common.Name != 'Unidentified') %>%
-  #filter(Year.of.Observation > 2001) %>%
-  nrow()
+#   #filter(Water.Body != 'OR_Coast') %>%
+   #filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+#   #filter(Pinniped.Common.Name != 'Unidentified') %>%
+  filter(Year.of.Observation > 2001) %>%
+#   filter(Water.Body == 'Inland_WA') %>%
+   nrow()
 
 ```
 
@@ -375,7 +376,7 @@ allprev_sp[is.na(allprev_sp)] <- 0
 allprev_sp <- allprev_sp %>% transform(HI.Prev = Y/(Y+N+CBD)) %>%
   dplyr::select(Year.of.Observation, Pinniped.Common.Name, HI.Prev) %>%
   transform(period = ifelse(Year.of.Observation < 2000, '1991-1999', 
-                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2009-2016'))) 
+                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2010-2016'))) 
 
 HI_prev_sp_figure <- ggplot(allprev_sp, 
                             aes(x = Pinniped.Common.Name, y = HI.Prev, fill = period)) +
@@ -412,7 +413,7 @@ allprev_type <- allprev_type %>%
   dplyr::select(Year.of.Observation, Boat, Gunshot, Fisheries, Other) %>%
   melt(id.vars = "Year.of.Observation") %>%
   transform(period = ifelse(Year.of.Observation < 2000, '1991-1999', 
-                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2009-2016')))
+                            ifelse(Year.of.Observation < 2010 & Year.of.Observation > 1999, '2000-2009', '2010-2016')))
 
 HI_type_prev_figure <- 
   ggplot(allprev_type, aes(x = variable, y = value, fill = period)) +
@@ -559,10 +560,10 @@ HI_county_final <- pinnipeds_data %>%
                   plot.margin = unit(c(.1, .1, .1, .1), "cm")) + 
   scale_fill_manual(values = color4_HI, guide = guide_legend(nrow = 1))
 
-countyfigure <- plot_grid(all_county_final, HI_county_final,
-          align = 'v', ncol = 1, rel_heights = c(1, 1.1), label_size = 10, labels = "auto")
-
-figs("countyfigure", caption = "Percent difference in the total number of human interaction cases in each county from the mean across all counties from 1991-2016. Points indicate locations of marine mammal stranding response networks.")
+# countyfigure <- plot_grid(all_county_final, HI_county_final,
+#           align = 'v', ncol = 1, rel_heights = c(1, 1.1), label_size = 10, labels = "auto")
+# 
+# figs("countyfigure", caption = "Percent difference in the total number of human interaction cases in each county from the mean across all counties from 1991-2016. Points indicate locations of marine mammal stranding response networks.")
 
 # figs("countyfigure", caption = "(a) Total strandings by species in Washington (left of dashed line) and Oregon (right of dashed line); and (b) total human interaction cases by type. Asterisks indicate counties where counts of total strandings or HI cases are significantly higher than the mean across all counties (*p* < 0.05).")
 
@@ -735,170 +736,171 @@ figs("HIstrands_species", caption = "Kernel density contour lines showing overla
 
 ```{r}
 
-county_outline <- map_data("county", region = c("oregon", "washington")) %>%
-  transform(subregion = firstCap(subregion)) 
-
-countyHI_percs <- pinnipeds_data %>%
-  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-  group_by(Interaction.Type, County) %>%
-  summarize(cnt = n_distinct(National.Database.Number)) %>%
-  dcast(County ~ Interaction.Type, value.var = 'cnt') %>%
-  transform(perc_fish = (Fisheries)/sum(Fisheries, na.rm = T)*100,
-            perc_gun = (Gunshot)/sum(Gunshot, na.rm = T)*100) %>%
-  dplyr::rename(subregion = County)
-
-countymapdata <- bind_rows(WAcounties_table, ORcounties_table) %>%
-  dplyr::rename(subregion = County) %>%
-  merge(county_outline, by = 'subregion', all = T) %>%
-  transform(subregion = as.character(subregion)) 
-countymapdata <- countymapdata[order(countymapdata$order),] 
-colnames(countymapdata) <- c("subregion", "all_cnt", "all_perc", "HI_cnt", "HI_perc", "Fish", "Gun", "Boat", "Other", "long", "lat", "group", "order", "region") 
-
-countymapdata <- countymapdata %>%
-  dplyr::select(-c(Fish, Gun, Boat, Other))
-
-# center_perc_all <- pinnipeds_data %>%
-#   group_by(Affiliation) %>%
-#   summarize(cnt = n_distinct(National.Database.Number))
-# center_perc_HI <- pinnipeds_data %>%
-#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
-#   group_by(Affiliation) %>%
-#   summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
-#   merge(center_perc_all, by = 'Affiliation', all = T) %>%
-#   transform(perc_HI = round(cnt_HI/cnt, 2)*100) %>%
-#   dplyr::rename(Center = Affiliation) %>%
-#   merge(center_locations, by = 'Center', all = F)
-
-countymapdata <- countymapdata %>%
-  transform(all_cnt = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', all_cnt))) %>%
-  transform(HI_cnt = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', HI_cnt))) %>%
-  transform(all_perc = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', all_perc))) %>%
-  transform(HI_perc = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', HI_perc))) %>%
-  transform(all_cnt = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', all_cnt))) %>%
-  transform(HI_cnt = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', HI_cnt))) %>%
-  transform(all_perc = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', all_perc))) %>%
-  transform(HI_perc = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', HI_perc))) %>%
-  merge(countyHI_percs, by = 'subregion', sort = FALSE)
-countymapdata <- countymapdata[order(countymapdata$order),] 
-
-countymapdata <- countymapdata %>%
-  transform(mean_all = mean(all_cnt, na.rm = T),
-            mean_HI = mean(HI_cnt, na.rm = T),
-            mean_fish = mean(Fisheries, na.rm = T),
-            mean_gun = mean(Gunshot, na.rm = T)) %>%
-  transform(all_diff = all_cnt - mean_all,
-            HI_diff = HI_cnt - mean_HI,
-            fish_diff = Fisheries - mean_fish,
-            gun_diff = Gunshot - mean_gun) %>%
-  transform(mean_val_all = (all_cnt + mean_all)/2) %>%
-  transform(perc_diff_all = (all_cnt - mean_all)/mean_val_all*100) %>%
-  transform(mean_val_HI = (HI_cnt + mean_HI)/2) %>%
-  transform(perc_diff_HI = (HI_cnt - mean_HI)/mean_val_HI*100)
-
-countymapdata_melt_cnt <- countymapdata %>%
-  select(subregion, long, lat, group, order, region, all_cnt, HI_cnt) %>%
-  melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
-
-countymapdata_melt_percs <- countymapdata %>%
-  select(subregion, long, lat, group, order, region, all_perc, HI_perc) %>%
-  melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
-
-countymapdata_melt_difs <- countymapdata %>%
-  select(subregion, long, lat, group, order, region, all_diff, HI_diff) %>%
-  melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
-
-countymapdata_melt_perc_difs <- countymapdata %>%
-  select(subregion, long, lat, group, order, region, perc_diff_all, perc_diff_HI) %>%
-  melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
-
-# county_HI <- ggplot(countymapdata_melt_cnt %>% filter(variable == 'HI_cnt'), aes(x = long, y = lat, group = group)) +
-# geom_polygon(aes(fill = value), size = 0.2) +
-#   xlab("") + ylab("") +
-#   coord_fixed(1) +
-#   #expand_limits(x = countymapdata$long, y = countymapdata$lat) +
-#   #coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -120)) + 
-#   geom_path(data = map_data("state", region = c("oregon", "washington"), colour = "grey20", size = 0.3)) +
-# theme_classic() +
-#    theme(legend.position = c(.7, .15),
-#      plot.margin = unit(c(0, 0, 0, 0), "mm"),
-#     axis.line = element_blank(),
-#     strip.text = element_text(size = 9),
-#     strip.background = element_blank(),
-#     panel.border = element_rect(colour = "black", fill = NA, size = 1)) + 
-#   scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Human Interactions",
-#               guide = guide_colorbar(direction = "horizontal",
-#       barheight = unit(2, units = "mm"), barwidth = unit(40, units = "mm"),
-#       draw.ulim = F, title.position = 'top', title.hjust = 0.5,
-#       label.hjust = 0.5))
+#something broke - commenting out
+# county_outline <- map_data("county", region = c("oregon", "washington")) %>%
+#   transform(subregion = firstCap(subregion)) 
 # 
-# county_facet <- ggplot(countymapdata_melt_difs %>% filter(variable == 'HI_diff'), aes(x = long, y = lat, group = group)) +
-# geom_polygon(aes(fill = value), size = 0.2) +
-#   xlab("") + ylab("") +
-#   coord_fixed(1) +
-#   #expand_limits(x = countymapdata$long, y = countymapdata$lat) +
-#   #coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -120)) +
+# countyHI_percs <- pinnipeds_data %>%
+#   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+#   group_by(Interaction.Type, County) %>%
+#   summarize(cnt = n_distinct(National.Database.Number)) %>%
+#   dcast(County ~ Interaction.Type, value.var = 'cnt') %>%
+#   transform(perc_fish = (Fisheries)/sum(Fisheries, na.rm = T)*100,
+#             perc_gun = (Gunshot)/sum(Gunshot, na.rm = T)*100) %>%
+#   dplyr::rename(subregion = County)
+# 
+# countymapdata <- bind_rows(WAcounties_table, ORcounties_table) %>%
+#   dplyr::rename(subregion = County) %>%
+#   merge(county_outline, by = 'subregion', all = T) %>%
+#   transform(subregion = as.character(subregion)) 
+# countymapdata <- countymapdata[order(countymapdata$order),] 
+# colnames(countymapdata) <- c("subregion", "all_cnt", "all_perc", "HI_cnt", "HI_perc", "Fish", "Gun", "Boat", "Other", "long", "lat", "group", "order", "region") 
+# 
+# countymapdata <- countymapdata %>%
+#   dplyr::select(-c(Fish, Gun, Boat, Other))
+# 
+# # center_perc_all <- pinnipeds_data %>%
+# #   group_by(Affiliation) %>%
+# #   summarize(cnt = n_distinct(National.Database.Number))
+# # center_perc_HI <- pinnipeds_data %>%
+# #   filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
+# #   group_by(Affiliation) %>%
+# #   summarize(cnt_HI = n_distinct(National.Database.Number)) %>%
+# #   merge(center_perc_all, by = 'Affiliation', all = T) %>%
+# #   transform(perc_HI = round(cnt_HI/cnt, 2)*100) %>%
+# #   dplyr::rename(Center = Affiliation) %>%
+# #   merge(center_locations, by = 'Center', all = F)
+# 
+# countymapdata <- countymapdata %>%
+#   transform(all_cnt = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', all_cnt))) %>%
+#   transform(HI_cnt = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', HI_cnt))) %>%
+#   transform(all_perc = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', all_perc))) %>%
+#   transform(HI_perc = as.numeric(ifelse(region == 'washington' & subregion == 'Lincoln' | region == 'washington' & subregion == 'Columbia' | region == 'washington' & subregion == 'Douglas', 'NA', HI_perc))) %>%
+#   transform(all_cnt = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', all_cnt))) %>%
+#   transform(HI_cnt = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', HI_cnt))) %>%
+#   transform(all_perc = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', all_perc))) %>%
+#   transform(HI_perc = as.numeric(ifelse(region == 'oregon' & subregion == 'Jefferson', 'NA', HI_perc))) %>%
+#   merge(countyHI_percs, by = 'subregion', sort = FALSE)
+# countymapdata <- countymapdata[order(countymapdata$order),] 
+# 
+# countymapdata <- countymapdata %>%
+#   transform(mean_all = mean(all_cnt, na.rm = T),
+#             mean_HI = mean(HI_cnt, na.rm = T),
+#             mean_fish = mean(Fisheries, na.rm = T),
+#             mean_gun = mean(Gunshot, na.rm = T)) %>%
+#   transform(all_diff = all_cnt - mean_all,
+#             HI_diff = HI_cnt - mean_HI,
+#             fish_diff = Fisheries - mean_fish,
+#             gun_diff = Gunshot - mean_gun) %>%
+#   transform(mean_val_all = (all_cnt + mean_all)/2) %>%
+#   transform(perc_diff_all = (all_cnt - mean_all)/mean_val_all*100) %>%
+#   transform(mean_val_HI = (HI_cnt + mean_HI)/2) %>%
+#   transform(perc_diff_HI = (HI_cnt - mean_HI)/mean_val_HI*100)
+# 
+# countymapdata_melt_cnt <- countymapdata %>%
+#   select(subregion, long, lat, group, order, region, all_cnt, HI_cnt) %>%
+#   melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
+# 
+# countymapdata_melt_percs <- countymapdata %>%
+#   select(subregion, long, lat, group, order, region, all_perc, HI_perc) %>%
+#   melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
+# 
+# countymapdata_melt_difs <- countymapdata %>%
+#   select(subregion, long, lat, group, order, region, all_diff, HI_diff) %>%
+#   melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
+# 
+# countymapdata_melt_perc_difs <- countymapdata %>%
+#   select(subregion, long, lat, group, order, region, perc_diff_all, perc_diff_HI) %>%
+#   melt(id.vars = c('subregion', 'long', 'lat', 'group', 'order', 'region'))
+# 
+# # county_HI <- ggplot(countymapdata_melt_cnt %>% filter(variable == 'HI_cnt'), aes(x = long, y = lat, group = group)) +
+# # geom_polygon(aes(fill = value), size = 0.2) +
+# #   xlab("") + ylab("") +
+# #   coord_fixed(1) +
+# #   #expand_limits(x = countymapdata$long, y = countymapdata$lat) +
+# #   #coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -120)) + 
+# #   geom_path(data = map_data("state", region = c("oregon", "washington"), colour = "grey20", size = 0.3)) +
+# # theme_classic() +
+# #    theme(legend.position = c(.7, .15),
+# #      plot.margin = unit(c(0, 0, 0, 0), "mm"),
+# #     axis.line = element_blank(),
+# #     strip.text = element_text(size = 9),
+# #     strip.background = element_blank(),
+# #     panel.border = element_rect(colour = "black", fill = NA, size = 1)) + 
+# #   scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Human Interactions",
+# #               guide = guide_colorbar(direction = "horizontal",
+# #       barheight = unit(2, units = "mm"), barwidth = unit(40, units = "mm"),
+# #       draw.ulim = F, title.position = 'top', title.hjust = 0.5,
+# #       label.hjust = 0.5))
+# # 
+# # county_facet <- ggplot(countymapdata_melt_difs %>% filter(variable == 'HI_diff'), aes(x = long, y = lat, group = group)) +
+# # geom_polygon(aes(fill = value), size = 0.2) +
+# #   xlab("") + ylab("") +
+# #   coord_fixed(1) +
+# #   #expand_limits(x = countymapdata$long, y = countymapdata$lat) +
+# #   #coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -120)) +
+# #   geom_path(data = map_data("state", region = c("oregon", "washington"), colour = "grey20", size = 0.3)) +
+# #   #facet_wrap(~variable) +
+# # theme_classic() +
+# #    theme(legend.position = c(.7, .15),
+# #      plot.margin = unit(c(0, 0, 0, 0), "mm"),
+# #     axis.line = element_blank(),
+# #     strip.text = element_text(size = 9),
+# #     strip.background = element_blank(),
+# #     panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+# #   scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Cases",
+# #             guide = guide_colorbar(direction = "horizontal",
+# #       barheight = unit(2, units = "mm"), barwidth = unit(40, units = "mm"),
+# #       draw.ulim = F, title.position = 'top',
+# #       title.hjust = 0.5, label.hjust = 0.5))
+# 
+# county_perc_diff <- ggplot(countymapdata_melt_perc_difs 
+#                            %>% filter(variable == 'perc_diff_HI')
+#                            , aes(x = long, y = lat, group = group)) +
+# geom_polygon(aes(fill = value), size = 0.2) + xlab("") + ylab("") + coord_fixed(1) +
+#     annotate("text", x = max(center_locations$long) + 2.6, 
+#                      y = min(center_locations$lat) + 4.25 - 0.18*(15:1), 
+#              label = paste(center_locations$Label,": ",center_locations$Center, sep = ""), size = 2.5, hjust = 0, fontface = 'bold') +
 #   geom_path(data = map_data("state", region = c("oregon", "washington"), colour = "grey20", size = 0.3)) +
-#   #facet_wrap(~variable) +
+#   geom_label_repel(data = center_locations, inherit.aes = FALSE, 
+#                    aes(x = long, y = lat, label = Label), show.legend = TRUE,
+#     fontface = 'bold', size = 2, color = 'black', fill = 'white', 
+#     force = 0.001) +
 # theme_classic() +
 #    theme(legend.position = c(.7, .15),
-#      plot.margin = unit(c(0, 0, 0, 0), "mm"),
 #     axis.line = element_blank(),
+#     axis.text = element_blank(), axis.ticks = element_blank(),
 #     strip.text = element_text(size = 9),
 #     strip.background = element_blank(),
-#     panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
-#   scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Cases",
+#     panel.border = element_blank()) +
+#     #panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
+#   scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Percent Difference",
 #             guide = guide_colorbar(direction = "horizontal",
 #       barheight = unit(2, units = "mm"), barwidth = unit(40, units = "mm"),
 #       draw.ulim = F, title.position = 'top',
 #       title.hjust = 0.5, label.hjust = 0.5))
-
-county_perc_diff <- ggplot(countymapdata_melt_perc_difs 
-                           %>% filter(variable == 'perc_diff_HI')
-                           , aes(x = long, y = lat, group = group)) +
-geom_polygon(aes(fill = value), size = 0.2) + xlab("") + ylab("") + coord_fixed(1) +
-    annotate("text", x = max(center_locations$long) + 2.6, 
-                     y = min(center_locations$lat) + 4.25 - 0.18*(15:1), 
-             label = paste(center_locations$Label,": ",center_locations$Center, sep = ""), size = 2.5, hjust = 0, fontface = 'bold') +
-  geom_path(data = map_data("state", region = c("oregon", "washington"), colour = "grey20", size = 0.3)) +
-  geom_label_repel(data = center_locations, inherit.aes = FALSE, 
-                   aes(x = long, y = lat, label = Label), show.legend = TRUE,
-    fontface = 'bold', size = 2, color = 'black', fill = 'white', 
-    force = 0.001) +
-theme_classic() +
-   theme(legend.position = c(.7, .15),
-    axis.line = element_blank(),
-    axis.text = element_blank(), axis.ticks = element_blank(),
-    strip.text = element_text(size = 9),
-    strip.background = element_blank(),
-    panel.border = element_blank()) +
-    #panel.border = element_rect(colour = "black", fill = NA, size = 1)) +
-  scale_fill_gradientn(colors = rainbow12, na.value = "white", name = "Percent Difference",
-            guide = guide_colorbar(direction = "horizontal",
-      barheight = unit(2, units = "mm"), barwidth = unit(40, units = "mm"),
-      draw.ulim = F, title.position = 'top',
-      title.hjust = 0.5, label.hjust = 0.5))
-
-HI_type_facet_all <- ggplot(pnw_state_outline) +
-geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
-  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
-  # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
-  geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
-  scale_alpha(range = c(0, 0.1), guide = FALSE) +
-  xlab("") + ylab("") +
-  facet_grid(Interaction.Type ~ Season) +
-  #theme_nothing() +
-  theme_classic() +
-  theme(plot.margin = unit(c(0, -20, 0, -20), "mm"),
-    axis.line = element_blank(),
-    strip.text = element_text(size = 12),
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    strip.background = element_blank(),
-    panel.border = element_rect(colour = "black", fill = NA, size = 1))
-
+# 
+# HI_type_facet_all <- ggplot(pnw_state_outline) +
+# geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
+#   coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+#   # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
+#   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
+#   scale_alpha(range = c(0, 0.1), guide = FALSE) +
+#   xlab("") + ylab("") +
+#   facet_grid(Interaction.Type ~ Season) +
+#   #theme_nothing() +
+#   theme_classic() +
+#   theme(plot.margin = unit(c(0, -20, 0, -20), "mm"),
+#     axis.line = element_blank(),
+#     strip.text = element_text(size = 12),
+#     axis.text = element_blank(),
+#     axis.ticks = element_blank(),
+#     strip.background = element_blank(),
+#     panel.border = element_rect(colour = "black", fill = NA, size = 1))
+# 
 HI_type_facet_seas <- ggplot(pnw_state_outline) +
-geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) + 
-  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) + 
+geom_polygon(aes(x = long, y = lat, group = group), fill = "grey93", color = "grey50", size = 0.2) +
+  coord_fixed(1, ylim = c(42.3, 49.15), xlim = c(-125, -121.8)) +
   # geom_point(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), color = 'grey20', size = 0.2, alpha = 0.8)  +
   geom_density2d(data = pinnipeds_data_mapping_HI, aes(x = long_corr, y = lat_corr), bins = 3, col = 'red') +
   scale_alpha(range = c(0, 0.1), guide = FALSE) +
@@ -1115,12 +1117,12 @@ monthly_combined_line
 `r figs("monthly_combined_line", caption = "Mean number of strandings and human interaction cases and confidence interval bands (+/- 1 SE of mean) for each month according to (a) species, (b) age class, and (c) human interaction type.")`
 
 
-```{r, fig.height = 8.5, fig.width = 8, fig.align = 'center'}
-countyfigure <- county_perc_diff
-countyfigure
-```
+<!-- ```{r, fig.height = 8.5, fig.width = 8, fig.align = 'center'} -->
+<!-- countyfigure <- county_perc_diff -->
+<!-- countyfigure -->
+<!-- ``` -->
 
-`r figs("countyfigure", caption = "Percent difference in the total number of human interaction cases in each county from the mean across all counties from 1991-2016. Points indicate locations of marine mammal stranding networks (MMSN).")`
+<!-- `r figs("countyfigure", caption = "Percent difference in the total number of human interaction cases in each county from the mean across all counties from 1991-2016. Points indicate locations of marine mammal stranding networks (MMSN).")` -->
 <!-- `r figs("countyfigure", caption = "(a) Total strandings by species in Washington (left of dashed line) and Oregon (right of dashed line); and (b) total human interaction cases by type. Asterisks indicate counties where counts of total strandings or HI cases are significantly higher than the mean across all counties (*p* < 0.05).")` -->
 
 ```{r, fig.height = 8.5, fig.width = 7, fig.align = 'center'}

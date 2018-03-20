@@ -79,7 +79,7 @@ data_by_decade <- pinnipeds_data %>%
 
 # GLM with Poisson
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = data_by_year))
-#slope of line =  exp(0.050462*x) = y = 1.05^x = 5%/year
+#slope of line =  exp(0.0446*x) = y = 1.045^x = 4.5%/year
 
 #Negative binomial GLM
 summary(glm.nb(cnt ~ Year.of.Observation, data = data_by_year))
@@ -151,7 +151,7 @@ summary(glm.nb(cnt ~ Year.of.Observation, data = all_sp %>% filter(Pinniped.Comm
 
 # (a) combined species 
 HI_by_year <- pinnipeds_data %>%
-  filter(Findings.of.Human.Interaction == 'Y') %>%
+  filter(Findings.of.Human.Interaction == 'Y' & Interaction.Type != 'NA') %>%
   group_by(Year.of.Observation) %>%
   summarize(cnt = n_distinct(National.Database.Number)) 
 
@@ -160,7 +160,7 @@ HI_by_year <- pinnipeds_data %>%
 #regression equation: y = exp(0.1089*x) = 1.11^x
 
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_by_year))
-#regression equation: y = exp(0.07377*x) = 1.10^x = 10% per year
+#regression equation: y = exp(0.07257) = 1.07^x = 7% per year
 
 # (b) certain HI types
 HI_type_by_year <- pinnipeds_data %>%
@@ -172,10 +172,12 @@ HI_type_by_year <- pinnipeds_data %>%
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Gunshot'))) #exp(0.04955) = y = 1.051
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))
-summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))  #exp(0.06605) = y = 1.068
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Fisheries')))  #exp(0.08605) = y = 1.068
 
 summary(glm(cnt ~ Year.of.Observation, family = poisson(link = log), data = HI_type_by_year %>% filter(Interaction.Type == 'Boat')))
 summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Boat'))) #exp(0.07688) = 1.0799
+
+summary(glm.nb(cnt ~ Year.of.Observation, data = HI_type_by_year %>% filter(Interaction.Type == 'Other'))) #exp(0.135) y = 1.14x
 
 # (c) for individual species?  
 HI_sp <- pinnipeds_data %>%
