@@ -219,7 +219,7 @@ HI_yes_no <- HI_yes_no %>%
 #link = logit default
 summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = logit), data = HI_yes_no)) # y = 0.046x = 0.05 per year untransformed - prop change over time
 
-# summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = log), 
+#summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial(link = log), 
 #             data = HI_yes_no)) # y = 1.059^x = 5.9%/year 
 
 
@@ -255,7 +255,7 @@ HI_yes_no_sp_period <- HI_yes_no_sp %>%
 # summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'Harbor seal'))) 
 
 #per period
-summary(glm(cbind(Yes, No) ~ period, family = binomial, data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #higher late: p < 0.001, z = 6.6, y = 0.6x
+summary(glm(cbind(Yes, No) ~ period, family = binomial(link = logit), data = HI_yes_no_sp_period %>% filter(Pinniped.Common.Name == 'Harbor seal'))) #higher late: p < 0.001, z = 6.6, y = 0.6x
 
 # summary(glm(cbind(Yes, No) ~ Year.of.Observation, family = binomial, data = HI_yes_no_sp %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
@@ -352,7 +352,7 @@ summary(glm(cbind(Boat, NoBoat) ~ Year.of.Observation, family = binomial, data =
 summary(glm(cbind(Fisheries, NoFish) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
 #not sig for harbors, SSL, NFS, NES, GFS
-summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
+summary(glm(cbind(Gunshot, NoGun) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'California sea lion')))
 
 #sig for CSL, HS, 
 summary(glm(cbind(Other, NoOther) ~ Year.of.Observation, family = binomial, data = HIcount_type_species %>% filter(Pinniped.Common.Name == 'Harbor seal')))
