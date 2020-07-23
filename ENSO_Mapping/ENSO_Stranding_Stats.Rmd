@@ -36,6 +36,9 @@ library(Hmisc) # rcorr()
 pinnipeds_ocean <- read.csv("pinnipeds_ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
   transform(Period = ifelse(Year.of.Observation < 2005, 'Pre_Prescott', 'Post_Prescott'))
 
+cetaceans_ocean <- read.csv("cetaceans_ocean.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
+  transform(Period = ifelse(Year.of.Observation < 2005, 'Pre_Prescott', 'Post_Prescott'))
+
 #Load dataframes from PinnipedsandENSO.Rmd
 
 #Ocean only variables for correlation exploration

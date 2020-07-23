@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE)
 
 ```{r, include = F, echo = F}
 library(ggplot2)
+library(gplots)
 library(tidyr)
 library(ggmap)
 library(data.table)
@@ -25,6 +26,7 @@ library(magrittr)
 library(scales)
 library(stats) 
 library(PMCMR)
+library(sciplot)
 library(pgirmess) #kruskalmc()
 library(MASS) #glm.nb()
 library(multcomp) #glht()
@@ -34,7 +36,7 @@ detach("package:Hmisc")
 # detach("package:TH.data")
 detach("package:MASS")
 
-#setwd("~/Documents/R/Strandings")
+setwd("~/Documents/R/Strandings")
 
 # Data Load 
 ###############################################################################

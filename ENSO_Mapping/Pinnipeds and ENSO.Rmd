@@ -37,7 +37,8 @@ library(strucchange) # chow test https://cran.r-project.org/web/packages/strucch
 library(pgirmess) 
 library(gganimate)
 
-setwd("~/Documents/R/Strandings/ENSO_Mapping")
+setwd("~/Documents/Research/strandings")
+
 
 plot_theme <- function(...) {
   theme(
@@ -86,9 +87,12 @@ color2 <- c("#e45f56", "#363e7e")
 
 ```{r load pre-built data, echo = FALSE}
 
-pinnipeds_data <- read.csv("pinnipeds_data.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) 
+pinnipeds_data <- read.csv("pinnipeds_data_protected.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) 
 
 pinnipeds_data$Month.of.Observation <- factor(pinnipeds_data$Month.of.Observation, levels = c('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'))
+
+setwd("~/Documents/Research/strandings/ENSO_Mapping/Env Data")
+
 
 ocean <- read.csv("ocean_full.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
   transform(Date = as.Date(Date, format = "%Y-%m-%d"),
@@ -99,6 +103,8 @@ ocean <- read.csv("ocean_full.csv", header = TRUE, na.strings = "NA", stringsAsF
 fish <- read.csv("fish.csv", header = TRUE, na.strings = "NA", stringsAsFactors = FALSE) %>%
   transform(Date = as.Date(Date, format = "%Y-%m-%d")) %>%
   dplyr::select(-c(CBA_North, CBA_South))
+
+write.csv(ocean, 'ocean_full.csv', row.names = F)
 
 #Full data set
 pinnipeds_ocean <- pinnipeds_data %>%
